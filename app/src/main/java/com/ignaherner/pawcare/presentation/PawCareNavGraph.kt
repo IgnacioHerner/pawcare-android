@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
+import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
 
 object PawCareDestinations {
@@ -68,12 +70,22 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
-            // PetDetailScreen(petId = petId) — lo agregamos en la próxima sesión
+            PetDetailScreen(
+                petId = petId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { id ->
+                    navController.navigate(PawCareDestinations.petForm(id))
+                },
+                onNavigateToVaccines = { id ->
+                    navController.navigate(PawCareDestinations.petDetail(id))
+                },
+                onNavigateToAppointments = { id ->
+                    navController.navigate(PawCareDestinations.petDetail(id))
+                },
+                onNavigateToWeight = { id ->
+                    navController.navigate(PawCareDestinations.petDetail(id))
+                }
+            )
         }
     }
-}
-
-@Composable
-fun PetFormScreen(petId: Long?, onNavigateBack: () -> Boolean) {
-    TODO("Not yet implemented")
 }

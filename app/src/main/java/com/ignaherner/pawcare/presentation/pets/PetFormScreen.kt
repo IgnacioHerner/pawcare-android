@@ -38,7 +38,6 @@ fun PetFormScreen(
     onNavigateBack: () -> Unit,
     viewModel: PetViewModel = hiltViewModel()
 ) {
-
     // Estado local del formulario
     var nombre by remember { mutableStateOf("") }
     var especieSeleccionada by remember { mutableStateOf(Especie.PERRO) }
@@ -66,24 +65,24 @@ fun PetFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             // Campo nombre
             OutlinedTextField(
                 value = nombre,
-                onValueChange = { nombre = it},
+                onValueChange = { nombre = it },
                 label = { Text("Nombre") },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             )
 
+            // Dropdown especie
             ExposedDropdownMenuBox(
                 expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it}
+                onExpandedChange = { dropdownExpanded = it }
             ) {
                 OutlinedTextField(
                     value = especieSeleccionada.displayName,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Especie")},
+                    label = { Text("Especie") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
                     },
@@ -93,11 +92,11 @@ fun PetFormScreen(
                 )
                 ExposedDropdownMenu(
                     expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false}
+                    onDismissRequest = { dropdownExpanded = false }
                 ) {
                     Especie.entries.forEach { especie ->
                         DropdownMenuItem(
-                            text = { Text(especie.displayName)},
+                            text = { Text(especie.displayName) },
                             onClick = {
                                 especieSeleccionada = especie
                                 dropdownExpanded = false
@@ -110,8 +109,8 @@ fun PetFormScreen(
             // Campo peso
             OutlinedTextField(
                 value = peso,
-                onValueChange = { peso = it},
-                label = { Text("Peso (kg)")},
+                onValueChange = { peso = it },
+                label = { Text("Peso (kg)") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),

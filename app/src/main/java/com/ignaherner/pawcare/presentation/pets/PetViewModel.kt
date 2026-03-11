@@ -20,6 +20,10 @@ class PetViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<PetUiState>(PetUiState.Loading)
     val uiState: StateFlow<PetUiState> = _uiState.asStateFlow()
 
+    // Estado de PetDetailState
+    private val _detailState = MutableStateFlow<PetDetailState>(PetDetailState.Loading)
+    val detailState: StateFlow<PetDetailState> = _detailState.asStateFlow()
+
     init {
         loadPets()
     }
@@ -37,6 +41,21 @@ class PetViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 _uiState.value = PetUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun loadPetById(id: Long) {
+        viewModelScope.launch {
+            try {
+                val pet = repository.getPetById(id)
+                _detailState.value = if (pet != null) {
+                    PetDetailState.Success(pet)
+                } else {
+                    PetDetailState.Error("Mascota no encontrada")
+                }
+            } catch (e: Exception) {
+                _detailState.value = PetDetailState.Error(e.message ?: "Error desconocido")
             }
         }
     }
@@ -77,4 +96,10 @@ sealed class PetUiState {
     object Empty: PetUiState()
     data class Success(val pets: List<Pet>) : PetUiState()
     data class Error(val mensaje: String) : PetUiState()
+}
+
+sealed class PetDetailState {
+    object Loading : PetDetailState()
+    data class Success(val pet: Pet) : PetDetailState()
+    data class Error(val mensaje: String) : PetDetailState()
 }
