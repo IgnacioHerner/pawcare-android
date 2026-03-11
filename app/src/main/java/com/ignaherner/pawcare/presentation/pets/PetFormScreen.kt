@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Pet
 
@@ -43,6 +45,24 @@ fun PetFormScreen(
     var especieSeleccionada by remember { mutableStateOf(Especie.PERRO) }
     var peso by remember { mutableStateOf("") }
     var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Cargar las mascotas si estamos editando
+    LaunchedEffect(petId) {
+        petId?.let { viewModel.loadPetById(it) }
+    }
+
+    // Pre-llenar campos cuando los datos cargan
+    val detailState by viewModel.detailState.collectAsStateWithLifecycle()
+
+    // Cuando detailState cambia, actualizá los campos
+    LaunchedEffect(detailState) {
+        if(detailState is PetDetailState.Success){
+            val pet = (detailState as PetDetailState.Success).pet
+            nombre = pet.nombre
+            especieSeleccionada = pet.especie
+            peso = pet.peso?.toString() ?: ""
+        }
+    }
 
     Scaffold(
         topBar = {
