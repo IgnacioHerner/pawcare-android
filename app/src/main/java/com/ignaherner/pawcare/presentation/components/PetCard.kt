@@ -16,8 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.ui.theme.PawCareTheme
 
 @Composable
 fun PetCard(
@@ -62,5 +65,43 @@ fun PetCard(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PetCardPreviewLight() {
+    PawCareTheme {
+        PetCard(
+            pet = Pet(
+                id = 1,
+                nombre = "Rex",
+                especie = Especie.PERRO,
+                fechaNacimiento = "2021-03-15",
+                peso = 12.5,
+                fotoUri = null
+            ),
+            onClick = {},
+            onDeleteClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PetCardPreviewDark() {
+    PawCareTheme {
+        PetCard(
+            pet = Pet(
+                id = 1,
+                nombre = "Rex",
+                especie = Especie.PERRO,
+                fechaNacimiento = "2021-03-15",
+                peso = 12.5,
+                fotoUri = null
+            ),
+            onClick = {},
+            onDeleteClick = {}
+        )
     }
 }
