@@ -3,8 +3,8 @@ package com.ignaherner.pawcare.di
 import android.content.Context
 import androidx.room.Room
 import com.ignaherner.pawcare.data.local.PawCareDatabase
-import com.ignaherner.pawcare.data.local.VaccineDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
+import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

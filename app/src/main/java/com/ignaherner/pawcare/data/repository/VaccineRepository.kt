@@ -1,6 +1,6 @@
 package com.ignaherner.pawcare.data.repository
 
-import com.ignaherner.pawcare.data.local.entity.VaccineDao
+import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import com.ignaherner.pawcare.data.local.entity.toDomain
 import com.ignaherner.pawcare.data.local.entity.toEntity
 import com.ignaherner.pawcare.domain.model.Vaccine

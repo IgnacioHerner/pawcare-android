@@ -10,15 +10,24 @@ import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
+import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
+import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 
 object PawCareDestinations {
     const val PET_LIST = "pet_list"
     const val PET_DETAIL = "pet_detail/{petId}"
     const val PET_FORM = "pet_form?petId={petId}"
 
+    const val VACCINE_LIST = "vaccine_list/{petId}"
+    const val VACCINE_FORM = "vaccine_form/{petId}?vaccineId={vaccinId}"
+
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
+
+    fun vaccineList(petId: Long) = "vaccine_list/$petId"
+    fun vaccineForm(petId: Long, vaccineId: Long? = null) =
+        if (vaccineId != null) "vaccine_form/$petId?vaccineId=$vaccineId" else "vaccine_form/$petId"
 }
 
 @Composable
@@ -77,7 +86,7 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.petForm(id))
                 },
                 onNavigateToVaccines = { id ->
-                    navController.navigate(PawCareDestinations.petDetail(id))
+                    navController.navigate(PawCareDestinations.vaccineList(id))
                 },
                 onNavigateToAppointments = { id ->
                     navController.navigate(PawCareDestinations.petDetail(id))
@@ -87,5 +96,44 @@ fun PawCareNavGraph(
                 }
             )
         }
+
+        // Lista de vacunas
+        composable(
+            route = PawCareDestinations.VACCINE_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            VaccineScreen(
+                petId = petId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.vaccineForm(petId))
+                }
+            )
+        }
+
+        // Formulario de vacunas
+        composable(
+            route = PawCareDestinations.VACCINE_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("vaccineId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
+                ?.takeIf { it != -1L }
+            VaccineFormScreen(
+                petId = petId,
+                vaccineId = vaccineId,
+                onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
     }
 }
