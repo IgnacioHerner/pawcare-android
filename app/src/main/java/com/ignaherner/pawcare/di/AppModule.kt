@@ -3,6 +3,7 @@ package com.ignaherner.pawcare.di
 import android.content.Context
 import androidx.room.Room
 import com.ignaherner.pawcare.data.local.PawCareDatabase
+import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import dagger.Module
@@ -37,4 +38,9 @@ object AppModule {
     @Singleton
     fun provideVaccineDao(database: PawCareDatabase) : VaccineDao =
         database.vaccineDao()
+
+    @Provides
+    @Singleton
+    fun provideAppointmentDao(database: PawCareDatabase) : AppointmentDao =
+        database.appointmentDao()
 }
