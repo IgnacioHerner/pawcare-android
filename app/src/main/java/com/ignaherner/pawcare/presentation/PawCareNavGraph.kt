@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
+import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
@@ -14,20 +16,33 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 
 object PawCareDestinations {
+
+    // Pets
     const val PET_LIST = "pet_list"
     const val PET_DETAIL = "pet_detail/{petId}"
     const val PET_FORM = "pet_form?petId={petId}"
 
+    // Vaccines
     const val VACCINE_LIST = "vaccine_list/{petId}"
     const val VACCINE_FORM = "vaccine_form/{petId}?vaccineId={vaccinId}"
+
+    // Appointments
+    const val APPOINTMENT_LIST = "appointment_list/{petId}"
+    const val APPOINTMENT_FORM = "appointment_form/{petId}?appointmentId={appointmentId}"
 
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
 
+    // Funciones para vaccines
     fun vaccineList(petId: Long) = "vaccine_list/$petId"
     fun vaccineForm(petId: Long, vaccineId: Long? = null) =
         if (vaccineId != null) "vaccine_form/$petId?vaccineId=$vaccineId" else "vaccine_form/$petId"
+
+    // Funciones para appoinments
+    fun appointmentList(petId: Long) = "appointment_list/$petId"
+    fun appointmentForm(petId: Long, appointmentId: Long? = null) =
+        if (appointmentId != null) "appointment_form/$petId?appointmentId=$appointmentId" else "appointment_form/$petId"
 }
 
 @Composable
@@ -89,7 +104,7 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.vaccineList(id))
                 },
                 onNavigateToAppointments = { id ->
-                    navController.navigate(PawCareDestinations.petDetail(id))
+                    navController.navigate(PawCareDestinations.appointmentList(id))
                 },
                 onNavigateToWeight = { id ->
                     navController.navigate(PawCareDestinations.petDetail(id))
@@ -131,6 +146,44 @@ fun PawCareNavGraph(
             VaccineFormScreen(
                 petId = petId,
                 vaccineId = vaccineId,
+                onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
+        // Lista de turnos
+        composable(
+            route = PawCareDestinations.APPOINTMENT_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            AppointmentScreen(
+                petId = petId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.appointmentForm(petId))
+                }
+            )
+        }
+
+        // Formulario de turnos
+        composable(
+            route = PawCareDestinations.APPOINTMENT_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("appointmentId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val appointmentId = backStackEntry.arguments?.getLong("appointmentId")
+                ?.takeIf { it != -1L }
+            AppointmentFormScreen(
+                petId = petId,
+                appointmentId = appointmentId,
                 onNavigateBack = { navController.popBackStack()}
             )
         }
