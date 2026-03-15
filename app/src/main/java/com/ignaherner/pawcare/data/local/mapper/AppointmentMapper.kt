@@ -1,5 +1,6 @@
-package com.ignaherner.pawcare.data.local.entity
+package com.ignaherner.pawcare.data.local.mapper
 
+import com.ignaherner.pawcare.data.local.entity.AppointmentEntity
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
 

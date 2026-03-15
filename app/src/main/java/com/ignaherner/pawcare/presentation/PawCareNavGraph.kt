@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
+import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
+import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
@@ -30,6 +32,10 @@ object PawCareDestinations {
     const val APPOINTMENT_LIST = "appointment_list/{petId}"
     const val APPOINTMENT_FORM = "appointment_form/{petId}?appointmentId={appointmentId}"
 
+    // Medications
+    const val MEDICATION_LIST = "medication_list/{petId}"
+    const val MEDICATION_FORM = "medication_form/{petId}?medicationId={medicationId}"
+
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
@@ -43,6 +49,11 @@ object PawCareDestinations {
     fun appointmentList(petId: Long) = "appointment_list/$petId"
     fun appointmentForm(petId: Long, appointmentId: Long? = null) =
         if (appointmentId != null) "appointment_form/$petId?appointmentId=$appointmentId" else "appointment_form/$petId"
+
+    // Funciones para medications
+    fun medicationList(petId: Long) = "medication_list/$petId"
+    fun medicationForm(petId: Long, medicationId: Long? = null) =
+        if(medicationId != null) "medication_form/$petId?medicationId=$medicationId" else "medication_form/$petId"
 }
 
 @Composable
@@ -102,6 +113,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToVaccines = { id ->
                     navController.navigate(PawCareDestinations.vaccineList(id))
+                },
+                onNavigateToMedication = { id ->
+                    navController.navigate(PawCareDestinations.medicationList(id))
                 },
                 onNavigateToAppointments = { id ->
                     navController.navigate(PawCareDestinations.appointmentList(id))
@@ -188,5 +202,39 @@ fun PawCareNavGraph(
             )
         }
 
+        // Lista de medicamentos
+        composable(
+            route = PawCareDestinations.MEDICATION_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            MedicationScreen(
+                petId = petId,
+                onNavigateBack = {navController.popBackStack()},
+                onNavigateToForm = {navController.navigate(PawCareDestinations.medicationForm(petId))}
+            )
+        }
+        // Formulario de medicamentos
+        composable(
+            route = PawCareDestinations.MEDICATION_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("medicationId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ){backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val medicationId = backStackEntry.arguments?.getLong("medicationId")
+                ?.takeIf { it != -1L }
+            MedicationFormScreen(
+                petId = petId,
+                medicationId = medicationId,
+                onNavigateBack = {navController.popBackStack()},
+            )
+        }
     }
 }

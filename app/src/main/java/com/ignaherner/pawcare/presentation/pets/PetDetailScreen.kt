@@ -39,6 +39,7 @@ fun PetDetailScreen(
     onNavigateToVaccines: (Long) -> Unit,
     onNavigateToAppointments: (Long) -> Unit,
     onNavigateToWeight: (Long) ->  Unit,
+    onNavigateToMedication: (Long) -> Unit,
     viewModel: PetViewModel = hiltViewModel()
 ) {
     val detailState by viewModel.detailState.collectAsStateWithLifecycle()
@@ -88,6 +89,7 @@ fun PetDetailScreen(
                         onNavigateToVaccines = { onNavigateToVaccines(petId)},
                         onNavigateToAppointments = {onNavigateToAppointments(petId)},
                         onNavigateToWeight = {onNavigateToWeight(petId)},
+                        onNavigateToMedication = {onNavigateToMedication(petId)},
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -102,6 +104,7 @@ fun PetDetailContent(
     onNavigateToVaccines: () -> Unit,
     onNavigateToAppointments: () -> Unit,
     onNavigateToWeight: () -> Unit,
+    onNavigateToMedication: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -145,6 +148,12 @@ fun PetDetailContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("\uD83D\uDC89 Vacunas e historial médico")
+        }
+        Button(
+            onClick = onNavigateToMedication,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Medicaciones")
         }
         Button(
             onClick = onNavigateToAppointments,

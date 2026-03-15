@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
+import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import dagger.Module
@@ -43,4 +44,9 @@ object AppModule {
     @Singleton
     fun provideAppointmentDao(database: PawCareDatabase) : AppointmentDao =
         database.appointmentDao()
+
+    @Provides
+    @Singleton
+    fun provideMedicationDao(database: PawCareDatabase) : MedicationDao =
+        database.medicationDao()
 }

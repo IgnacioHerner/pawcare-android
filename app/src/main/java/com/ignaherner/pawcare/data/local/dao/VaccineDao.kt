@@ -18,7 +18,7 @@ interface VaccineDao {
     @Query("SELECT * FROM vaccines WHERE id = :vaccineId")
     suspend fun getVaccineById(vaccineId: Long): VaccineEntity?
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVaccine(vaccine: VaccineEntity)
 
     @Update

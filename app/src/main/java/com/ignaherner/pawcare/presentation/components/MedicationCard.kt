@@ -18,17 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.NoOpUpdate
-import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
+import com.ignaherner.pawcare.domain.model.Medication
+import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.ui.theme.PawCareTheme
 
 @Composable
-fun AppointmentCard(
-    appointment: Appointment,
+fun MedicationCard(
+    medication: Medication,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
-) {
+){
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -50,32 +49,32 @@ fun AppointmentCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = appointment.fecha,
+                        text = medication.nombre,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = appointment.status.displayName,
+                        text = medication.status.displayName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = when (appointment.status) {
-                            AppointmentStatus.PENDIENTE -> Color(0xFFFF9800)
-                            AppointmentStatus.AGENDADO -> Color(0xFF2196F3)
-                            AppointmentStatus.REALIZADO -> Color(0xFF4CAF50)
+                        color = when (medication.status) {
+                            MedicationStatus.ACTIVO -> Color(0xFF4CAF50)
+                            MedicationStatus.FINALIZADO -> Color(0xFF9E9E9E)
                         }
                     )
                 }
-                appointment.veterinario?.let {
-                    Text(
-                        text = "Dr/a: $it",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                appointment.motivo?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                appointment.notas?.let {
+                Text(
+                    text = "Dosis: ${medication.dosis}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Cada ${medication.intervaloHoras} horas",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = medication.fechaInicio,
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+                medication.notas?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall
@@ -94,17 +93,19 @@ fun AppointmentCard(
 
 @PreviewLightDark
 @Composable
-fun AppoinmentCardPreview() {
+fun MedicationCardPreview(){
     PawCareTheme {
-        AppointmentCard(
-            appointment = Appointment(
+        MedicationCard(
+            medication = Medication (
                 id = 1,
                 petId = 1,
-                fecha = "13-03-2026",
-                veterinario = "Agustina Ochoa",
-                motivo = "Urgencia",
-                notas = "Atropello",
-                status = AppointmentStatus.PENDIENTE
+                nombre = "Corticoides",
+                fechaInicio = "14-03-2026",
+                duracionDias = 4,
+                intervaloHoras = 12,
+                dosis = "1/2",
+                notas = "Alergia",
+                status = MedicationStatus.ACTIVO
             ),
             onClick = {},
             onDeleteClick = {}

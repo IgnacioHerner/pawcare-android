@@ -1,8 +1,8 @@
 package com.ignaherner.pawcare.data.repository
 
 import com.ignaherner.pawcare.data.local.dao.PetDao
-import com.ignaherner.pawcare.data.local.entity.toDomain
-import com.ignaherner.pawcare.data.local.entity.toEntity
+import com.ignaherner.pawcare.data.local.mapper.toDomain
+import com.ignaherner.pawcare.data.local.mapper.toEntity
 import com.ignaherner.pawcare.domain.model.Pet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
