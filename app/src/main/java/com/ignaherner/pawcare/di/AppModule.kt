@@ -7,6 +7,7 @@ import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
+import com.ignaherner.pawcare.data.local.dao.WeightDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,4 +50,9 @@ object AppModule {
     @Singleton
     fun provideMedicationDao(database: PawCareDatabase) : MedicationDao =
         database.medicationDao()
+
+    @Provides
+    @Singleton
+    fun provideWeightDao(database: PawCareDatabase) : WeightDao =
+        database.weightDao()
 }

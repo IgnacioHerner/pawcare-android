@@ -16,6 +16,8 @@ import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
+import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
+import com.ignaherner.pawcare.presentation.weight.WeightScreen
 
 object PawCareDestinations {
 
@@ -36,6 +38,10 @@ object PawCareDestinations {
     const val MEDICATION_LIST = "medication_list/{petId}"
     const val MEDICATION_FORM = "medication_form/{petId}?medicationId={medicationId}"
 
+    // Weights
+    const val WEIGHT_LIST = "weight_list/{petId}"
+    const val WEIGHT_FORM = "weight_form/{petId}?weightId={weightId}"
+
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
@@ -54,6 +60,11 @@ object PawCareDestinations {
     fun medicationList(petId: Long) = "medication_list/$petId"
     fun medicationForm(petId: Long, medicationId: Long? = null) =
         if(medicationId != null) "medication_form/$petId?medicationId=$medicationId" else "medication_form/$petId"
+
+    // Funciones para weights
+    fun weightList(petId: Long) = "weight_list/$petId"
+    fun weightForm(petId: Long, weightId: Long? = null) =
+        if(weightId != null) "weight_form/$petId?weightId=$weightId" else "weight_form/$petId"
 }
 
 @Composable
@@ -121,7 +132,7 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.appointmentList(id))
                 },
                 onNavigateToWeight = { id ->
-                    navController.navigate(PawCareDestinations.petDetail(id))
+                    navController.navigate(PawCareDestinations.weightList(id))
                 }
             )
         }
@@ -233,6 +244,42 @@ fun PawCareNavGraph(
             MedicationFormScreen(
                 petId = petId,
                 medicationId = medicationId,
+                onNavigateBack = {navController.popBackStack()},
+            )
+        }
+
+        // Lista de weighst
+        composable(
+            route = PawCareDestinations.WEIGHT_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            WeightScreen(
+                petId = petId,
+                onNavigateBack = {navController.popBackStack()},
+                onNavigateToForm = {navController.navigate(PawCareDestinations.weightForm(petId))}
+            )
+        }
+
+        // Formulario de weights
+        composable(
+            route = PawCareDestinations.WEIGHT_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("weightId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ){backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val weightId = backStackEntry.arguments?.getLong("weightId")
+                ?.takeIf { it != -1L }
+            WeightFormScreen(
+                petId = petId,
+                weightId = weightId,
                 onNavigateBack = {navController.popBackStack()},
             )
         }
