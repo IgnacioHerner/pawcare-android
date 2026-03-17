@@ -1,12 +1,26 @@
 package com.ignaherner.pawcare.presentation.pets
 
+import android.Manifest
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -15,6 +29,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,13 +41,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.Sex
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,8 +67,14 @@ fun PetFormScreen(
     // Estado local del formulario
     var nombre by remember { mutableStateOf("") }
     var especieSeleccionada by remember { mutableStateOf(Especie.PERRO) }
+    var raza by remember { mutableStateOf("") }
+    var sexoSeleccionado by remember { mutableStateOf(Sex.MACHO) }
+    var fechaNacimiento by remember { mutableStateOf("") }
     var peso by remember { mutableStateOf("") }
     var dropdownExpanded by remember { mutableStateOf(false) }
+    var sexoDropdownExpanded by remember { mutableStateOf(false) }
+    var fotoUri by remember { mutableStateOf("") }
+
 
     // Cargar las mascotas si estamos editando
     LaunchedEffect(petId) {
@@ -61,6 +91,38 @@ fun PetFormScreen(
             nombre = pet.nombre
             especieSeleccionada = pet.especie
             peso = pet.peso?.toString() ?: ""
+        }
+    }
+
+    val context = LocalContext.current
+
+    // Launcher para galeria
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {fotoUri = it.toString()}
+    }
+
+    // Uri temporal para la camara
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher para camara
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if(success){
+            tempCameraUri?.let { fotoUri = it.toString() }
+        }
+    }
+
+    // Launcher para permiso de camara
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val uri = createImageUri(context)
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
         }
     }
 
@@ -85,11 +147,108 @@ fun PetFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Foto de mascota
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable{}
+            ){
+                if (fotoUri.isNotBlank()) {
+                    AsyncImage(
+                        model = fotoUri,
+                        contentDescription = "Foto de ${nombre}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }else {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Agregar foto",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .align(Alignment.Center),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            // Botones galeria y camara
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                OutlinedButton(
+                    onClick = { galleryLauncher.launch("image/*")},
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("📷 Galería")
+                }
+                OutlinedButton(
+                    onClick = {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("📸 Cámara")
+                }
+            }
+
             // Campo nombre
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
                 label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Campo raza
+            OutlinedTextField(
+                value = raza,
+                onValueChange = { raza = it},
+                label = { Text("Raza")},
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Dropdown sexo
+            ExposedDropdownMenuBox(
+                expanded = dropdownExpanded,
+                onExpandedChange = { sexoDropdownExpanded = it}
+            ) {
+                OutlinedTextField(
+                    value = sexoSeleccionado.displayName,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Sexo")},
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sexoDropdownExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = sexoDropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false}
+                ) {
+                    Sex.entries.forEach { sexo ->
+                        DropdownMenuItem(
+                            text = { Text(sexo.displayName) },
+                            onClick = {
+                                sexoSeleccionado = sexo
+                                sexoDropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = fechaNacimiento,
+                onValueChange = { fechaNacimiento = it},
+                label = { Text("Fecha de nacimiento: ")},
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -144,7 +303,9 @@ fun PetFormScreen(
                         id = petId ?: 0L,
                         nombre = nombre,
                         especie = especieSeleccionada,
-                        fechaNacimiento = null,
+                        raza = raza.ifBlank { null },
+                        sexo = sexoSeleccionado,
+                        fechaNacimiento = fechaNacimiento,
                         peso = peso.toDoubleOrNull(),
                         fotoUri = null
                     )
@@ -162,4 +323,16 @@ fun PetFormScreen(
             }
         }
     }
+}
+
+fun createImageUri(context: Context): Uri {
+    val imageFile = File(
+        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+        "pawcare_${System.currentTimeMillis()}.jpg"
+    )
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        imageFile
+    )
 }

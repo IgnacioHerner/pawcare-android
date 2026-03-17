@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.Sex
 import com.ignaherner.pawcare.ui.theme.PawCareTheme
 
 @Composable
@@ -79,7 +81,9 @@ fun PetCardPreviewLight() {
                 especie = Especie.PERRO,
                 fechaNacimiento = "2021-03-15",
                 peso = 12.5,
-                fotoUri = null
+                fotoUri = null,
+                raza = "Border Collie",
+                sexo = Sex.MACHO
             ),
             onClick = {},
             onDeleteClick = {}
@@ -87,7 +91,7 @@ fun PetCardPreviewLight() {
     }
 }
 
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PetCardPreviewDark() {
     PawCareTheme {
@@ -98,7 +102,9 @@ fun PetCardPreviewDark() {
                 especie = Especie.PERRO,
                 fechaNacimiento = "2021-03-15",
                 peso = 12.5,
-                fotoUri = null
+                fotoUri = null,
+                raza = "Border Collie",
+                sexo = Sex.MACHO
             ),
             onClick = {},
             onDeleteClick = {}

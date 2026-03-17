@@ -4,6 +4,8 @@ data class Pet(
     val id: Long = 0,
     val nombre: String,
     val especie: Especie,
+    val raza: String?,
+    val sexo: Sex?,
     val fechaNacimiento: String?,
     val peso: Double?,
     val fotoUri: String?
