@@ -5,6 +5,7 @@ data class Vaccine(
     val petId: Long,
     val nombre: String,
     val fecha: String?,
+    val esAnual: Boolean = false,
     val proximaDosis: String?,
     val veterinario: String?,
     val notas: String?,

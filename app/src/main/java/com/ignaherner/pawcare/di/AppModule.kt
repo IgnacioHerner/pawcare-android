@@ -3,6 +3,7 @@ package com.ignaherner.pawcare.di
 import android.content.Context
 import androidx.room.Room
 import com.ignaherner.pawcare.data.local.PawCareDatabase
+import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
@@ -55,4 +56,10 @@ object AppModule {
     @Singleton
     fun provideWeightDao(database: PawCareDatabase) : WeightDao =
         database.weightDao()
+
+    @Provides
+    @Singleton
+    fun provideSettingsDataStore(
+        @ApplicationContext context: Context
+    ): SettingsDataStore = SettingsDataStore(context)
 }

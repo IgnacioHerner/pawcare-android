@@ -1,6 +1,8 @@
 package com.ignaherner.pawcare.presentation.vaccines
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,19 +75,25 @@ fun VaccineScreen(
                     )
                 }
                 is VaccineUiState.Empty -> {
-                    Text(
-                        text = "\uD83D\uDC89",
-                        style = MaterialTheme.typography.displayLarge
-                    )
-                    Text(
-                        text = "Todavía no tenés vacnas para tus mascotas",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Tocá el + para agregar la primera",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "\uD83D\uDC89",
+                            style = MaterialTheme.typography.displayLarge
+                        )
+                        Text(
+                            text = "Todavía no tenés vacnas para tus mascotas",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Tocá el + para agregar la primera",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 is VaccineUiState.Success -> {
                     LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {

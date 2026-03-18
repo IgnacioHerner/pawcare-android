@@ -23,6 +23,7 @@ data class VaccineEntity(
     val petId: Long,
     val nombre: String,
     val fecha: String?,
+    val esAnual: Int = 0,
     val proximaDosis: String?,
     val veterinario: String?,
     val notas: String?,

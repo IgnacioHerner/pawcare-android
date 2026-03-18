@@ -21,7 +21,7 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         MedicationEntity::class,
         WeightEntity::class
         ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class PawCareDatabase : RoomDatabase() {

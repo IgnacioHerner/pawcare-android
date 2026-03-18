@@ -1,6 +1,8 @@
 package com.ignaherner.pawcare.presentation.weight
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -72,19 +74,25 @@ fun WeightScreen(
                 }
 
                 is WeightUiState.Empty -> {
-                    Text(
-                        text = "⚖\uFE0F",
-                        style = MaterialTheme.typography.displayLarge
-                    )
-                    Text(
-                        text = "Todavía no tenés mascotas",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Tocá el + para agregar la primera",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "⚖\uFE0F",
+                            style = MaterialTheme.typography.displayLarge
+                        )
+                        Text(
+                            text = "Todavía no tenés mascotas",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Tocá el + para agregar la primera",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 is WeightUiState.Error -> {
                     Text(

@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation.pets
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,10 +11,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,29 +30,48 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.presentation.components.PetCard
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PetListScreen(
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
-    viewModel: PetViewModel = hiltViewModel()
+    onNavigateToSettings: () -> Unit,
+    viewModel: PetViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val nombreUsuario by settingsViewModel.nombreUsuario.collectAsStateWithLifecycle()
 
     val mensajeMascotas = when (val currentState = uiState) {
         is PetUiState.Success -> {
             if (currentState.pets.size == 1) {
-                "¿Cómo está ${currentState.pets.first().nombre} hoy? 🐾"
+                "¿Cómo está ${currentState.pets.first().nombre} hoy?"
             } else {
-                "¿Cómo están tus ${currentState.pets.size} mascotas hoy? 🐾"
+                "¿Cómo están tus ${currentState.pets.size} mascotas hoy?"
             }
         }
-        else -> "¿Cómo están tus mascotas hoy? 🐾"
+        else -> "¿Cómo están tus mascotas hoy?"
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Mis mascotas \uD83D\uDC3E")},
+                actions = {
+                    IconButton(
+                        onClick = { onNavigateToSettings()}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Configuracion"
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToForm) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar mascota")
@@ -68,7 +90,7 @@ fun PetListScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text(
-                    text = "Hola, Ignacio 👋",
+                    text = "Hola, $nombreUsuario 👋",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -90,10 +112,25 @@ fun PetListScreen(
                         )
                     }
                     is PetUiState.Empty -> {
-                        Text(
-                            text = "Agregar tu primera mascota \uD83D\uDC3E",
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "🐾",
+                                style = MaterialTheme.typography.displayLarge
+                            )
+                            Text(
+                                text = "Todavía no tenés mascotas",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Tocá el + para agregar la primera",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     is PetUiState.Success -> {
                         LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {

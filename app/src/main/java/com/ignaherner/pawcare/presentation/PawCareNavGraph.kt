@@ -14,6 +14,7 @@ import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
+import com.ignaherner.pawcare.presentation.settings.SettingsScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
@@ -41,6 +42,9 @@ object PawCareDestinations {
     // Weights
     const val WEIGHT_LIST = "weight_list/{petId}"
     const val WEIGHT_FORM = "weight_form/{petId}?weightId={weightId}"
+
+    // Settings
+    const val SETTINGS = "settings"
 
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
@@ -75,6 +79,13 @@ fun PawCareNavGraph(
         navController = navController,
         startDestination = PawCareDestinations.PET_LIST
     ) {
+        // Settings DataStore
+        composable(PawCareDestinations.SETTINGS) {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
         // Lista de mascotas
         composable(PawCareDestinations.PET_LIST) {
             PetListScreen(
@@ -83,6 +94,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.petForm())
+                },
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS)
                 }
             )
         }
