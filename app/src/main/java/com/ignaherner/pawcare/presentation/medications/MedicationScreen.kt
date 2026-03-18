@@ -1,6 +1,7 @@
 package com.ignaherner.pawcare.presentation.medications
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.presentation.components.MedicationCard
@@ -44,7 +47,7 @@ fun MedicationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Medicacion") },
+                title = { Text("Medicamentos 💊") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -71,12 +74,21 @@ fun MedicationScreen(
                 }
                 is MedicationUiState.Empty -> {
                     Text(
-                        text = "Agrega un medicamento para tus mascotas",
-                        modifier = Modifier.align(Alignment.Center)
+                        text = "\uD83D\uDC8A",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                    Text(
+                        text = "Todavía no tenés medicaciones para tus mascotas",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Tocá el + para agregar la primera",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 is MedicationUiState.Success -> {
-                    LazyColumn {
+                    LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(
                             items = state.medications,
                             key = {it.id}

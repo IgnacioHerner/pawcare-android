@@ -1,6 +1,7 @@
 package com.ignaherner.pawcare.presentation.weight
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -21,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.presentation.components.WeightCard
@@ -42,7 +45,7 @@ fun WeightScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Peso") },
+                title = { Text("Registro de peso ⚖️") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -70,8 +73,17 @@ fun WeightScreen(
 
                 is WeightUiState.Empty -> {
                     Text(
-                        text = "Agregá el primer peso de tu mascota ⚖️",
-                        modifier = Modifier.align(Alignment.Center)
+                        text = "⚖\uFE0F",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                    Text(
+                        text = "Todavía no tenés mascotas",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Tocá el + para agregar la primera",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 is WeightUiState.Error -> {
@@ -81,7 +93,7 @@ fun WeightScreen(
                     )
                 }
                 is WeightUiState.Success -> {
-                    LazyColumn {
+                    LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
                         items(
                             items = state.weights,
                             key = {it.id}
