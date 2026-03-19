@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,12 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.domain.model.calcularProximaDosis
 import com.ignaherner.pawcare.domain.model.displayName
 import com.ignaherner.pawcare.domain.model.fechaHoy
 import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +53,8 @@ fun VaccineFormScreen(
     petId: Long,
     vaccineId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: VaccineViewModel = hiltViewModel()
+    viewModel: VaccineViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ){
     // Estado local del formulario
     var nombre by remember { mutableStateOf("") }
@@ -63,6 +67,15 @@ fun VaccineFormScreen(
     var dropdownExpanded by remember { mutableStateOf(false) }
     // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(nombreVeterinarioState) {
+        if (veterinario.isNotBlank()) {
+            veterinario = nombreVeterinarioState
+        }
+    }
 
     // DatePickerState
     val datePickerState = rememberDatePickerState(
@@ -184,13 +197,13 @@ fun VaccineFormScreen(
                 )
             }
 
-            // Proxima dosis
-            OutlinedTextField(
-                value = proximaDosis,
-                onValueChange = { proximaDosis = it},
-                label = { Text("Proxima dosis (dd/mm/yyyy)")},
-                modifier = Modifier.fillMaxWidth()
-            )
+//            // Proxima dosis
+//            OutlinedTextField(
+//                value = proximaDosis,
+//                onValueChange = { proximaDosis = it},
+//                label = { Text("Proxima dosis (dd/mm/yyyy)")},
+//                modifier = Modifier.fillMaxWidth()
+//            )
 
             // Veterinario
             OutlinedTextField(

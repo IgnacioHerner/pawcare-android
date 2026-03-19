@@ -7,6 +7,7 @@ data class Medication(
     val fechaInicio: String,
     val duracionDias: Int,
     val intervaloHoras: Int,
+    val recetadoPor: String?,
     val dosis: String,
     val notas: String?,
     val status: MedicationStatus

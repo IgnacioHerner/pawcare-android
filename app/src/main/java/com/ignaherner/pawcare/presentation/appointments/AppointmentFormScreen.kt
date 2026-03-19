@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +39,8 @@ fun AppointmentFormScreen(
     petId: Long,
     appointmentId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: AppointmentViewModel = hiltViewModel()
+    viewModel: AppointmentViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Estado local del formulario
     var fecha by remember { mutableStateOf("") }
@@ -45,6 +49,14 @@ fun AppointmentFormScreen(
     var notas by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<AppointmentStatus>(AppointmentStatus.PENDIENTE) }
     var dropdownExpanded by remember { mutableStateOf(false) }
+
+    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+
+    LaunchedEffect(nombreVeterinarioState) {
+        if (veterinario.isNotBlank()) {
+            veterinario = nombreVeterinarioState
+        }
+    }
 
     Scaffold(
         topBar = {

@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,17 +41,26 @@ fun MedicationFormScreen(
     petId: Long,
     medicationId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: MedicationViewModel = hiltViewModel()
+    viewModel: MedicationViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var fechaInicio by remember { mutableStateOf("") }
     var duracionDias by remember { mutableStateOf("") }
     var intervaloHoras by remember { mutableStateOf("") }
+    var recetadoPor by remember { mutableStateOf("") }
     var dosis by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<MedicationStatus>(MedicationStatus.ACTIVO) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
+    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+
+    LaunchedEffect(nombreVeterinarioState) {
+        if(recetadoPor.isNotBlank()) {
+            recetadoPor = nombreVeterinarioState
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -90,6 +102,13 @@ fun MedicationFormScreen(
                 onValueChange = {duracionDias = it},
                 label = { Text("Duracion dias: ")},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = recetadoPor,
+                onValueChange = { recetadoPor = it},
+                label = { Text("Recetado por")},
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -155,6 +174,7 @@ fun MedicationFormScreen(
                         nombre = nombre,
                         fechaInicio = fechaInicio,
                         intervaloHoras = intervaloHoras.toInt(),
+                        recetadoPor = recetadoPor.ifBlank { null },
                         duracionDias = duracionDias.toInt(),
                         dosis = dosis,
                         notas = notas.ifBlank { null},

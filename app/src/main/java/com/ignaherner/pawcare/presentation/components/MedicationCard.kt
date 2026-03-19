@@ -103,6 +103,7 @@ fun MedicationCardPreview(){
                 fechaInicio = "14-03-2026",
                 duracionDias = 4,
                 intervaloHoras = 12,
+                recetadoPor = "Agustina Ochoa",
                 dosis = "1/2",
                 notas = "Alergia",
                 status = MedicationStatus.ACTIVO

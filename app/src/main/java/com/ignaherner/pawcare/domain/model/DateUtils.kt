@@ -13,3 +13,16 @@ fun calcularProximaDosis(fecha: String) : String =
     fecha.toLocalDate().plusYears(1).toFormattedString()
 
 fun fechaHoy(): String = LocalDate.now().toFormattedString()
+
+fun String.toFriendlyDate(): String {
+    return try {
+        val date = this.toLocalDate()
+        val formatter = DateTimeFormatter.ofPattern(
+            "dd MMM yyyy",
+            java.util.Locale("es", "AR")
+        )
+        date.format(formatter)
+    } catch (e: Exception) {
+        this // si falla, devuelve el string original
+    }
+}
