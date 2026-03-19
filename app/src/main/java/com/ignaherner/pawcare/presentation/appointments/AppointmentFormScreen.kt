@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation.appointments
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -18,7 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +37,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
+import com.ignaherner.pawcare.domain.model.fechaHoy
+import com.ignaherner.pawcare.domain.model.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +51,7 @@ fun AppointmentFormScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Estado local del formulario
-    var fecha by remember { mutableStateOf("") }
+    var fecha by remember { mutableStateOf(fechaHoy()) }
     var veterinario by remember { mutableStateOf("") }
     var motivo by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
@@ -51,6 +59,42 @@ fun AppointmentFormScreen(
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+
+    // Estado para controlar si el dialog esta abierto
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // DatePickerState
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+    // Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            fecha = localDate.toFormattedString()
+                        }
+                        showDatePicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     LaunchedEffect(nombreVeterinarioState) {
         if (veterinario.isNotBlank()) {
@@ -81,9 +125,20 @@ fun AppointmentFormScreen(
         ) {
             OutlinedTextField(
                 value = fecha,
-                onValueChange = { fecha = it},
-                label = { Text("Fecha (dd//mm/yyyy)") },
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha del turno") },
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true}) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Elegir fecha"
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable{ showDatePicker = true}
             )
 
             OutlinedTextField(

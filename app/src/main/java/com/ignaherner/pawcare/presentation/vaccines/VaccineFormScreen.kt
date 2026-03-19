@@ -65,6 +65,7 @@ fun VaccineFormScreen(
     var notas by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<VaccineStatus>(VaccineStatus.Pendiente) }
     var dropdownExpanded by remember { mutableStateOf(false) }
+
     // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -207,8 +208,8 @@ fun VaccineFormScreen(
 
             // Veterinario
             OutlinedTextField(
-                value = veterinario,
-                onValueChange = { veterinario = it},
+                value = nombreVeterinarioState,
+                onValueChange = {},
                 label = { Text("Veterinario")},
                 modifier = Modifier.fillMaxWidth()
             )

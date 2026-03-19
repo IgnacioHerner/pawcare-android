@@ -1,6 +1,8 @@
 package com.ignaherner.pawcare.presentation.medications
 
 import android.widget.Button
+import android.widget.DatePicker
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -19,7 +24,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +40,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.domain.model.fechaHoy
+import com.ignaherner.pawcare.domain.model.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +54,7 @@ fun MedicationFormScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
-    var fechaInicio by remember { mutableStateOf("") }
+    var fechaInicio by remember { mutableStateOf(fechaHoy()) }
     var duracionDias by remember { mutableStateOf("") }
     var intervaloHoras by remember { mutableStateOf("") }
     var recetadoPor by remember { mutableStateOf("") }
@@ -53,6 +62,43 @@ fun MedicationFormScreen(
     var notas by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<MedicationStatus>(MedicationStatus.ACTIVO) }
     var dropdownExpanded by remember { mutableStateOf(false) }
+
+
+    // Estado para controlar si el dialog esta abierto
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // DatePickerState
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+// Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            fechaInicio = localDate.toFormattedString()
+                        }
+                        showDatePicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
 
@@ -92,9 +138,21 @@ fun MedicationFormScreen(
 
             OutlinedTextField(
                 value = fechaInicio,
-                onValueChange = { fechaInicio = it},
-                label = { Text("Fecha de inicio: ")},
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha de inicio")},
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true}) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Elegir fecha"
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable{ showDatePicker = true}
+
             )
 
             OutlinedTextField(
