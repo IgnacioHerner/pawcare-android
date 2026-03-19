@@ -17,5 +17,14 @@ enum class Especie(val displayName: String) {
     CONEJO("Conejo"),
     AVE("Ave"),
     PEZ("Pez"),
-    OTRO("Otro")
+    OTRO("Otro");
+
+    fun emoji(): String = when (this) {
+        PERRO -> "🐶"
+        GATO -> "🐱"
+        CONEJO -> "🐰"
+        AVE -> "🐦"
+        PEZ -> "🐟"
+        OTRO -> "🐾"
+    }
 }
