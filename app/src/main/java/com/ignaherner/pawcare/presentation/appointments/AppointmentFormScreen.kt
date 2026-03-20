@@ -68,6 +68,12 @@ fun AppointmentFormScreen(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
+    LaunchedEffect(nombreVeterinarioState) {
+        if (veterinario.isNotBlank()) {
+            veterinario = nombreVeterinarioState
+        }
+    }
+
     // Dialog
     if (showDatePicker) {
         DatePickerDialog(
@@ -142,8 +148,8 @@ fun AppointmentFormScreen(
             )
 
             OutlinedTextField(
-                value = veterinario,
-                onValueChange = {veterinario = it},
+                value = nombreVeterinarioState,
+                onValueChange = {},
                 label = { Text("Veterinario")},
                 modifier = Modifier.fillMaxWidth()
             )
