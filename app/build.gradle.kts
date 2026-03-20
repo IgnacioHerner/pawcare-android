@@ -2,20 +2,18 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias { libs.plugins.ksp }
-    alias { libs.plugins.hilt }
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
     namespace = "com.ignaherner.pawcare"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ignaherner.pawcare"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -82,6 +80,9 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    // Vico (Estadisticas para el peso)
+    implementation(libs.vico.compose.m3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
