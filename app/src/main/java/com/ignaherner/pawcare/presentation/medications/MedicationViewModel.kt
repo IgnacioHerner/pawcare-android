@@ -2,8 +2,10 @@ package com.ignaherner.pawcare.presentation.medications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.local.WorkManagerHelper
 import com.ignaherner.pawcare.data.repository.MedicationRepository
 import com.ignaherner.pawcare.domain.model.Medication
+import com.ignaherner.pawcare.domain.model.MedicationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MedicationViewModel @Inject constructor(
-    private val repository: MedicationRepository
+    private val repository: MedicationRepository,
+    private val workManagerHelper: WorkManagerHelper
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<MedicationUiState>(MedicationUiState.Loading)
     val uiState: StateFlow<MedicationUiState> = _uiState.asStateFlow()
@@ -35,20 +38,28 @@ class MedicationViewModel @Inject constructor(
         }
     }
 
-    fun insertMedication(medication: Medication) {
+    fun insertMedication(medication: Medication, petName: String) {
         viewModelScope.launch {
             try {
                 repository.insertMedication(medication)
+                if (medication.status == MedicationStatus.ACTIVO) {
+                    workManagerHelper.programarRecordatorioMedicamento(medication, petName)
+                }
             }catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error al guardar")
             }
         }
     }
 
-    fun updateMedication(medication: Medication) {
+    fun updateMedication(medication: Medication, petName: String) {
         viewModelScope.launch {
             try {
                 repository.updateMedication(medication)
+                if (medication.status == MedicationStatus.ACTIVO) {
+                    workManagerHelper.programarRecordatorioMedicamento(medication, petName)
+                } else {
+                    workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
+                }
             }catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error al actualizar")
             }
@@ -59,6 +70,7 @@ class MedicationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteMedication(medication)
+                workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
             }catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error al eliminar")
             }

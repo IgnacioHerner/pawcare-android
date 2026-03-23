@@ -62,6 +62,7 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.hilt.common)
     ksp(libs.androidx.room.compiler)
 
     // Hilt
@@ -83,6 +84,10 @@ dependencies {
 
     // Vico (Estadisticas para el peso)
     implementation(libs.vico.compose.m3)
+
+    // Hilt Work
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

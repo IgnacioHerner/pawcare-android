@@ -20,6 +20,8 @@ workManager = "2.9.0"
 material-icons = "1.6.0"
 datastore = "1.0.0"
 vico = "2.0.0-alpha.28"
+hiltCommon = "1.3.0"
+hilt-work = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,6 +68,10 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 # Vico
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico"}
+
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-work" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt-work" }
+androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hilt-work" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
