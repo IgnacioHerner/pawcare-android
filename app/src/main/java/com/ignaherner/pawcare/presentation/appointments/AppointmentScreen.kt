@@ -137,8 +137,8 @@ fun AppointmentScreen(
                         onClick = { filtroSeleccionado = AppointmentStatus.AGENDADO },
                         label = { Text("Agendado", style = MaterialTheme.typography.labelSmall) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFF57F17).copy(alpha = 0.15f),
-                            selectedLabelColor = Color(0xFFF57F17)
+                            selectedContainerColor = Color(0xFF2196F3).copy(alpha = 0.15f),
+                            selectedLabelColor = Color(0xFF2196F3)
                         )
                     )
                 }
@@ -205,7 +205,7 @@ fun AppointmentScreen(
 
                         LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
                             items(
-                                items = state.appointments,
+                                items = appointmentFiltradas,
                                 key = { it.id }
                             ) { appointment ->
                                 AppointmentCard(

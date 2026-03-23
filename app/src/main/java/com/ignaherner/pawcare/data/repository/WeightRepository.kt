@@ -4,6 +4,7 @@ import com.ignaherner.pawcare.data.local.dao.WeightDao
 import com.ignaherner.pawcare.data.local.mapper.toDomain
 import com.ignaherner.pawcare.data.local.mapper.toEntity
 import com.ignaherner.pawcare.domain.model.Weight
+import com.ignaherner.pawcare.domain.model.toLocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -16,7 +17,9 @@ class WeightRepository @Inject constructor(
     fun getWeightByPetId(petId: Long): Flow<List<Weight>> =
         weightDao.getWeightsByPetId(petId)
             .map { entities ->
-                entities.map { it.toDomain() }
+                entities
+                    .map { it.toDomain() }
+                    .sortedByDescending { it.fecha.toLocalDate() }
             }
 
     suspend fun insertWeight(weight: Weight) =

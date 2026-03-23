@@ -134,6 +134,7 @@ fun WeightScreen(
                 is WeightUiState.Success -> {
                     WeightContent(
                         weights = state.weights,
+                        onDeleteWeight = { viewModel.deleteWeight(it) },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -151,6 +152,7 @@ fun WeightScreen(
 @Composable
 private fun WeightContent(
     weights: List<Weight>,
+    onDeleteWeight: (Weight) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val metricas = calcularMetricas(weights)
@@ -188,7 +190,7 @@ private fun WeightContent(
                 weight = weight,
                 pesoAnterior = weights.getOrNull(index + 1)?.peso,
                 onClick = {},
-                onDeleteClick = {}
+                onDeleteClick = {onDeleteWeight(weight)}
             )
         }
     }
