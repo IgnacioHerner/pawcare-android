@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.presentation.pets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.local.WorkManagerHelper
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Pet
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PetViewModel @Inject constructor(
-    private val repository: PetRepository
+    private val repository: PetRepository,
+    private val workManagerHelper: WorkManagerHelper
 ): ViewModel() {
 
     // Estado de la UI
@@ -83,6 +85,7 @@ class PetViewModel @Inject constructor(
     fun deletePet(pet: Pet) {
         viewModelScope.launch {
             try {
+                workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
                 repository.deletePet(pet)
             } catch (e: Exception) {
                 _uiState.value = PetUiState.Error(e.message ?: "Error al eliminar")

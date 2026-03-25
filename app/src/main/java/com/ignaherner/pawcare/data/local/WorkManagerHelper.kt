@@ -49,6 +49,7 @@ class WorkManagerHelper @Inject constructor(
                 TimeUnit.HOURS
             )
             .addTag("medication_${medication.id}")
+            .addTag("pet_${medication.petId}")
             .build()
 
         workManager.enqueueUniquePeriodicWork(
@@ -91,6 +92,7 @@ class WorkManagerHelper @Inject constructor(
             // Producción
             .setInitialDelay(diasRestantes, TimeUnit.DAYS)
             .addTag("vaccine_${vaccine.id}")
+            .addTag("pet_${vaccine.petId}")
             .build()
 
         workManager.enqueueUniqueWork(
@@ -103,5 +105,9 @@ class WorkManagerHelper @Inject constructor(
     fun cancelarRecordatorioVacuna(vaccineId: Long) {
         android.util.Log.d("WorkManager", "Cancelando vaccine_$vaccineId")
         workManager.cancelAllWorkByTag("vaccine_${vaccineId}")
+    }
+
+    fun cancelarTodosLosRecordatoriosDeMascota(petId: Long) {
+        workManager.cancelAllWorkByTag("pet_$petId")
     }
 }
