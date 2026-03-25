@@ -19,6 +19,8 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 object PawCareDestinations {
 
@@ -28,16 +30,16 @@ object PawCareDestinations {
     const val PET_FORM = "pet_form?petId={petId}"
 
     // Vaccines
-    const val VACCINE_LIST = "vaccine_list/{petId}"
-    const val VACCINE_FORM = "vaccine_form/{petId}?vaccineId={vaccinId}"
+    const val VACCINE_LIST = "vaccine_list/{petId}/{petName}"
+    const val VACCINE_FORM = "vaccine_form/{petId}/{petName}?vaccineId={vaccineId}"
 
     // Appointments
     const val APPOINTMENT_LIST = "appointment_list/{petId}"
     const val APPOINTMENT_FORM = "appointment_form/{petId}?appointmentId={appointmentId}"
 
     // Medications
-    const val MEDICATION_LIST = "medication_list/{petId}"
-    const val MEDICATION_FORM = "medication_form/{petId}?medicationId={medicationId}"
+    const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
+    const val MEDICATION_FORM = "medication_form/{petId}/{petName}?medicationId={medicationId}"
 
     // Weights
     const val WEIGHT_LIST = "weight_list/{petId}"
@@ -51,9 +53,12 @@ object PawCareDestinations {
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
 
     // Funciones para vaccines
-    fun vaccineList(petId: Long) = "vaccine_list/$petId"
-    fun vaccineForm(petId: Long, vaccineId: Long? = null) =
-        if (vaccineId != null) "vaccine_form/$petId?vaccineId=$vaccineId" else "vaccine_form/$petId"
+    fun vaccineList(petId: Long, petName: String) = "vaccine_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun vaccineForm(petId: Long, petName: String, vaccineId: Long? = null) =
+        if (vaccineId != null)
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?vaccineId=$vaccineId"
+        else
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para appoinments
     fun appointmentList(petId: Long) = "appointment_list/$petId"
@@ -61,9 +66,12 @@ object PawCareDestinations {
         if (appointmentId != null) "appointment_form/$petId?appointmentId=$appointmentId" else "appointment_form/$petId"
 
     // Funciones para medications
-    fun medicationList(petId: Long) = "medication_list/$petId"
-    fun medicationForm(petId: Long, medicationId: Long? = null) =
-        if(medicationId != null) "medication_form/$petId?medicationId=$medicationId" else "medication_form/$petId"
+    fun medicationList(petId: Long, petName: String) = "medication_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun medicationForm(petId: Long, petName: String, medicationId: Long? = null) =
+        if(medicationId != null)
+            "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?medicationId=$medicationId"
+        else
+            "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para weights
     fun weightList(petId: Long) = "weight_list/$petId"
@@ -120,7 +128,7 @@ fun PawCareNavGraph(
             )
         }
 
-        // Detalle - lo completamos cuando hagamos PetDetailScreen
+        // PET DETAIL
         composable(
             route = PawCareDestinations.PET_DETAIL,
             arguments = listOf(
@@ -136,11 +144,11 @@ fun PawCareNavGraph(
                 onNavigateToEdit = { id ->
                     navController.navigate(PawCareDestinations.petForm(id))
                 },
-                onNavigateToVaccines = { id ->
-                    navController.navigate(PawCareDestinations.vaccineList(id))
+                onNavigateToVaccines = { id, nombre ->
+                    navController.navigate(PawCareDestinations.vaccineList(id, nombre))
                 },
-                onNavigateToMedication = { id ->
-                    navController.navigate(PawCareDestinations.medicationList(id))
+                onNavigateToMedication = { id, nombre ->
+                    navController.navigate(PawCareDestinations.medicationList(id, nombre))
                 },
                 onNavigateToAppointments = { id ->
                     navController.navigate(PawCareDestinations.appointmentList(id))
@@ -155,15 +163,20 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.VACCINE_LIST,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType }
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType}
             )
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             VaccineScreen(
                 petId = petId,
+                petName = petName,
                 onNavigateBack = { navController.popBackStack()},
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.vaccineForm(petId))
+                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
                 }
             )
         }
@@ -173,6 +186,7 @@ fun PawCareNavGraph(
             route = PawCareDestinations.VACCINE_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType},
                 navArgument("vaccineId") {
                     type = NavType.LongType
                     defaultValue = -1L
@@ -180,10 +194,14 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
                 ?.takeIf { it != -1L }
             VaccineFormScreen(
                 petId = petId,
+                petName = petName,
                 vaccineId = vaccineId,
                 onNavigateBack = { navController.popBackStack()}
             )
@@ -231,14 +249,23 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.MEDICATION_LIST,
             arguments = listOf(
-                navArgument("petId") {type = NavType.LongType}
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
             )
         ) {backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             MedicationScreen(
                 petId = petId,
+                petName = petName,
                 onNavigateBack = {navController.popBackStack()},
-                onNavigateToForm = {navController.navigate(PawCareDestinations.medicationForm(petId))}
+                onNavigateToForm = {
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(petId, petName)
+                    )
+                }
             )
         }
         // Formulario de medicamentos
@@ -246,6 +273,7 @@ fun PawCareNavGraph(
             route = PawCareDestinations.MEDICATION_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType},
+                navArgument("petName") { type = NavType.StringType},
                 navArgument("medicationId") {
                     type = NavType.LongType
                     defaultValue = -1L
@@ -253,10 +281,14 @@ fun PawCareNavGraph(
             )
         ){backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             val medicationId = backStackEntry.arguments?.getLong("medicationId")
                 ?.takeIf { it != -1L }
             MedicationFormScreen(
                 petId = petId,
+                petName = petName,
                 medicationId = medicationId,
                 onNavigateBack = {navController.popBackStack()},
             )

@@ -48,6 +48,7 @@ import com.ignaherner.pawcare.presentation.pets.PetViewModel
 @Composable
 fun MedicationScreen(
     petId: Long,
+    petName: String,
     onNavigateBack: () -> Unit,
     onNavigateToForm: () -> Unit,
     viewModel: MedicationViewModel = hiltViewModel(),

@@ -42,6 +42,8 @@ import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.fechaHoy
 import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.presentation.pets.PetDetailState
+import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,8 +52,9 @@ fun MedicationFormScreen(
     petId: Long,
     medicationId: Long? = null,
     onNavigateBack: () -> Unit,
+    petName: String,
     viewModel: MedicationViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
     var nombre by remember { mutableStateOf("") }
     var fechaInicio by remember { mutableStateOf(fechaHoy()) }
@@ -239,9 +242,9 @@ fun MedicationFormScreen(
                         status = statusSeleccionado
                     )
                     if (medicationId == null) {
-                        viewModel.insertMedication(nuevoMedicamento)
+                        viewModel.insertMedication(nuevoMedicamento, petName)
                     }else {
-                        viewModel.updateMedication(nuevoMedicamento)
+                        viewModel.updateMedication(nuevoMedicamento, petName)
                     }
                     onNavigateBack()
                 },

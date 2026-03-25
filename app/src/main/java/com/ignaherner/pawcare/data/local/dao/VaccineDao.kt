@@ -19,7 +19,7 @@ interface VaccineDao {
     suspend fun getVaccineById(vaccineId: Long): VaccineEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertVaccine(vaccine: VaccineEntity)
+    suspend fun insertVaccine(vaccine: VaccineEntity) : Long
 
     @Update
     suspend fun updateVaccine(vaccine: VaccineEntity)

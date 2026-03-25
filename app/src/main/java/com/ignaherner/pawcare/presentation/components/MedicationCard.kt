@@ -114,7 +114,7 @@ fun MedicationCard(
                 ) {
                     Text("⏱", style = MaterialTheme.typography.bodyMedium)
                     Text(
-                        text = "Cada ${medication.intervaloHoras}",
+                        text = "Cada ${medication.intervaloHoras} hs",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

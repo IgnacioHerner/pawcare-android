@@ -20,7 +20,7 @@ class VaccineRepository @Inject constructor(
                 entities.map { it.toDomain() }
             }
 
-    suspend fun insertVaccine(vaccine: Vaccine) =
+    suspend fun insertVaccine(vaccine: Vaccine) : Long =
         vaccineDao.insertVaccine(vaccine.toEntity())
 
     suspend fun updateVaccine(vaccine: Vaccine) =
