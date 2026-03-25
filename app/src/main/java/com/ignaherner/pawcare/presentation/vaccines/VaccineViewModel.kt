@@ -41,9 +41,10 @@ class VaccineViewModel @Inject constructor(
     fun insertVaccine(vaccine: Vaccine, petName: String) {
         viewModelScope.launch {
             try {
-                repository.insertVaccine(vaccine)
+                val id = repository.insertVaccine(vaccine)
+                val vaccineConId = vaccine.copy(id = id)
                 if(vaccine.status is VaccineStatus.Aplicada && vaccine.proximaDosis != null) {
-                    workManagerHelper.programarRecordatorioVacuna(vaccine, petName)
+                    workManagerHelper.programarRecordatorioVacuna(vaccineConId, petName)
                 }
             } catch (e: Exception) {
                 _uiState.value = VaccineUiState.Error(e.message ?: "Error al guardar")

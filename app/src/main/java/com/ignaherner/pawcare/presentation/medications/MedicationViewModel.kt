@@ -41,9 +41,10 @@ class MedicationViewModel @Inject constructor(
     fun insertMedication(medication: Medication, petName: String) {
         viewModelScope.launch {
             try {
-                repository.insertMedication(medication)
+                val id = repository.insertMedication(medication)
+                val medicationConId = medication.copy(id = id)
                 if (medication.status == MedicationStatus.ACTIVO) {
-                    workManagerHelper.programarRecordatorioMedicamento(medication, petName)
+                    workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
                 }
             }catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error al guardar")

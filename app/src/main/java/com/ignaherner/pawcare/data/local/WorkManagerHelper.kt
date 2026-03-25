@@ -55,6 +55,7 @@ class WorkManagerHelper @Inject constructor(
     }
 
     fun cancelarRecordatorioMedicamento(medicationId: Long) {
+//        android.util.Log.d("WorkManager", "Cancelando medication_$medicationId")
         workManager.cancelAllWorkByTag("medication_${medicationId}")
     }
 
@@ -81,9 +82,9 @@ class WorkManagerHelper @Inject constructor(
         val workRequest = OneTimeWorkRequestBuilder<VaccineWorker>()
             .setInputData(inputData)
             // Temporal para testear
-            .setInitialDelay(1L, TimeUnit.MINUTES)
+            // .setInitialDelay(1L, TimeUnit.MINUTES)
             // Producción
-//            .setInitialDelay(diasRestantes, TimeUnit.DAYS)
+            .setInitialDelay(diasRestantes, TimeUnit.DAYS)
             .addTag("vaccine_${vaccine.id}")
             .build()
 
@@ -95,6 +96,7 @@ class WorkManagerHelper @Inject constructor(
     }
 
     fun cancelarRecordatorioVacuna(vaccineId: Long) {
+        android.util.Log.d("WorkManager", "Cancelando vaccine_$vaccineId")
         workManager.cancelAllWorkByTag("vaccine_${vaccineId}")
     }
 }
