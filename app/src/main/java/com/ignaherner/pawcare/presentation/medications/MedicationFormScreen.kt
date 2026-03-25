@@ -52,9 +52,9 @@ fun MedicationFormScreen(
     petId: Long,
     medicationId: Long? = null,
     onNavigateBack: () -> Unit,
+    petName: String,
     viewModel: MedicationViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
-    petViewModel: PetViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var fechaInicio by remember { mutableStateOf(fechaHoy()) }
@@ -74,8 +74,6 @@ fun MedicationFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-
-    val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
 // Dialog
     if (showDatePicker) {
@@ -243,10 +241,6 @@ fun MedicationFormScreen(
                         notas = notas.ifBlank { null},
                         status = statusSeleccionado
                     )
-                    val petName = when (val state = detailState) {
-                        is PetDetailState.Success -> state.pet.nombre
-                        else -> ""
-                    }
                     if (medicationId == null) {
                         viewModel.insertMedication(nuevoMedicamento, petName)
                     }else {

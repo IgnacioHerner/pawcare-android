@@ -28,9 +28,15 @@ class WorkManagerHelper @Inject constructor(
             .putString(MedicationWorker.KEY_MEDICATION_ID, medication.id.toInt().toString())
             .build()
 
+//        val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
+//            medication.intervaloHoras.toLong(),
+//            TimeUnit.HOURS
+//        )
+
+        // WorkManagerHelper.kt — temporal para testear
         val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
-            medication.intervaloHoras.toLong(),
-            TimeUnit.HOURS
+            15L,
+            TimeUnit.MINUTES  // ← temporal
         )
             .setInputData(inputData)
             .addTag("medication_${medication.id}")
@@ -41,6 +47,7 @@ class WorkManagerHelper @Inject constructor(
             androidx.work.ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
         )
+
     }
 
     fun cancelarRecordatorioMedicamento(medicationId: Long) {

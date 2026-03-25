@@ -66,7 +66,7 @@ fun PetDetailScreen(
     onNavigateToVaccines: (Long) -> Unit,
     onNavigateToAppointments: (Long) -> Unit,
     onNavigateToWeight: (Long) ->  Unit,
-    onNavigateToMedication: (Long) -> Unit,
+    onNavigateToMedication: (Long, String) -> Unit,
     viewModel: PetViewModel = hiltViewModel()
 ) {
     val detailState by viewModel.detailState.collectAsStateWithLifecycle()
@@ -184,7 +184,7 @@ fun PetDetailScreen(
                                 titulo = "Medicamentos",
                                 icono = Icons.Default.LocalPharmacy,
                                 color = MedicationColor,
-                                onClick = { onNavigateToMedication(petId) }
+                                onClick = { onNavigateToMedication(petId, state.pet.nombre) }
                             ),
                             SeccionItem(
                                 titulo = "Visitas",
