@@ -19,6 +19,8 @@ class AppointmentRepository @Inject constructor(
                 entities.map { it.toDomain() }
             }
 
+    suspend fun getAppointmentById(id: Long) : Appointment? =
+        appointmentDao.getAppointmentById(id)?.toDomain()
     suspend fun insertAppointment(appointment: Appointment) =
         appointmentDao.insertAppointment(appointment.toEntity())
 

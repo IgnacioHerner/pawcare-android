@@ -18,6 +18,9 @@ class AppointmentViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<AppointmentUiState>(AppointmentUiState.Loading)
     val uiState: StateFlow<AppointmentUiState> = _uiState.asStateFlow()
 
+    private val _appointmentDetailState = MutableStateFlow<AppointmentDetailState>(AppointmentDetailState.Loading)
+    val appointentDetailState: StateFlow<AppointmentDetailState> = _appointmentDetailState
+
     fun loadAppointments(petId: Long) {
         viewModelScope.launch {
             try {
@@ -31,6 +34,21 @@ class AppointmentViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 _uiState.value = AppointmentUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun loadAppointmentById(id: Long) {
+        viewModelScope.launch {
+            try {
+                val appointment = repository.getAppointmentById(id)
+                _appointmentDetailState.value = if (appointment != null) {
+                    AppointmentDetailState.Success(appointment)
+                } else {
+                    AppointmentDetailState.Error("Turno no encontrado")
+                }
+            }catch (e: Exception) {
+                _appointmentDetailState.value = AppointmentDetailState.Error(e.message ?: "Error")
             }
         }
     }
@@ -72,4 +90,10 @@ sealed class AppointmentUiState{
     object Empty: AppointmentUiState()
     data class Success(val appointments: List<Appointment>) : AppointmentUiState()
     data class Error(val mensaje: String) : AppointmentUiState()
+}
+
+sealed class AppointmentDetailState{
+    object Loading: AppointmentDetailState()
+    data class Success(val appointments: Appointment) : AppointmentDetailState()
+    data class Error(val mensaje: String) : AppointmentDetailState()
 }

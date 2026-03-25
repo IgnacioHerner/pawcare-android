@@ -21,6 +21,9 @@ class MedicationViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<MedicationUiState>(MedicationUiState.Loading)
     val uiState: StateFlow<MedicationUiState> = _uiState.asStateFlow()
 
+    private val _medicationDetailState = MutableStateFlow<MedicationDetailState>(MedicationDetailState.Loading)
+    val medicationDetailState: StateFlow<MedicationDetailState> = _medicationDetailState
+
     fun loadMedications(petId: Long) {
         viewModelScope.launch {
             try {
@@ -34,6 +37,21 @@ class MedicationViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun loadMedicationById(id: Long) {
+        viewModelScope.launch {
+            try {
+                val medication = repository.getMedicationById(id)
+                _medicationDetailState.value = if (medication != null) {
+                    MedicationDetailState.Success(medication)
+                } else {
+                    MedicationDetailState.Error("Medicamento no encontrado")
+                }
+            } catch (e: Exception) {
+                _medicationDetailState.value = MedicationDetailState.Error(e.message ?: "Error")
             }
         }
     }
@@ -85,4 +103,10 @@ sealed class MedicationUiState {
     object Empty: MedicationUiState()
     data class Success(val medications: List<Medication>) : MedicationUiState()
     data class Error(val mensaje: String) : MedicationUiState()
+}
+
+sealed class MedicationDetailState {
+    object Loading: MedicationDetailState()
+    data class Success(val medication: Medication) : MedicationDetailState()
+    data class Error(val mensaje: String) : MedicationDetailState()
 }

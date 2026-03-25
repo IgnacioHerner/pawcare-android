@@ -40,7 +40,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.MedicationCard
+import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
 
@@ -50,6 +52,7 @@ fun MedicationScreen(
     petId: Long,
     petName: String,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
     viewModel: MedicationViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
@@ -59,6 +62,21 @@ fun MedicationScreen(
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
     var filtroSeleccionado by remember { mutableStateOf<MedicationStatus?>(null) }
+
+    var medicationToDelete by remember { mutableStateOf<Medication?>(null) }
+
+    medicationToDelete?.let { medication ->
+        ConfirmDeleteDialog(
+            titulo = "¿Eliminar a ${medication.nombre}?",
+            mensaje = "Esta accion no se puede deshacer. ",
+            onConfirm = {
+                viewModel.deleteMedication(medication)
+                medicationToDelete = null
+            },
+            onDismiss = { medicationToDelete = null}
+        )
+    }
+
 
     LaunchedEffect(petId) {
         viewModel.loadMedications(petId)
@@ -193,11 +211,16 @@ fun MedicationScreen(
                                 items = medicationsFiltradas,
                                 key = {it.id}
                             ) { medication ->
-                                MedicationCard(
-                                    medication = medication,
-                                    onClick = {},
-                                    onDeleteClick = { viewModel.deleteMedication(medication)}
-                                )
+                                SwipeRevealCard(
+                                    onDelete = { medicationToDelete = medication},
+                                    onEdit = { onNavigateToEdit(medication.id)}
+                                ) {
+                                    MedicationCard(
+                                        medication = medication,
+                                        onClick = {},
+                                        onDeleteClick = { viewModel.deleteMedication(medication)}
+                                    )
+                                }
                             }
                         }
                     }

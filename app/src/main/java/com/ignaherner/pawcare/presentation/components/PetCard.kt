@@ -108,14 +108,6 @@ fun PetCard(
                     )
                 }
             }
-            // Eliminar
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar ${pet.nombre}",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
         }
     }
 }

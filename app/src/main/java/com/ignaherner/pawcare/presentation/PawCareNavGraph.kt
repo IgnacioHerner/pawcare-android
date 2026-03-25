@@ -34,8 +34,8 @@ object PawCareDestinations {
     const val VACCINE_FORM = "vaccine_form/{petId}/{petName}?vaccineId={vaccineId}"
 
     // Appointments
-    const val APPOINTMENT_LIST = "appointment_list/{petId}"
-    const val APPOINTMENT_FORM = "appointment_form/{petId}?appointmentId={appointmentId}"
+    const val APPOINTMENT_LIST = "appointment_list/{petId}/{petName}"
+    const val APPOINTMENT_FORM = "appointment_form/{petId}/{petName}?appointmentId={appointmentId}"
 
     // Medications
     const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
@@ -61,9 +61,12 @@ object PawCareDestinations {
             "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para appoinments
-    fun appointmentList(petId: Long) = "appointment_list/$petId"
-    fun appointmentForm(petId: Long, appointmentId: Long? = null) =
-        if (appointmentId != null) "appointment_form/$petId?appointmentId=$appointmentId" else "appointment_form/$petId"
+    fun appointmentList(petId: Long, petName: String) = "appointment_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun appointmentForm(petId: Long, petName: String, appointmentId: Long? = null) =
+        if (appointmentId != null)
+            "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?appointmentId=$appointmentId"
+        else
+            "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para medications
     fun medicationList(petId: Long, petName: String) = "medication_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
@@ -102,6 +105,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.petForm())
+                },
+                onNavigateToEdit = { petId ->
+                    navController.navigate(PawCareDestinations.petForm(petId))
                 },
                 onNavigateToSettings = {
                     navController.navigate(PawCareDestinations.SETTINGS)
@@ -150,8 +156,8 @@ fun PawCareNavGraph(
                 onNavigateToMedication = { id, nombre ->
                     navController.navigate(PawCareDestinations.medicationList(id, nombre))
                 },
-                onNavigateToAppointments = { id ->
-                    navController.navigate(PawCareDestinations.appointmentList(id))
+                onNavigateToAppointments = { id, nombre ->
+                    navController.navigate(PawCareDestinations.appointmentList(id, nombre))
                 },
                 onNavigateToWeight = { id ->
                     navController.navigate(PawCareDestinations.weightList(id))
@@ -175,6 +181,8 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { vaccineId ->
+                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
                 }
@@ -211,15 +219,21 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.APPOINTMENT_LIST,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType}
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("petName") { type = NavType.StringType}
             )
         ) {backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             AppointmentScreen(
                 petId = petId,
                 onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { appointmentId ->
+                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.appointmentForm(petId))
+                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName))
                 }
             )
         }
@@ -261,6 +275,8 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 onNavigateBack = {navController.popBackStack()},
+                onNavigateToEdit = { medicationId ->
+                    navController.navigate(PawCareDestinations.medicationForm(petId, petName, medicationId))},
                 onNavigateToForm = {
                     navController.navigate(
                         PawCareDestinations.medicationForm(petId, petName)

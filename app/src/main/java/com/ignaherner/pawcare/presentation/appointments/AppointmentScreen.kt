@@ -37,10 +37,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.presentation.components.AppointmentCard
+import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
 
@@ -49,6 +52,7 @@ import com.ignaherner.pawcare.presentation.pets.PetViewModel
 fun AppointmentScreen(
     petId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
     viewModel: AppointmentViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
@@ -58,6 +62,20 @@ fun AppointmentScreen(
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
     var filtroSeleccionado by remember { mutableStateOf<AppointmentStatus?>(null) }
+
+    var appointmentToDelete by remember { mutableStateOf<Appointment?>(null) }
+
+    appointmentToDelete?.let { appointment ->
+        ConfirmDeleteDialog(
+            titulo = "¿Eliminar a ${appointment.motivo}?",
+            mensaje = "Esta accion no se puede deshacer. ",
+            onConfirm = {
+                viewModel.deleteAppointment(appointment)
+                appointmentToDelete = null
+            },
+            onDismiss = { appointmentToDelete = null}
+        )
+    }
 
     LaunchedEffect(petId) {
         viewModel.loadAppointments(petId)
@@ -208,11 +226,16 @@ fun AppointmentScreen(
                                 items = appointmentFiltradas,
                                 key = { it.id }
                             ) { appointment ->
-                                AppointmentCard(
-                                    appointment = appointment,
-                                    onClick = {},
-                                    onDeleteClick = { viewModel.deleteAppointment(appointment) }
-                                )
+                                SwipeRevealCard(
+                                    onDelete = { appointmentToDelete = appointment},
+                                    onEdit = { onNavigateToEdit(appointment.id)}
+                                ) {
+                                    AppointmentCard(
+                                        appointment = appointment,
+                                        onClick = {},
+                                        onDeleteClick = { viewModel.deleteAppointment(appointment) }
+                                    )
+                                }
                             }
                         }
                     }

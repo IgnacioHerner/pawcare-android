@@ -32,17 +32,22 @@ class WorkManagerHelper @Inject constructor(
             .putString(MedicationWorker.KEY_MEDICATION_ID, medication.id.toInt().toString())
             .build()
 
+        // WorkManagerHelper.kt — temporal para testear
+//        val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
+//            15L,
+//            TimeUnit.MINUTES  // ← temporal
+//        )
+
         val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
             medication.intervaloHoras.toLong(),
             TimeUnit.HOURS
         )
 
-//        // WorkManagerHelper.kt — temporal para testear
-//        val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
-//            15L,
-//            TimeUnit.MINUTES  // ← temporal
-//        )
             .setInputData(inputData)
+            .setInitialDelay(
+                medication.intervaloHoras.toLong(),
+                TimeUnit.HOURS
+            )
             .addTag("medication_${medication.id}")
             .build()
 

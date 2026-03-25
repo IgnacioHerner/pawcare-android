@@ -20,6 +20,9 @@ class VaccineRepository @Inject constructor(
                 entities.map { it.toDomain() }
             }
 
+    suspend fun getVaccineById(id: Long): Vaccine? =
+        vaccineDao.getVaccineById(id)?.toDomain()
+
     suspend fun insertVaccine(vaccine: Vaccine) : Long =
         vaccineDao.insertVaccine(vaccine.toEntity())
 

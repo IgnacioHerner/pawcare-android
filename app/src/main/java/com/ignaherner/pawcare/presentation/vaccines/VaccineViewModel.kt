@@ -21,6 +21,9 @@ class VaccineViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<VaccineUiState>(VaccineUiState.Loading)
     val uiState: StateFlow<VaccineUiState> = _uiState.asStateFlow()
 
+    private val _vaccineDetailState = MutableStateFlow< VaccineDetailState>(VaccineDetailState.Loading)
+    val vaccineDetailState: StateFlow<VaccineDetailState> = _vaccineDetailState.asStateFlow()
+
     fun loadVaccines(petId: Long) {
         viewModelScope.launch {
             try {
@@ -34,6 +37,21 @@ class VaccineViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 _uiState.value = VaccineUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun loadVaccineById(id: Long) {
+        viewModelScope.launch {
+            try {
+                val vaccine = repository.getVaccineById(id)
+                _vaccineDetailState.value = if (vaccine != null) {
+                    VaccineDetailState.Success(vaccine)
+                } else {
+                    VaccineDetailState.Error("Vacuna no encontrada")
+                }
+            } catch (e: Exception) {
+                _vaccineDetailState.value = VaccineDetailState.Error(e.message ?: "Error")
             }
         }
     }
@@ -81,10 +99,15 @@ class VaccineViewModel @Inject constructor(
 
 }
 
-
 sealed class VaccineUiState{
     object Loading: VaccineUiState()
     object Empty: VaccineUiState()
     data class Success(val vaccines: List<Vaccine>) : VaccineUiState()
     data class Error(val mensaje: String) : VaccineUiState()
+}
+
+sealed class VaccineDetailState{
+    object Loading : VaccineDetailState()
+    data class Success(val vaccine: Vaccine) : VaccineDetailState()
+    data class Error(val mensaje: String) : VaccineDetailState()
 }

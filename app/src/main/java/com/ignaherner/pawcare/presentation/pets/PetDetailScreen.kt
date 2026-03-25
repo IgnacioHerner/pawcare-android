@@ -64,7 +64,7 @@ fun PetDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToVaccines: (Long, String) -> Unit,
-    onNavigateToAppointments: (Long) -> Unit,
+    onNavigateToAppointments: (Long, String) -> Unit,
     onNavigateToWeight: (Long) ->  Unit,
     onNavigateToMedication: (Long, String) -> Unit,
     viewModel: PetViewModel = hiltViewModel()
@@ -190,7 +190,7 @@ fun PetDetailScreen(
                                 titulo = "Visitas",
                                 icono = Icons.Default.CalendarMonth,
                                 color = AppointmentColor,
-                                onClick = { onNavigateToAppointments(petId) }
+                                onClick = { onNavigateToAppointments(petId, state.pet.nombre) }
                             ),
                             SeccionItem(
                                 titulo = "Peso",

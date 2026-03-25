@@ -72,6 +72,25 @@ fun VaccineFormScreen(
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
 
+    // Colecta el detailState
+    val vaccineDetailState by viewModel.vaccineDetailState.collectAsStateWithLifecycle()
+
+    // Cargar la vacuna si estamos editando
+    LaunchedEffect(vaccineId) {
+        vaccineId?.let{ viewModel.loadVaccineById(it)}
+    }
+
+    LaunchedEffect(vaccineDetailState) {
+        if(vaccineDetailState is VaccineDetailState.Success) {
+            val vaccine = (vaccineDetailState as VaccineDetailState.Success).vaccine
+            nombre = vaccine.nombre
+            fecha = vaccine.fecha ?: ""
+            esAnual = vaccine.esAnual
+            veterinario = vaccine.veterinario ?: ""
+            notas = vaccine.notas ?: ""
+            statusSeleccionado = vaccine.status
+        }
+    }
 
     LaunchedEffect(nombreVeterinarioState) {
         if (veterinario.isNotBlank()) {

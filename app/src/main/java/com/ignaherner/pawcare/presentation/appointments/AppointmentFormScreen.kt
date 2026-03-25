@@ -74,6 +74,23 @@ fun AppointmentFormScreen(
         }
     }
 
+    val appointmentDetailState by viewModel.appointentDetailState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(appointmentId) {
+        appointmentId?.let { viewModel.loadAppointmentById(it) }
+    }
+
+    LaunchedEffect(appointmentDetailState) {
+        if (appointmentDetailState is AppointmentDetailState.Success) {
+            val appointment = (appointmentDetailState as AppointmentDetailState.Success).appointments
+            fecha = appointment.fecha
+            veterinario = appointment.veterinario ?: ""
+            motivo = appointment.motivo ?: ""
+            notas = appointment.notas ?: ""
+            statusSeleccionado = appointment.status
+        }
+    }
+
     // Dialog
     if (showDatePicker) {
         DatePickerDialog(

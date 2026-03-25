@@ -39,7 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
+import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.components.VaccineCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
@@ -50,15 +53,31 @@ fun VaccineScreen(
     petId: Long,
     petName: String,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
     viewModel: VaccineViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
     var filtroSeleccionado by remember { mutableStateOf<VaccineStatus?>(null) }
+
+    // Para el AlertDialog
+    var vaccineToDelete by remember { mutableStateOf<Vaccine?>(null) }
+
+
+    vaccineToDelete?.let { vaccine ->
+        ConfirmDeleteDialog(
+            titulo = "¿Eliminar a ${vaccine.nombre}?",
+            mensaje = "Esta accion no se puede deshacer. ",
+            onConfirm = {
+                viewModel.deleteVaccine(vaccine)
+                vaccineToDelete = null
+            },
+            onDismiss = { vaccineToDelete = null}
+        )
+    }
 
     LaunchedEffect(petId) {
         viewModel.loadVaccines(petId)
@@ -217,11 +236,16 @@ fun VaccineScreen(
                                 items = vaccinesOrdenadas,
                                 key = { it.id }
                             ) { vaccine ->
-                                VaccineCard(
-                                    vaccine = vaccine,
-                                    onClick = { },
-                                    onDeleteClick = { viewModel.deleteVaccine(vaccine) }
-                                )
+                                SwipeRevealCard(
+                                    onDelete = { vaccineToDelete = vaccine},
+                                    onEdit = { onNavigateToEdit(vaccine.id)}
+                                ) {
+                                    VaccineCard(
+                                        vaccine = vaccine,
+                                        onClick = { },
+                                        onDeleteClick = { viewModel.deleteVaccine(vaccine) }
+                                    )
+                                }
                             }
                         }
                     }

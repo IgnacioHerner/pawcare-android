@@ -75,7 +75,35 @@ fun MedicationFormScreen(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
-// Dialog
+    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+
+    LaunchedEffect(nombreVeterinarioState) {
+        if(recetadoPor.isNotBlank()) {
+            recetadoPor = nombreVeterinarioState
+        }
+    }
+
+    val medicationDetailState by viewModel.medicationDetailState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(medicationId) {
+        medicationId?.let { viewModel.loadMedicationById(it) }
+    }
+
+    LaunchedEffect(medicationDetailState) {
+        if (medicationDetailState is MedicationDetailState.Success) {
+            val medication = (medicationDetailState as MedicationDetailState.Success).medication
+            nombre = medication.nombre
+            fechaInicio = medication.fechaInicio
+            duracionDias = medication.duracionDias.toString()
+            intervaloHoras = medication.intervaloHoras.toString()
+            recetadoPor = medication.recetadoPor ?: ""
+            dosis = medication.dosis
+            notas = medication.notas ?: ""
+            statusSeleccionado = medication.status
+        }
+    }
+
+    // Dialog
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false},
@@ -100,14 +128,6 @@ fun MedicationFormScreen(
             }
         ) {
             DatePicker(state = datePickerState)
-        }
-    }
-
-    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
-
-    LaunchedEffect(nombreVeterinarioState) {
-        if(recetadoPor.isNotBlank()) {
-            recetadoPor = nombreVeterinarioState
         }
     }
 
@@ -167,8 +187,8 @@ fun MedicationFormScreen(
             )
 
             OutlinedTextField(
-                value = recetadoPor,
-                onValueChange = { recetadoPor = it},
+                value = nombreVeterinarioState,
+                onValueChange = {},
                 label = { Text("Recetado por")},
                 modifier = Modifier.fillMaxWidth()
             )

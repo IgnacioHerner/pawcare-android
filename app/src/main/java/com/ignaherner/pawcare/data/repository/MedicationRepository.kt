@@ -20,6 +20,9 @@ class MedicationRepository @Inject constructor(
                 entities.map { it.toDomain() }
             }
 
+    suspend fun getMedicationById(id: Long) : Medication? =
+        medicationDao.getMedicationById(id)?.toDomain()
+
     suspend fun insertMedication(medication: Medication) : Long =
         medicationDao.insertMedication(medication.toEntity())
 
