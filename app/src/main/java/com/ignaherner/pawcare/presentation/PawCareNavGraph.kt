@@ -30,8 +30,8 @@ object PawCareDestinations {
     const val PET_FORM = "pet_form?petId={petId}"
 
     // Vaccines
-    const val VACCINE_LIST = "vaccine_list/{petId}"
-    const val VACCINE_FORM = "vaccine_form/{petId}?vaccineId={vaccinId}"
+    const val VACCINE_LIST = "vaccine_list/{petId}/{petName}"
+    const val VACCINE_FORM = "vaccine_form/{petId}/{petName}?vaccineId={vaccineId}"
 
     // Appointments
     const val APPOINTMENT_LIST = "appointment_list/{petId}"
@@ -53,9 +53,12 @@ object PawCareDestinations {
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
 
     // Funciones para vaccines
-    fun vaccineList(petId: Long) = "vaccine_list/$petId"
-    fun vaccineForm(petId: Long, vaccineId: Long? = null) =
-        if (vaccineId != null) "vaccine_form/$petId?vaccineId=$vaccineId" else "vaccine_form/$petId"
+    fun vaccineList(petId: Long, petName: String) = "vaccine_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun vaccineForm(petId: Long, petName: String, vaccineId: Long? = null) =
+        if (vaccineId != null)
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?vaccineId=$vaccineId"
+        else
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para appoinments
     fun appointmentList(petId: Long) = "appointment_list/$petId"
@@ -141,8 +144,8 @@ fun PawCareNavGraph(
                 onNavigateToEdit = { id ->
                     navController.navigate(PawCareDestinations.petForm(id))
                 },
-                onNavigateToVaccines = { id ->
-                    navController.navigate(PawCareDestinations.vaccineList(id))
+                onNavigateToVaccines = { id, nombre ->
+                    navController.navigate(PawCareDestinations.vaccineList(id, nombre))
                 },
                 onNavigateToMedication = { id, nombre ->
                     navController.navigate(PawCareDestinations.medicationList(id, nombre))
@@ -160,15 +163,20 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.VACCINE_LIST,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType }
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType}
             )
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             VaccineScreen(
                 petId = petId,
+                petName = petName,
                 onNavigateBack = { navController.popBackStack()},
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.vaccineForm(petId))
+                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
                 }
             )
         }
@@ -178,6 +186,7 @@ fun PawCareNavGraph(
             route = PawCareDestinations.VACCINE_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType},
                 navArgument("vaccineId") {
                     type = NavType.LongType
                     defaultValue = -1L
@@ -185,10 +194,14 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
             val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
                 ?.takeIf { it != -1L }
             VaccineFormScreen(
                 petId = petId,
+                petName = petName,
                 vaccineId = vaccineId,
                 onNavigateBack = { navController.popBackStack()}
             )

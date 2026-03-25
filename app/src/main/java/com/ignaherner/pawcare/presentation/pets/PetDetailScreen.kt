@@ -63,7 +63,7 @@ fun PetDetailScreen(
     petId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
-    onNavigateToVaccines: (Long) -> Unit,
+    onNavigateToVaccines: (Long, String) -> Unit,
     onNavigateToAppointments: (Long) -> Unit,
     onNavigateToWeight: (Long) ->  Unit,
     onNavigateToMedication: (Long, String) -> Unit,
@@ -178,7 +178,7 @@ fun PetDetailScreen(
                                 titulo = "Vacunas",
                                 icono = Icons.Default.Favorite,
                                 color = VaccineColor,
-                                onClick = { onNavigateToVaccines(petId)}
+                                onClick = { onNavigateToVaccines(petId, state.pet.nombre)}
                             ),
                             SeccionItem(
                                 titulo = "Medicamentos",

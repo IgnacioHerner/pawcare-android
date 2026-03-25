@@ -51,6 +51,7 @@ import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 @Composable
 fun VaccineFormScreen(
     petId: Long,
+    petName: String,
     vaccineId: Long? = null,
     onNavigateBack: () -> Unit,
     viewModel: VaccineViewModel = hiltViewModel(),
@@ -269,9 +270,9 @@ fun VaccineFormScreen(
                         status = statusSeleccionado
                     )
                     if (vaccineId == null){
-                        viewModel.insertVaccine(nuevaVacuna)
+                        viewModel.insertVaccine(nuevaVacuna, petName)
                     } else {
-                        viewModel.updateVaccine(nuevaVacuna)
+                        viewModel.updateVaccine(nuevaVacuna, petName)
                     }
                     onNavigateBack()
                 },

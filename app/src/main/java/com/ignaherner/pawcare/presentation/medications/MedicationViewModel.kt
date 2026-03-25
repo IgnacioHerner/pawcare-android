@@ -69,8 +69,8 @@ class MedicationViewModel @Inject constructor(
     fun deleteMedication(medication: Medication) {
         viewModelScope.launch {
             try {
-                repository.deleteMedication(medication)
                 workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
+                repository.deleteMedication(medication)
             }catch (e: Exception) {
                 _uiState.value = MedicationUiState.Error(e.message ?: "Error al eliminar")
             }

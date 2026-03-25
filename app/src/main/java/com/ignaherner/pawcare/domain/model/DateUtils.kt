@@ -84,3 +84,10 @@ fun calcularMetricas (registros: List<Weight>): WeightMetrics? {
 
     return WeightMetrics(ultimoPeso, cambio, promedio, tendencia)
 }
+
+// Calcualar cuántos días faltan desde hoy hasta "15/03/2027" ejmplo
+fun diasHastaFecha(fecha: String): Long {
+    val fechaDate = fecha.toLocalDate()
+    val hoy = LocalDate.now()
+    return ChronoUnit.DAYS.between(hoy, fechaDate)
+}
