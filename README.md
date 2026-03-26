@@ -104,4 +104,4 @@ git clone https://github.com/tuUsuario/pawcare-android.git
 
 **Ignacio Herner**
 Android Developer en formación
-[LinkedIn](https://linkedin.com/in/tuPerfil) · [GitHub](https://github.com/tuUsuario)
+[LinkedIn](https://www.linkedin.com/in/ignacioherner/) · [GitHub](https://github.com/IgnacioHerner)
