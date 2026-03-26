@@ -53,7 +53,7 @@ fun MedicationFormScreen(
     medicationId: Long? = null,
     onNavigateBack: () -> Unit,
     petName: String,
-    viewModel: MedicationViewModel = hiltViewModel(),
+    viewModel: MedicationViewModel,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
     var nombre by remember { mutableStateOf("") }

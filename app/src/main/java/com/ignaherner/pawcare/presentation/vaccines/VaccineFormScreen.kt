@@ -54,7 +54,7 @@ fun VaccineFormScreen(
     petName: String,
     vaccineId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: VaccineViewModel = hiltViewModel(),
+    viewModel: VaccineViewModel,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ){
     // Estado local del formulario

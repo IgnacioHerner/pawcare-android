@@ -6,6 +6,7 @@ import com.ignaherner.pawcare.data.local.WorkManagerHelper
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
+import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,13 @@ class VaccineViewModel @Inject constructor(
 
     private val _vaccineDetailState = MutableStateFlow< VaccineDetailState>(VaccineDetailState.Loading)
     val vaccineDetailState: StateFlow<VaccineDetailState> = _vaccineDetailState.asStateFlow()
+
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
 
     fun loadVaccines(petId: Long) {
         viewModelScope.launch {
@@ -63,9 +71,11 @@ class VaccineViewModel @Inject constructor(
                 val vaccineConId = vaccine.copy(id = id)
                 if(vaccine.status is VaccineStatus.Aplicada && vaccine.proximaDosis != null) {
                     workManagerHelper.programarRecordatorioVacuna(vaccineConId, petName)
+                    _snackbarMessage.value = "Próxima dosis: ${vaccineConId.proximaDosis?.toFriendlyDate()} 💉"
+                    android.util.Log.d("PawCare", "Snackbar message set: ${_snackbarMessage.value}")
                 }
             } catch (e: Exception) {
-                _uiState.value = VaccineUiState.Error(e.message ?: "Error al guardar")
+                _snackbarMessage.value = "Error al guardar"
             }
         }
     }
@@ -90,8 +100,9 @@ class VaccineViewModel @Inject constructor(
             try {
                 workManagerHelper.cancelarRecordatorioVacuna(vaccine.id)
                 repository.deleteVaccine(vaccine)
+                _snackbarMessage.value = "${vaccine.nombre} eliminada"
             }catch (e: Exception) {
-                _uiState.value = VaccineUiState.Error(e.message ?: "Error al eliminar")
+                _snackbarMessage.value = "Error al eliminar"
             }
         }
     }

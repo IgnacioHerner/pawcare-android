@@ -19,6 +19,13 @@ class WeightViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<WeightUiState>(WeightUiState.Loading)
     val uiState: StateFlow<WeightUiState> = _uiState.asStateFlow()
 
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+
     fun loadWeights(petId: Long) {
         viewModelScope.launch {
             try {
@@ -60,8 +67,9 @@ class WeightViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteWeight(weight)
+                _snackbarMessage.value = "${weight.fecha} eliminada"
             } catch (e: Exception) {
-                _uiState.value = WeightUiState.Error(e.message ?: "Error al eliminar")
+                _snackbarMessage.value = "Error al eliminar"
             }
         }
     }

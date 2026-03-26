@@ -21,6 +21,13 @@ class AppointmentViewModel @Inject constructor(
     private val _appointmentDetailState = MutableStateFlow<AppointmentDetailState>(AppointmentDetailState.Loading)
     val appointentDetailState: StateFlow<AppointmentDetailState> = _appointmentDetailState
 
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+
     fun loadAppointments(petId: Long) {
         viewModelScope.launch {
             try {
@@ -77,8 +84,9 @@ class AppointmentViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteAppointment(appointment)
+                _snackbarMessage.value = "${appointment.fecha} eliminada"
             } catch (e: Exception) {
-                _uiState.value = AppointmentUiState.Error(e.message ?: "Error al eliminar")
+                _snackbarMessage.value = "Error al eliminar"
             }
         }
     }

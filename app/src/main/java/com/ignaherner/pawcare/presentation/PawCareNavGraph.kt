@@ -1,6 +1,8 @@
 package com.ignaherner.pawcare.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,12 +13,14 @@ import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
+import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
+import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
 import java.net.URLDecoder
@@ -177,6 +181,7 @@ fun PawCareNavGraph(
             val petName = URLDecoder.decode(
                 backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
             )
+            val viewModel: VaccineViewModel = hiltViewModel()
             VaccineScreen(
                 petId = petId,
                 petName = petName,
@@ -207,7 +212,12 @@ fun PawCareNavGraph(
             )
             val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
                 ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(PawCareDestinations.VACCINE_LIST)
+            }
+            val viewModel: VaccineViewModel = hiltViewModel(parentEntry)
             VaccineFormScreen(
+                viewModel = viewModel,
                 petId = petId,
                 petName = petName,
                 vaccineId = vaccineId,
@@ -271,7 +281,9 @@ fun PawCareNavGraph(
             val petName = URLDecoder.decode(
                 backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
             )
+            val viewModel: MedicationViewModel = hiltViewModel()
             MedicationScreen(
+                viewModel = viewModel,
                 petId = petId,
                 petName = petName,
                 onNavigateBack = {navController.popBackStack()},
@@ -302,7 +314,12 @@ fun PawCareNavGraph(
             )
             val medicationId = backStackEntry.arguments?.getLong("medicationId")
                 ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(PawCareDestinations.MEDICATION_LIST)
+            }
+            val viewModel: MedicationViewModel = hiltViewModel(parentEntry)
             MedicationFormScreen(
+                viewModel = viewModel,
                 petId = petId,
                 petName = petName,
                 medicationId = medicationId,

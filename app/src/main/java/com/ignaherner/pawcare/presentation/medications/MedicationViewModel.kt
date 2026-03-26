@@ -24,6 +24,13 @@ class MedicationViewModel @Inject constructor(
     private val _medicationDetailState = MutableStateFlow<MedicationDetailState>(MedicationDetailState.Loading)
     val medicationDetailState: StateFlow<MedicationDetailState> = _medicationDetailState
 
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+
     fun loadMedications(petId: Long) {
         viewModelScope.launch {
             try {
@@ -63,9 +70,10 @@ class MedicationViewModel @Inject constructor(
                 val medicationConId = medication.copy(id = id)
                 if (medication.status == MedicationStatus.ACTIVO) {
                     workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
+                    _snackbarMessage.value = "Recordatorio cada ${medicationConId.intervaloHoras}h programado 💊"
                 }
             }catch (e: Exception) {
-                _uiState.value = MedicationUiState.Error(e.message ?: "Error al guardar")
+                _snackbarMessage.value = "Error al guardar"
             }
         }
     }
@@ -90,8 +98,9 @@ class MedicationViewModel @Inject constructor(
             try {
                 workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
                 repository.deleteMedication(medication)
+                _snackbarMessage.value = "${medication.nombre} eliminada"
             }catch (e: Exception) {
-                _uiState.value = MedicationUiState.Error(e.message ?: "Error al eliminar")
+                _snackbarMessage.value = "Error al eliminar"
             }
         }
     }

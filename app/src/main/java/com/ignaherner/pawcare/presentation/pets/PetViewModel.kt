@@ -26,6 +26,13 @@ class PetViewModel @Inject constructor(
     private val _detailState = MutableStateFlow<PetDetailState>(PetDetailState.Loading)
     val detailState: StateFlow<PetDetailState> = _detailState.asStateFlow()
 
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+
     init {
         loadPets()
     }
@@ -87,8 +94,9 @@ class PetViewModel @Inject constructor(
             try {
                 workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
                 repository.deletePet(pet)
+                _snackbarMessage.value = "${pet.nombre} eliminado"
             } catch (e: Exception) {
-                _uiState.value = PetUiState.Error(e.message ?: "Error al eliminar")
+                _snackbarMessage.value = "Error al eliminar"
             }
         }
     }
