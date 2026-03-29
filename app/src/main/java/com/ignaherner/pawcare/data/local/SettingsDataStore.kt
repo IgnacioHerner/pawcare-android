@@ -22,7 +22,6 @@ class SettingsDataStore @Inject constructor(
 
     companion object {
         val NOMBRE_VETERINARIO = stringPreferencesKey("nombre_veterinario")
-        val NOMBRE_USUARIO = stringPreferencesKey("nombre_usuario")
     }
 
     // Leer nombre veterinario
@@ -31,11 +30,6 @@ class SettingsDataStore @Inject constructor(
             preferences[NOMBRE_VETERINARIO] ?: ""
         }
 
-    // Leer nombre usuario
-    val nombreUsuario: Flow<String> = context.dataStore.data
-        .map { preferences ->
-            preferences[NOMBRE_USUARIO] ?: "Usuario"
-        }
 
     // Guardar nombre veterinario
     suspend fun guardarNombreVeterinario(nombre: String) {
@@ -44,10 +38,4 @@ class SettingsDataStore @Inject constructor(
         }
     }
 
-    // Guardar nombre usuario
-    suspend fun guardarNombreUsuario(nombre: String) {
-        context.dataStore.edit { preferences ->
-            preferences[NOMBRE_USUARIO] = nombre
-        }
-    }
 }

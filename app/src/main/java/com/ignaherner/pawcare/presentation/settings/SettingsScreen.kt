@@ -37,17 +37,11 @@ fun SettingsScreen(
 ){
 
     //Colectas los StateFlow
-    val nombreUsuarioState by viewModel.nombreUsuario.collectAsStateWithLifecycle()
     val nombreVeterinarioState by viewModel.nombreVeterinario.collectAsStateWithLifecycle()
 
     var nombreUsuarioInput by remember { mutableStateOf("") }
     var nombreVeterinarioInput by remember { mutableStateOf("") }
 
-    LaunchedEffect(nombreUsuarioState) {
-        if (nombreUsuarioInput.isBlank()){
-            nombreUsuarioInput = nombreUsuarioState
-        }
-    }
 
     LaunchedEffect(nombreVeterinarioState) {
         if (nombreVeterinarioInput.isBlank()){
@@ -101,7 +95,6 @@ fun SettingsScreen(
 
             Button(
                 onClick = {
-                    viewModel.guardarNombreUsuario(nombreUsuarioInput)
                     viewModel.guardarNombreVeterinario(nombreVeterinarioInput)
                     onNavigateBack()
                 },

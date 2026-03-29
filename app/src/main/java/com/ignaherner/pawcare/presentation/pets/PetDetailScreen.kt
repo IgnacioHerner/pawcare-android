@@ -5,16 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +21,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalPharmacy
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,7 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.presentation.components.OwnerCard
+import com.ignaherner.pawcare.presentation.owners.OwnerState
+import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.ui.theme.AppointmentColor
 import com.ignaherner.pawcare.ui.theme.MedicationColor
 import com.ignaherner.pawcare.ui.theme.VaccineColor
@@ -65,15 +61,22 @@ fun PetDetailScreen(
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToVaccines: (Long, String) -> Unit,
     onNavigateToAppointments: (Long, String) -> Unit,
-    onNavigateToWeight: (Long) ->  Unit,
+    onNavigateToWeight: (Long) -> Unit,
+    onNavigateToOwnerDetail: () -> Unit,
     onNavigateToMedication: (Long, String) -> Unit,
-    viewModel: PetViewModel = hiltViewModel()
+    petViewModel: PetViewModel = hiltViewModel(),
+    ownerViewModel: OwnerViewModel = hiltViewModel(),
 ) {
-    val detailState by viewModel.detailState.collectAsStateWithLifecycle()
+    val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
     // Carga la mascota cuando aparece en la pantalla
     LaunchedEffect(petId) {
-        viewModel.loadPetById(petId)
+        petViewModel.loadPetById(petId)
+    }
+
+    val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        ownerViewModel.loadOwner()
     }
 
     Scaffold(
@@ -170,6 +173,19 @@ fun PetDetailScreen(
                             state.pet.fechaNacimiento?.let {
                                 InfoRow("Nacimiento", it)
                             }
+                        }
+
+                        // Info del dueño
+                        when(val state = ownerState) {
+                            is OwnerState.Success -> {
+                                OwnerCard(
+                                    owner = state.owner,
+                                    onEditClick = {
+                                        onNavigateToOwnerDetail()
+                                    }
+                                )
+                            }
+                            else -> {}
                         }
 
                         // Grilla de secciones

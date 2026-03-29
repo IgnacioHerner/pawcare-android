@@ -47,6 +47,8 @@ import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.PetCard
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
+import com.ignaherner.pawcare.presentation.owners.OwnerState
+import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,12 +59,20 @@ fun PetListScreen(
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToSettings: () -> Unit,
     viewModel: PetViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    ownerViewModel: OwnerViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val nombreUsuario by settingsViewModel.nombreUsuario.collectAsStateWithLifecycle()
     var petToDelete by remember { mutableStateOf<Pet?>(null) }
+
+    // Agarrar el nombre del usuario a traves del estado del ownerViewModel
+    val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+
+    // Actualizar el nombre del usuario
+    val nombreUsuario = when(val state = ownerState) {
+        is OwnerState.Success -> state.owner.nombre
+        else -> "Usuario"
+    }
 
     petToDelete?.let { pet ->
         ConfirmDeleteDialog(

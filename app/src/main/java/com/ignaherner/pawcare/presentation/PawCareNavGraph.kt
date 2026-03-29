@@ -1,8 +1,10 @@
 package com.ignaherner.pawcare.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,6 +16,9 @@ import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
+import com.ignaherner.pawcare.presentation.owners.OwnerDetailScreen
+import com.ignaherner.pawcare.presentation.owners.OwnerFormScreen
+import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.PetListScreen
@@ -51,6 +56,12 @@ object PawCareDestinations {
 
     // Settings
     const val SETTINGS = "settings"
+
+    // Owner
+    const val OWNER_FORM = "owner_form"
+    const val OWNER_EDIT = "owner_edit"
+
+    const val OWNER_DETAIL = "owner_detail"
 
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
@@ -90,10 +101,49 @@ object PawCareDestinations {
 fun PawCareNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
+
+    val ownerViewModel: OwnerViewModel = hiltViewModel()
+    val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+
+    if (ownerExist == null) return
+
     NavHost(
         navController = navController,
-        startDestination = PawCareDestinations.PET_LIST
+        startDestination = if (ownerExist == true)
+            PawCareDestinations.PET_LIST
+        else
+            PawCareDestinations.OWNER_FORM
     ) {
+
+        // Formulario - sirve para crear y editar
+        composable(PawCareDestinations.OWNER_FORM) {
+            OwnerFormScreen(
+                ownerId = null,
+                onNavigateBack = {
+                    navController.navigate(PawCareDestinations.PET_LIST) {
+                        popUpTo(PawCareDestinations.OWNER_FORM) { inclusive = true}
+                    }
+                }
+            )
+        }
+
+        composable(PawCareDestinations.OWNER_DETAIL) {
+            OwnerDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = {
+                    navController.navigate(PawCareDestinations.OWNER_EDIT)
+                }
+            )
+        }
+
+        // Editar dueño
+        composable(PawCareDestinations.OWNER_EDIT){
+            OwnerFormScreen(
+                ownerId = 1L, // Siempre hay un solo Owner
+                onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
         // Settings DataStore
         composable(PawCareDestinations.SETTINGS) {
             SettingsScreen(
@@ -157,14 +207,17 @@ fun PawCareNavGraph(
                 onNavigateToVaccines = { id, nombre ->
                     navController.navigate(PawCareDestinations.vaccineList(id, nombre))
                 },
-                onNavigateToMedication = { id, nombre ->
-                    navController.navigate(PawCareDestinations.medicationList(id, nombre))
-                },
                 onNavigateToAppointments = { id, nombre ->
                     navController.navigate(PawCareDestinations.appointmentList(id, nombre))
                 },
                 onNavigateToWeight = { id ->
                     navController.navigate(PawCareDestinations.weightList(id))
+                },
+                onNavigateToMedication = { id, nombre ->
+                    navController.navigate(PawCareDestinations.medicationList(id, nombre))
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
                 }
             )
         }

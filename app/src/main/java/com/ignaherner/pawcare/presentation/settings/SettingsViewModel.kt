@@ -22,12 +22,6 @@ class SettingsViewModel @Inject constructor(
             initialValue = ""
         )
 
-    val nombreUsuario: StateFlow<String> = settingsDataStore.nombreUsuario
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
-        )
 
     fun guardarNombreVeterinario(nombre: String) {
         viewModelScope.launch {
@@ -35,9 +29,4 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun guardarNombreUsuario(nombre: String) {
-        viewModelScope.launch {
-            settingsDataStore.guardarNombreUsuario(nombre)
-        }
-    }
 }

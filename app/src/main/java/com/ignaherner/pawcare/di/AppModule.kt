@@ -8,6 +8,7 @@ import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
+import com.ignaherner.pawcare.data.local.dao.OwnerDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import com.ignaherner.pawcare.data.local.dao.WeightDao
@@ -74,5 +75,10 @@ abstract class AppModule {
         ): Configuration = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+        @Provides
+        @Singleton
+        fun provideOwnerDao(database: PawCareDatabase): OwnerDao =
+            database.ownerDao()
     }
 }
