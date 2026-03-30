@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
+import com.ignaherner.pawcare.presentation.home.HomeScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
@@ -32,6 +33,9 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 object PawCareDestinations {
+
+    // Home
+    const val HOME = "home"
 
     // Pets
     const val PET_LIST = "pet_list"
@@ -60,8 +64,10 @@ object PawCareDestinations {
     // Owner
     const val OWNER_FORM = "owner_form"
     const val OWNER_EDIT = "owner_edit"
-
     const val OWNER_DETAIL = "owner_detail"
+
+    // Splash
+    const val SPLASH = "splash"
 
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
@@ -109,11 +115,42 @@ fun PawCareNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = if (ownerExist == true)
-            PawCareDestinations.PET_LIST
-        else
-            PawCareDestinations.OWNER_FORM
+        startDestination = PawCareDestinations.SPLASH
     ) {
+
+        composable(PawCareDestinations.HOME) {
+            HomeScreen(
+                onNavigateToPetDetail = { petId ->
+                    navController.navigate(PawCareDestinations.petDetail(petId))
+                },
+                onNavigateToAddPet = {
+                    navController.navigate(PawCareDestinations.petForm())
+                },
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS)
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                }
+            )
+        }
+
+
+
+        composable(PawCareDestinations.SPLASH){
+            SplashScreen (
+                onSplashFinished = {
+                    navController.navigate(
+                        if (ownerExist == true)
+                            PawCareDestinations.HOME
+                        else
+                            PawCareDestinations.OWNER_FORM
+                    ) {
+                        popUpTo(PawCareDestinations.SPLASH){inclusive = true}
+                    }
+                }
+            )
+        }
 
         // Formulario - sirve para crear y editar
         composable(PawCareDestinations.OWNER_FORM) {

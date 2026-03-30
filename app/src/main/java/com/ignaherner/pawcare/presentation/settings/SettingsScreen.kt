@@ -39,7 +39,6 @@ fun SettingsScreen(
     //Colectas los StateFlow
     val nombreVeterinarioState by viewModel.nombreVeterinario.collectAsStateWithLifecycle()
 
-    var nombreUsuarioInput by remember { mutableStateOf("") }
     var nombreVeterinarioInput by remember { mutableStateOf("") }
 
 
@@ -71,17 +70,6 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Perfil de usuario",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            OutlinedTextField(
-                value = nombreUsuarioInput,
-                onValueChange = { nombreUsuarioInput = it },
-                label = { Text("Tu nombre") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
                 text = "Datos del veterinario",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
@@ -98,7 +86,7 @@ fun SettingsScreen(
                     viewModel.guardarNombreVeterinario(nombreVeterinarioInput)
                     onNavigateBack()
                 },
-                enabled = nombreUsuarioInput.isNotBlank(),
+                enabled = nombreVeterinarioInput.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Guardar")
