@@ -13,5 +13,9 @@ data class PetEntity(
     val sexo: String?,
     val fechaNacimiento: String?,
     val peso: Double?,
-    val fotoUri: String?
+    val fotoUri: String?,
+    val castrado: Boolean,
+    val fechaCastracion: String?,
+    val fechaUltimaDesparasitacion : String?,
+    val proximaDesparasitacion : String?,
 )

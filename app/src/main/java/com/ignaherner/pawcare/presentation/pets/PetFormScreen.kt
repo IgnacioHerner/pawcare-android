@@ -17,12 +17,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -33,8 +38,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -55,6 +64,7 @@ import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
+import com.ignaherner.pawcare.domain.model.toFormattedString
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +84,107 @@ fun PetFormScreen(
     var dropdownExpanded by remember { mutableStateOf(false) }
     var sexoDropdownExpanded by remember { mutableStateOf(false) }
     var fotoUri by remember { mutableStateOf("") }
+    var castrado by remember { mutableStateOf(false) }
+    var fechaCastracion by remember { mutableStateOf("") }
+    var fechaUltimaDesparasitacion by remember { mutableStateOf("") }
+    var proximaDesparasitacion by remember { mutableStateOf("") }
 
+    var showFechaCastracionPicker by remember { mutableStateOf(false) }
+    var showFechaDesparasitacionPicker by remember { mutableStateOf(false) }
+    var showProximaDesparasitacionPicker by remember { mutableStateOf(false) }
+
+    val fechaCastracionPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+    if (showFechaCastracionPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showFechaCastracionPicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        fechaCastracionPickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            fechaCastracion = localDate.toFormattedString()
+                        }
+                        showFechaCastracionPicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = { showFechaCastracionPicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = fechaCastracionPickerState)
+        }
+    }
+
+    val fechaDesparasitacionPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+    if (showFechaDesparasitacionPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showFechaDesparasitacionPicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        fechaDesparasitacionPickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            fechaUltimaDesparasitacion  = localDate.toFormattedString()
+                        }
+                        showFechaDesparasitacionPicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = { showFechaDesparasitacionPicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = fechaDesparasitacionPickerState)
+        }
+    }
+
+    val fechaProximaDesparasitacionPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+
+    if (showProximaDesparasitacionPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showProximaDesparasitacionPicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        fechaProximaDesparasitacionPickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            proximaDesparasitacion  = localDate.toFormattedString()
+                        }
+                        showProximaDesparasitacionPicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = { showProximaDesparasitacionPicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = fechaProximaDesparasitacionPickerState)
+        }
+    }
 
     // Cargar las mascotas si estamos editando
     LaunchedEffect(petId) {
@@ -91,6 +201,10 @@ fun PetFormScreen(
             nombre = pet.nombre
             especieSeleccionada = pet.especie
             peso = pet.peso?.toString() ?: ""
+            castrado = pet.castrado
+            fechaCastracion = pet.fechaCastracion ?: ""
+            fechaUltimaDesparasitacion = pet.fechaUltimaDesparasitacion ?: ""
+            proximaDesparasitacion = pet.proximaDesparasitacion ?: ""
         }
     }
 
@@ -144,7 +258,8 @@ fun PetFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Foto de mascota
@@ -295,6 +410,87 @@ fun PetFormScreen(
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
+            // Castración
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = "¿Está castrado/a?",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Recomendamos la castración responsable",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = castrado,
+                    onCheckedChange = {
+                        castrado = it
+                        if (!it) fechaCastracion = "" // limpiá la fecha si desactiva
+                    }
+                )
+            }
+
+            // Fecha castración — solo si está castrado
+            if (castrado) {
+                OutlinedTextField(
+                    value = fechaCastracion,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Fecha de castración") },
+                    trailingIcon = {
+                        IconButton(onClick = { showFechaCastracionPicker = true }) {
+                            Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showFechaCastracionPicker = true }
+                )
+            }
+
+            // Desparasitación
+            Text(
+                text = "Desparasitación",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            OutlinedTextField(
+                value = fechaUltimaDesparasitacion,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Última desparasitación") },
+                trailingIcon = {
+                    IconButton(onClick = { showFechaDesparasitacionPicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showFechaDesparasitacionPicker = true }
+            )
+
+            OutlinedTextField(
+                value = proximaDesparasitacion,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Próxima desparasitación") },
+                trailingIcon = {
+                    IconButton(onClick = { showProximaDesparasitacionPicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showProximaDesparasitacionPicker = true }
+            )
 
             // Botón guardar
             Button(
@@ -307,7 +503,11 @@ fun PetFormScreen(
                         sexo = sexoSeleccionado,
                         fechaNacimiento = fechaNacimiento,
                         peso = peso.toDoubleOrNull(),
-                        fotoUri = null
+                        fotoUri = null,
+                        castrado = castrado,
+                        fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null,
+                        fechaUltimaDesparasitacion = fechaUltimaDesparasitacion.ifBlank { null },
+                        proximaDesparasitacion = proximaDesparasitacion.ifBlank { null }
                     )
                     if (petId == null) {
                         viewModel.insertPet(nuevaMascota)
@@ -316,7 +516,7 @@ fun PetFormScreen(
                     }
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank(),
+                enabled = nombre.isNotBlank() && (!castrado || fechaCastracion.isNotBlank()),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (petId == null) "Guardar" else "Actualizar")

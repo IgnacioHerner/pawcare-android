@@ -8,7 +8,11 @@ data class Pet(
     val sexo: Sex?,
     val fechaNacimiento: String?,
     val peso: Double?,
-    val fotoUri: String?
+    val fotoUri: String?,
+    val castrado: Boolean = false,
+    val fechaCastracion: String? = null,
+    val fechaUltimaDesparasitacion : String? = null,
+    val proximaDesparasitacion : String? = null
 )
 
 enum class Especie(val displayName: String) {

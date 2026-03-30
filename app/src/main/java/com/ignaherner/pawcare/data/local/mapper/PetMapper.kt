@@ -18,7 +18,11 @@ fun PetEntity.toDomain(): Pet = Pet(
     },
     fechaNacimiento = fechaNacimiento,
     peso = peso,
-    fotoUri = fotoUri
+    fotoUri = fotoUri,
+    castrado = castrado,
+    fechaCastracion = fechaCastracion,
+    fechaUltimaDesparasitacion = fechaUltimaDesparasitacion,
+    proximaDesparasitacion = proximaDesparasitacion
 )
 
 fun Pet.toEntity(): PetEntity = PetEntity(
@@ -29,5 +33,9 @@ fun Pet.toEntity(): PetEntity = PetEntity(
     sexo = sexo?.name,
     fechaNacimiento = fechaNacimiento,
     peso = peso,
-    fotoUri = fotoUri
+    fotoUri = fotoUri,
+    castrado = castrado,
+    fechaCastracion = fechaCastracion,
+    fechaUltimaDesparasitacion = fechaUltimaDesparasitacion,
+    proximaDesparasitacion = proximaDesparasitacion
 )
