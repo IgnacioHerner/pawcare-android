@@ -45,9 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.OwnerCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
+import com.ignaherner.pawcare.presentation.weight.WeightUiState
+import com.ignaherner.pawcare.presentation.weight.WeightViewModel
 import com.ignaherner.pawcare.ui.theme.AppointmentColor
 import com.ignaherner.pawcare.ui.theme.MedicationColor
 import com.ignaherner.pawcare.ui.theme.VaccineColor
@@ -66,13 +69,17 @@ fun PetDetailScreen(
     onNavigateToMedication: (Long, String) -> Unit,
     petViewModel: PetViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel(),
+    weightViewModel: WeightViewModel = hiltViewModel()
 ) {
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
     // Carga la mascota cuando aparece en la pantalla
     LaunchedEffect(petId) {
         petViewModel.loadPetById(petId)
+        weightViewModel.loadWeights(petId)
     }
+
+    val weightState by weightViewModel.uiState.collectAsStateWithLifecycle()
 
     val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
@@ -167,11 +174,20 @@ fun PetDetailScreen(
                             state.pet.sexo?.let {
                                 InfoRow("Sexo", it.displayName)
                             }
-                            state.pet.peso?.let {
-                                InfoRow("Peso", "$it kg")
-                            }
                             state.pet.fechaNacimiento?.let {
                                 InfoRow("Nacimiento", it)
+                            }
+                            when (val wState = weightState) {
+                                is WeightUiState.Success -> {
+                                    val ultimoPeso = wState.weights.firstOrNull()
+                                    ultimoPeso?.let {
+                                        InfoRow(
+                                            label = "Peso actual",
+                                            value = "${it.peso} kg · ${it.fecha.toFriendlyDate()}"
+                                        )
+                                    }
+                                }
+                                else -> {}
                             }
                         }
 

@@ -7,7 +7,6 @@ data class Pet(
     val raza: String?,
     val sexo: Sex?,
     val fechaNacimiento: String?,
-    val peso: Double?,
     val fotoUri: String?,
     val castrado: Boolean = false,
     val fechaCastracion: String? = null,

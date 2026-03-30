@@ -157,7 +157,7 @@ fun PawCareNavGraph(
             OwnerFormScreen(
                 ownerId = null,
                 onNavigateBack = {
-                    navController.navigate(PawCareDestinations.PET_LIST) {
+                    navController.navigate(PawCareDestinations.HOME) {
                         popUpTo(PawCareDestinations.OWNER_FORM) { inclusive = true}
                     }
                 }

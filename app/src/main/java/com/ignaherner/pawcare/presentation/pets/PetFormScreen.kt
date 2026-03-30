@@ -200,7 +200,6 @@ fun PetFormScreen(
             val pet = (detailState as PetDetailState.Success).pet
             nombre = pet.nombre
             especieSeleccionada = pet.especie
-            peso = pet.peso?.toString() ?: ""
             castrado = pet.castrado
             fechaCastracion = pet.fechaCastracion ?: ""
             fechaUltimaDesparasitacion = pet.fechaUltimaDesparasitacion ?: ""
@@ -400,16 +399,6 @@ fun PetFormScreen(
                 }
             }
 
-            // Campo peso
-            OutlinedTextField(
-                value = peso,
-                onValueChange = { peso = it },
-                label = { Text("Peso (kg)") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
             // Castración
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -502,7 +491,6 @@ fun PetFormScreen(
                         raza = raza.ifBlank { null },
                         sexo = sexoSeleccionado,
                         fechaNacimiento = fechaNacimiento,
-                        peso = peso.toDoubleOrNull(),
                         fotoUri = null,
                         castrado = castrado,
                         fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null,

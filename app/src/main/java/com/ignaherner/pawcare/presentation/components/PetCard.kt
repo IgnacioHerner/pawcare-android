@@ -99,14 +99,6 @@ fun PetCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                // Con let - idiomatico, una expresion limpia
-                pet.peso?.let {
-                    Text(
-                        text = "$it kg",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
         }
     }
@@ -122,7 +114,6 @@ fun PetCardPreviewLight() {
                 nombre = "Rex",
                 especie = Especie.PERRO,
                 fechaNacimiento = "2021-03-15",
-                peso = 12.5,
                 fotoUri = null,
                 raza = "Border Collie",
                 sexo = Sex.MACHO
@@ -143,7 +134,6 @@ fun PetCardPreviewDark() {
                 nombre = "Rex",
                 especie = Especie.PERRO,
                 fechaNacimiento = "2021-03-15",
-                peso = 12.5,
                 fotoUri = null,
                 raza = "Border Collie",
                 sexo = Sex.MACHO
