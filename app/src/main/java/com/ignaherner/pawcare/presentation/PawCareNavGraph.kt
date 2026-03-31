@@ -179,6 +179,11 @@ fun PawCareNavGraph(
                             launchSingleTop = true
                         }
                     }
+                },
+                onNavigateToEdit = { petId ->
+                    navController.navigate(PawCareDestinations.petForm(petId)) {
+                        launchSingleTop = true
+                    }
                 }
             )
 

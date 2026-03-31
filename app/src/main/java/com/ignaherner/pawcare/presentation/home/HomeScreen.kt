@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,13 +25,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.PetSummaryCard
+import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 
@@ -41,6 +46,7 @@ import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 fun HomeScreen(
     onNavigateToPetDetail: (Long) -> Unit,
     onNavigateToAddPet: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -66,6 +72,20 @@ fun HomeScreen(
                 "¿Cómo están tus ${state.summaries.size} mascotas hoy?"
         }
         else -> "¿Cómo están tus mascotas hoy?"
+    }
+
+    var petToDelete by remember { mutableStateOf<Pet?>(null) }
+
+    petToDelete?.let { pet ->
+        ConfirmDeleteDialog(
+            titulo = "¿Eliminar a ${pet.nombre}?",
+            mensaje = "Se eliminarán también todas sus vacunas, medicamentos y registros. Esta acción no se puede deshacer.",
+            onConfirm = {
+                viewModel.deletePet(pet)
+                petToDelete = null
+            },
+            onDismiss = { petToDelete = null }
+        )
     }
 
     Scaffold(
@@ -151,10 +171,15 @@ fun HomeScreen(
                                 items = state.summaries,
                                 key = { it.pet.id }
                             ) { summary ->
-                                PetSummaryCard(
-                                    summary = summary,
-                                    onClick = { onNavigateToPetDetail(summary.pet.id)}
-                                )
+                                SwipeRevealCard(
+                                    onDelete = { petToDelete = summary.pet },
+                                    onEdit = { onNavigateToEdit(summary.pet.id) }
+                                ) {
+                                    PetSummaryCard(
+                                        summary = summary,
+                                        onClick = { onNavigateToPetDetail(summary.pet.id)}
+                                    )
+                                }
                             }
                         }
                     }

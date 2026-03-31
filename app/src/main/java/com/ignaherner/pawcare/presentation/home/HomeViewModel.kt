@@ -7,6 +7,7 @@ import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.data.repository.WeightRepository
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.PetSummary
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
 import com.ignaherner.pawcare.presentation.weight.WeightViewModel
@@ -69,6 +70,16 @@ class HomeViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 _uiState.value = HomeUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun deletePet(pet: Pet){
+        viewModelScope.launch {
+            try {
+                petRepository.deletePet(pet)
+            } catch (e: Exception) {
+                _uiState.value = HomeUiState.Error(e.message ?: "Error al eliminar")
             }
         }
     }

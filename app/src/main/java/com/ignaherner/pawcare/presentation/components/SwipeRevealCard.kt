@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SwipeRevealCard(
     onDelete: () -> Unit,
-    onEdit: (() -> Unit)? = null, // Opcional
+    onEdit: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
