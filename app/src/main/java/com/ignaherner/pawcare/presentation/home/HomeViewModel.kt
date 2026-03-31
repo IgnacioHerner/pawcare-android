@@ -34,7 +34,7 @@ class HomeViewModel @Inject constructor(
         loadHome()
     }
 
-    private fun loadHome() {
+    fun loadHome() {
         viewModelScope.launch {
             try {
                 petRepository.getAllPets()

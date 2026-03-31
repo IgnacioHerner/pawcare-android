@@ -57,6 +57,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         ownerViewModel.loadOwner()
+        viewModel.loadHome()
     }
 
     val nombreUsuario = when (val state = ownerState) {
