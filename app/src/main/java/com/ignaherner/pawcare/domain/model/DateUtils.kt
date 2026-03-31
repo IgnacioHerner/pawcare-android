@@ -111,7 +111,7 @@ fun calcularEdad(fechaNacimiento: String?, tipo: FechaNacimientoTipo): String {
                 val hoy = LocalDate.now()
                 val años = ChronoUnit.YEARS.between(nacimiento, hoy)
                 val meses = ChronoUnit.MONTHS.between(nacimiento, hoy)
-                val prefijo = if (tipo == FechaNacimientoTipo.APROXIMADA) "~" else ""
+                val prefijo = if (tipo == FechaNacimientoTipo.APROXIMADA) "~ " else ""
                 when {
                     años >= 1 -> "$prefijo$años ${if (años == 1L) "año" else "años"}"
                     meses >= 1 -> "$prefijo$meses ${if (meses == 1L) "mes" else "meses"}"

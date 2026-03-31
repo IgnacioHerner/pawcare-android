@@ -144,4 +144,8 @@ class WorkManagerHelper @Inject constructor(
     fun cancelarFinMedicamento(medicationId: Long) {
         workManager.cancelAllWorkByTag("medication_finish_$medicationId")
     }
+
+    fun cancelAllWorkers() {
+        workManager.cancelAllWork()
+    }
 }
