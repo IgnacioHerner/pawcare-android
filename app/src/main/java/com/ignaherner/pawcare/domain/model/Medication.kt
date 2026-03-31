@@ -9,6 +9,7 @@ data class Medication(
     val intervaloHoras: Int,
     val recetadoPor: String?,
     val dosis: String,
+    val esUnicaDosis: Boolean = false,
     val notas: String?,
     val status: MedicationStatus
 )

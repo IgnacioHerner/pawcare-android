@@ -13,6 +13,7 @@ fun MedicationEntity.toDomain(): Medication = Medication(
     intervaloHoras = intervaloHoras,
     recetadoPor = recetadoPor,
     dosis = dosis,
+    esUnicaDosis = esUnicaDosis == 1,
     notas = notas,
     status = when(status) {
         "ACTIVO" -> MedicationStatus.ACTIVO
@@ -29,6 +30,7 @@ fun Medication.toEntity(): MedicationEntity = MedicationEntity(
     intervaloHoras = intervaloHoras,
     recetadoPor = recetadoPor,
     dosis = dosis,
+    esUnicaDosis = if (esUnicaDosis) 1 else 0,
     notas = notas,
     status = when (status) {
         MedicationStatus.ACTIVO -> "ACTIVO"

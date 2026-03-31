@@ -68,9 +68,26 @@ class MedicationViewModel @Inject constructor(
             try {
                 val id = repository.insertMedication(medication)
                 val medicationConId = medication.copy(id = id)
+
                 if (medication.status == MedicationStatus.ACTIVO) {
-                    workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
-                    _snackbarMessage.value = "Recordatorio cada ${medicationConId.intervaloHoras}h programado 💊"
+                    if (!medicationConId.esUnicaDosis) {
+                        // Recordatorio periodico
+                        workManagerHelper.programarRecordatorioMedicamento(
+                            medicationConId, petName
+                        )
+                        // Finalizar automaticamente al terminar
+                        workManagerHelper.programarFinMedicamento(medicationConId)
+                        _snackbarMessage.value =
+                            "Recordatorio cada ${medicationConId.intervaloHoras}h programado \uD83D\uDC8A"
+                    } else {
+                        // Unica dosis - finalizar inmediatamente despues
+                        _snackbarMessage.value = "Medicamento de única dosis registrado \uD83D\uDC8A"
+                        // Cambiar a FINALIZADO directamente
+                        val medicationFinalizada = medicationConId.copy(
+                            status = MedicationStatus.FINALIZADO
+                        )
+                        repository.updateMedication(medicationFinalizada)
+                    }
                 }
             }catch (e: Exception) {
                 _snackbarMessage.value = "Error al guardar"
@@ -97,6 +114,7 @@ class MedicationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
+                workManagerHelper.cancelarFinMedicamento(medication.id)
                 repository.deleteMedication(medication)
                 _snackbarMessage.value = "${medication.nombre} eliminada"
             }catch (e: Exception) {

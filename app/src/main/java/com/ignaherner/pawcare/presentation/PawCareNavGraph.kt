@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation
 
+import android.R.attr.type
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.home.HomeScreen
+import com.ignaherner.pawcare.presentation.medications.MedicationDetailScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
@@ -53,6 +55,7 @@ object PawCareDestinations {
     // Medications
     const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
     const val MEDICATION_FORM = "medication_form/{petId}/{petName}?medicationId={medicationId}"
+    const val MEDICATION_DETAIL = "medication_detail/{medicationId}/{petId}/{petName}"
 
     // Weights
     const val WEIGHT_LIST = "weight_list/{petId}"
@@ -96,6 +99,9 @@ object PawCareDestinations {
             "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?medicationId=$medicationId"
         else
             "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun medicationDetail(medicationId: Long, petId: Long, petName: String) =
+        "medication_detail/$medicationId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para weights
     fun weightList(petId: Long) = "weight_list/$petId"
@@ -376,12 +382,24 @@ fun PawCareNavGraph(
                 viewModel = viewModel,
                 petId = petId,
                 petName = petName,
-                onNavigateBack = {navController.popBackStack()},
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { medicationId ->
-                    navController.navigate(PawCareDestinations.medicationForm(petId, petName, medicationId))},
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(
+                            petId,
+                            petName,
+                            medicationId
+                        )
+                    )
+                },
                 onNavigateToForm = {
                     navController.navigate(
                         PawCareDestinations.medicationForm(petId, petName)
+                    )
+                },
+                onNavigateToDetail = { medicationId ->
+                    navController.navigate(
+                        PawCareDestinations.medicationDetail(medicationId, petId, petName)
                     )
                 }
             )
@@ -414,6 +432,33 @@ fun PawCareNavGraph(
                 petName = petName,
                 medicationId = medicationId,
                 onNavigateBack = {navController.popBackStack()},
+            )
+        }
+
+        // Detalle de Medicacion
+        composable(
+            route = PawCareDestinations.MEDICATION_DETAIL,
+            arguments = listOf(
+                navArgument("medicationId") { type = NavType.LongType },
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val medicationId = backStackEntry.arguments?.getLong("medicationId")
+                ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId")
+                ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            MedicationDetailScreen(
+                medicationId = medicationId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id  ->
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(petId, petName, id)
+                    )
+                }
             )
         }
 
@@ -454,3 +499,4 @@ fun PawCareNavGraph(
         }
     }
 }
+

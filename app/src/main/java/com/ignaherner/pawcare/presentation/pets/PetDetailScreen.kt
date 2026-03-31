@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ignaherner.pawcare.presentation.components.InfoRow
 import com.ignaherner.pawcare.presentation.components.OwnerCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
@@ -296,25 +297,5 @@ private fun SeccionCard(
                 color = seccion.color
             )
         }
-    }
-}
-
-// Fila de informacion
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
-        )
     }
 }
