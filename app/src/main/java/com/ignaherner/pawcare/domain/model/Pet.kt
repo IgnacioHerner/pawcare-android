@@ -7,12 +7,19 @@ data class Pet(
     val raza: String?,
     val sexo: Sex?,
     val fechaNacimiento: String?,
+    val fechaNacimientoTipo: FechaNacimientoTipo = FechaNacimientoTipo.DESCONOCIDA,
     val fotoUri: String?,
     val castrado: Boolean = false,
     val fechaCastracion: String? = null,
     val fechaUltimaDesparasitacion : String? = null,
     val proximaDesparasitacion : String? = null
 )
+
+enum class FechaNacimientoTipo {
+    EXACTA,
+    APROXIMADA,
+    DESCONOCIDA
+}
 
 enum class Especie(val displayName: String) {
     PERRO("Perro"),

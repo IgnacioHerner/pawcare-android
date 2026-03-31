@@ -92,23 +92,6 @@ fun diasHastaFecha(fecha: String): Long {
     return ChronoUnit.DAYS.between(hoy, fechaDate)
 }
 
-// Calcula la edad en texto "3 años" o "5 meses"
-fun calcularEdad(fechaNacimiento: String?): String{
-    if (fechaNacimiento.isNullOrBlank()) return "Edad desconocida"
-    return try {
-        val nacimiento = fechaNacimiento.toLocalDate()
-        val hoy = LocalDate.now()
-        val años = ChronoUnit.YEARS.between(nacimiento, hoy)
-        val meses = ChronoUnit.MONTHS.between(nacimiento, hoy)
-        when {
-            años >= 1 -> "$años ${if (años == 1L) "año" else "años"}"
-            meses >= 1 -> "$meses ${if (meses == 1L) "mes" else "meses"}"
-            else -> "Menos de 1 mes"
-        }
-    } catch (e: Exception) {
-        "Edad desconocida"
-    }
-}
 
 // Devuelve el numero del dia actual del tratamiento
 fun calcularDiaNumero(fechaInicio: String, duracionDias: Int): Int {
@@ -116,4 +99,27 @@ fun calcularDiaNumero(fechaInicio: String, duracionDias: Int): Int {
     val hoy = LocalDate.now()
     val diasPasados = ChronoUnit.DAYS.between(inicio, hoy).toInt() + 1
     return diasPasados.coerceIn(1, duracionDias)
+}
+
+fun calcularEdad(fechaNacimiento: String?, tipo: FechaNacimientoTipo): String {
+    return when (tipo) {
+        FechaNacimientoTipo.DESCONOCIDA -> "Edad desconocida"
+        FechaNacimientoTipo.EXACTA, FechaNacimientoTipo.APROXIMADA -> {
+            if (fechaNacimiento.isNullOrBlank()) return "Edad desconocida"
+            try {
+                val nacimiento = fechaNacimiento.toLocalDate()
+                val hoy = LocalDate.now()
+                val años = ChronoUnit.YEARS.between(nacimiento, hoy)
+                val meses = ChronoUnit.MONTHS.between(nacimiento, hoy)
+                val prefijo = if (tipo == FechaNacimientoTipo.APROXIMADA) "~" else ""
+                when {
+                    años >= 1 -> "$prefijo$años ${if (años == 1L) "año" else "años"}"
+                    meses >= 1 -> "$prefijo$meses ${if (meses == 1L) "mes" else "meses"}"
+                    else -> "${prefijo}Menos de 1 mes"
+                }
+            } catch (e: Exception) {
+                "Edad desconocida"
+            }
+        }
+    }
 }

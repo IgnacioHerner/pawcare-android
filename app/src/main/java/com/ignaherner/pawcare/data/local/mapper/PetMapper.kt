@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.data.local.mapper
 
 import com.ignaherner.pawcare.data.local.entity.PetEntity
 import com.ignaherner.pawcare.domain.model.Especie
+import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
 
@@ -17,6 +18,11 @@ fun PetEntity.toDomain(): Pet = Pet(
         }
     },
     fechaNacimiento = fechaNacimiento,
+    fechaNacimientoTipo = when(fechaNacimientoTipo) {
+        "EXACTA" -> FechaNacimientoTipo.EXACTA
+        "APROXIMADA" -> FechaNacimientoTipo.APROXIMADA
+        else -> FechaNacimientoTipo.DESCONOCIDA
+    },
     fotoUri = fotoUri,
     castrado = castrado,
     fechaCastracion = fechaCastracion,
@@ -31,6 +37,7 @@ fun Pet.toEntity(): PetEntity = PetEntity(
     raza = raza,
     sexo = sexo?.name,
     fechaNacimiento = fechaNacimiento,
+    fechaNacimientoTipo = fechaNacimientoTipo.name,
     fotoUri = fotoUri,
     castrado = castrado,
     fechaCastracion = fechaCastracion,

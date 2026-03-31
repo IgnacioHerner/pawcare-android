@@ -32,6 +32,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,10 +63,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Especie
+import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
 import com.ignaherner.pawcare.domain.model.toFormattedString
 import java.io.File
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +83,9 @@ fun PetFormScreen(
     var raza by remember { mutableStateOf("") }
     var sexoSeleccionado by remember { mutableStateOf(Sex.MACHO) }
     var fechaNacimiento by remember { mutableStateOf("") }
-    var peso by remember { mutableStateOf("") }
+    var fechaNacimientoTipo by remember {
+        mutableStateOf(FechaNacimientoTipo.DESCONOCIDA)
+    }
     var dropdownExpanded by remember { mutableStateOf(false) }
     var sexoDropdownExpanded by remember { mutableStateOf(false) }
     var fotoUri by remember { mutableStateOf("") }
@@ -89,12 +94,9 @@ fun PetFormScreen(
 
 
     var showFechaCastracionPicker by remember { mutableStateOf(false) }
-
-
     val fechaCastracionPickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-
     if (showFechaCastracionPicker) {
         DatePickerDialog(
             onDismissRequest = { showFechaCastracionPicker = false},
@@ -121,6 +123,38 @@ fun PetFormScreen(
             DatePicker(state = fechaCastracionPickerState)
         }
     }
+
+    var showFechaNacimientoPicker by remember { mutableStateOf(false) }
+    val fechaNacimientoPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
+    if (showFechaNacimientoPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showFechaNacimientoPicker = false},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        fechaNacimientoPickerState.selectedDateMillis?.let { millis ->
+                            val localDate = java.time.Instant
+                                .ofEpochMilli(millis)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                            fechaNacimiento = localDate.toFormattedString()
+                        }
+                        showFechaNacimientoPicker = false
+                    }
+                ) { Text("Aceptar")}
+            },
+            dismissButton = {
+                TextButton(onClick = {showFechaNacimientoPicker = false}) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = fechaNacimientoPickerState)
+        }
+    }
+
     // Cargar las mascotas si estamos editando
     LaunchedEffect(petId) {
         petId?.let { viewModel.loadPetById(it) }
@@ -137,6 +171,7 @@ fun PetFormScreen(
             especieSeleccionada = pet.especie
             castrado = pet.castrado
             fechaCastracion = pet.fechaCastracion ?: ""
+            fechaNacimientoTipo = pet.fechaNacimientoTipo
         }
     }
 
@@ -292,12 +327,158 @@ fun PetFormScreen(
                 }
             }
 
-            OutlinedTextField(
-                value = fechaNacimiento,
-                onValueChange = { fechaNacimiento = it},
-                label = { Text("Fecha de nacimiento: ")},
-                modifier = Modifier.fillMaxWidth()
+            // Tipo de fecha de nacimiento
+            Text(
+                text = "Fecha de nacimiento",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FechaNacimientoTipo.entries.forEach { tipo ->
+                    FilterChip(
+                        selected = fechaNacimientoTipo == tipo,
+                        onClick = {
+                            fechaNacimientoTipo = tipo
+                            if (tipo  == FechaNacimientoTipo.DESCONOCIDA) {
+                                fechaNacimiento = ""
+                            }
+                        },
+                        label = {
+                            Text(
+                                text = when(tipo) {
+                                    FechaNacimientoTipo.EXACTA -> "Exacta"
+                                    FechaNacimientoTipo.APROXIMADA -> "Aproximada"
+                                    FechaNacimientoTipo.DESCONOCIDA -> "Desconocida"
+                                },
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    )
+                }
+            }
+
+            // DatePicker solo si no es DESCONOCIDA
+            if (fechaNacimientoTipo != FechaNacimientoTipo.DESCONOCIDA) {
+                if (fechaNacimientoTipo == FechaNacimientoTipo.APROXIMADA) {
+                    // Dos dropdowns - mes y año
+                    var mesExpanded by remember { mutableStateOf(false) }
+                    var anioExpanded by remember { mutableStateOf(false) }
+                    var mesSeleccionado by remember { mutableStateOf("") }
+                    var anioSeleccionado by remember { mutableStateOf("") }
+
+                    val meses = listOf(
+                        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                    )
+
+                    val anioActual = LocalDate.now().year
+                    val anios = (anioActual downTo anioActual - 30).map { it.toString() }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Dropdown Mes
+                        ExposedDropdownMenuBox(
+                            expanded = mesExpanded,
+                            onExpandedChange = { mesExpanded = it},
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            OutlinedTextField(
+                                value = mesSeleccionado.ifBlank { "Mes" },
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text ("Mes aprox.")},
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = mesExpanded)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = mesExpanded,
+                                onDismissRequest = { mesExpanded = false}
+                            ) {
+                                meses.forEachIndexed { index, mes ->
+                                    DropdownMenuItem(
+                                        text = { Text(mes)},
+                                        onClick = {
+                                            mesSeleccionado = mes
+                                            mesExpanded = false
+                                            // Actualizar fechaNacimiento
+                                            if(anioSeleccionado.isNotBlank()){
+                                                val mesNum = (index + 1).toString().padStart(2,'0')
+                                                fechaCastracion = "01/$mesNum/$anioSeleccionado"
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        // Dropdown año
+                        ExposedDropdownMenuBox(
+                            expanded = anioExpanded,
+                            onExpandedChange = { anioExpanded = it},
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            OutlinedTextField(
+                                value = anioSeleccionado.ifBlank { "Año" },
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text ("Año aprox.")},
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = mesExpanded)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = anioExpanded,
+                                onDismissRequest = { anioExpanded = false}
+                            ) {
+                                anios.forEach { anio ->
+                                    DropdownMenuItem(
+                                        text = { Text(anio) },
+                                        onClick = {
+                                            anioSeleccionado = anio
+                                            anioExpanded = false
+                                            // Actualizar fechaNacimiento
+                                            if (mesSeleccionado.isNotBlank()) {
+                                                val mesNum = (meses.indexOf(mesSeleccionado) + 1)
+                                                    .toString().padStart(2, '0')
+                                                fechaNacimiento = "01/$mesNum/$anio"
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // EXACTA → DatePicker normal
+                    OutlinedTextField(
+                        value = fechaNacimiento,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Fecha de nacimiento") },
+                        trailingIcon = {
+                            IconButton(onClick = { showFechaNacimientoPicker = true }) {
+                                Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showFechaNacimientoPicker = true }
+                    )
+                }
+            }
 
             // Dropdown especie
             ExposedDropdownMenuBox(
@@ -385,7 +566,8 @@ fun PetFormScreen(
                         especie = especieSeleccionada,
                         raza = raza.ifBlank { null },
                         sexo = sexoSeleccionado,
-                        fechaNacimiento = fechaNacimiento,
+                        fechaNacimientoTipo = fechaNacimientoTipo,
+                        fechaNacimiento = if (fechaNacimientoTipo == FechaNacimientoTipo.DESCONOCIDA) null else fechaNacimiento.ifBlank { null },
                         fotoUri = null,
                         castrado = castrado,
                         fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null,

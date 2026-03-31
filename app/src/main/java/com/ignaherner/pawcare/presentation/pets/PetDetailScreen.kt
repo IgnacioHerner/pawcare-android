@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
+import com.ignaherner.pawcare.domain.model.calcularEdad
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.InfoRow
 import com.ignaherner.pawcare.presentation.components.OwnerCard
@@ -175,8 +177,37 @@ fun PetDetailScreen(
                             state.pet.sexo?.let {
                                 InfoRow("Sexo", it.displayName)
                             }
-                            state.pet.fechaNacimiento?.let {
-                                InfoRow("Nacimiento", it)
+                            // Fecha nacimiento + edad
+                            when (state.pet.fechaNacimientoTipo) {
+                                FechaNacimientoTipo.DESCONOCIDA -> {
+                                    InfoRow("Nacimiento", "Desconocido")
+                                }
+                                FechaNacimientoTipo.APROXIMADA -> {
+                                    state.pet.fechaNacimiento?.let { fecha ->
+                                        val partes = fecha.split("/")
+                                        if (partes.size == 3) {
+                                            val mes = partes[1].toIntOrNull() ?: 1
+                                            val anio = partes[2]
+                                            val nombreMes = java.time.Month.of(mes)
+                                                .getDisplayName(
+                                                    java.time.format.TextStyle.FULL,
+                                                    java.util.Locale("es", "AR")
+                                                )
+                                            InfoRow(
+                                                label = "Nacimiento (aprox.)",
+                                                value = "$nombreMes $anio · ${calcularEdad(fecha, state.pet.fechaNacimientoTipo)}"
+                                            )
+                                        }
+                                    } ?: InfoRow("Nacimiento", "Desconocido")
+                                }
+                                FechaNacimientoTipo.EXACTA -> {
+                                    state.pet.fechaNacimiento?.let { fecha ->
+                                        InfoRow(
+                                            label = "Nacimiento",
+                                            value = "${fecha.toFriendlyDate()} · ${calcularEdad(fecha, state.pet.fechaNacimientoTipo)}"
+                                        )
+                                    }
+                                }
                             }
                             when (val wState = weightState) {
                                 is WeightUiState.Success -> {

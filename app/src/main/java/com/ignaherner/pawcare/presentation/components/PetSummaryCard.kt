@@ -83,7 +83,7 @@ fun PetSummaryCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${summary.pet.especie.displayName} · ${calcularEdad(summary.pet.fechaNacimiento)}",
+                        text = "${summary.pet.especie.displayName} · ${calcularEdad(summary.pet.fechaNacimiento, summary.pet.fechaNacimientoTipo)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
