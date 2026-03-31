@@ -2,8 +2,11 @@ package com.ignaherner.pawcare.presentation
 
 import android.R.attr.type
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -24,7 +27,6 @@ import com.ignaherner.pawcare.presentation.owners.OwnerFormScreen
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
-import com.ignaherner.pawcare.presentation.pets.PetListScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
@@ -40,7 +42,6 @@ object PawCareDestinations {
     const val HOME = "home"
 
     // Pets
-    const val PET_LIST = "pet_list"
     const val PET_DETAIL = "pet_detail/{petId}"
     const val PET_FORM = "pet_form?petId={petId}"
 
@@ -114,37 +115,21 @@ fun PawCareNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
 
-    val ownerViewModel: OwnerViewModel = hiltViewModel()
-    val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
-
-    if (ownerExist == null) return
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        android.util.Log.d("NavDebug", "Navegando a: ${destination.route}")
+    }
 
     NavHost(
         navController = navController,
         startDestination = PawCareDestinations.SPLASH
     ) {
 
-        composable(PawCareDestinations.HOME) {
-            HomeScreen(
-                onNavigateToPetDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId))
-                },
-                onNavigateToAddPet = {
-                    navController.navigate(PawCareDestinations.petForm())
-                },
-                onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS)
-                },
-                onNavigateToOwnerDetail = {
-                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
-                }
-            )
-        }
-
-
-
         composable(PawCareDestinations.SPLASH){
-            SplashScreen (
+
+            val ownerViewModel: OwnerViewModel = hiltViewModel()
+            val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+
+            SplashScreen(
                 onSplashFinished = {
                     navController.navigate(
                         if (ownerExist == true)
@@ -152,10 +137,57 @@ fun PawCareNavGraph(
                         else
                             PawCareDestinations.OWNER_FORM
                     ) {
-                        popUpTo(PawCareDestinations.SPLASH){inclusive = true}
+                        popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             )
+        }
+
+        composable(PawCareDestinations.HOME) {
+            var isNavigating by remember { mutableStateOf(false) }
+
+            HomeScreen(
+                onNavigateToPetDetail = { petId ->
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.petDetail(petId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToSettings = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.SETTINGS) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToOwnerDetail = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.OWNER_DETAIL) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToAddPet = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.petForm()) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+
+            // Resetear cuando volvemos a HOME
+            LaunchedEffect(navController.currentDestination?.route) {
+                if (navController.currentDestination?.route == PawCareDestinations.HOME) {
+                    isNavigating = false
+                }
+            }
         }
 
         // Formulario - sirve para crear y editar
@@ -163,7 +195,7 @@ fun PawCareNavGraph(
             OwnerFormScreen(
                 ownerId = null,
                 onNavigateBack = {
-                    navController.navigate(PawCareDestinations.PET_LIST) {
+                    navController.navigate(PawCareDestinations.HOME) {
                         popUpTo(PawCareDestinations.OWNER_FORM) { inclusive = true}
                     }
                 }
@@ -191,24 +223,6 @@ fun PawCareNavGraph(
         composable(PawCareDestinations.SETTINGS) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack()}
-            )
-        }
-
-        // Lista de mascotas
-        composable(PawCareDestinations.PET_LIST) {
-            PetListScreen(
-                onNavigateToDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId))
-                },
-                onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.petForm())
-                },
-                onNavigateToEdit = { petId ->
-                    navController.navigate(PawCareDestinations.petForm(petId))
-                },
-                onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS)
-                }
             )
         }
 
