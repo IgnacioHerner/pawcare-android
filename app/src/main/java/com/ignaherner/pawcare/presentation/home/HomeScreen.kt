@@ -71,25 +71,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    // Saludo
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Hola, $nombreUsuario \uD83D\uDC4B",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = mensajeMascota,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
+                title = {},
                 actions = {
                     IconButton(onClick = onNavigateToOwnerDetail) {
                         Icon(
@@ -118,9 +100,6 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .padding(top = 8.dp)
         ) {
-<<<<<<< HEAD
-
-=======
             // Saludo
             Column(
                 modifier = Modifier
@@ -138,7 +117,6 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
->>>>>>> develop
             // Estados
             Box(modifier = Modifier.fillMaxSize()) {
                 when (val state = uiState) {

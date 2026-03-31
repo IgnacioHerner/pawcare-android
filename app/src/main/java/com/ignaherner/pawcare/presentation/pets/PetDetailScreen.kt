@@ -45,11 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-<<<<<<< HEAD
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
-=======
 import com.ignaherner.pawcare.presentation.components.InfoRow
->>>>>>> develop
 import com.ignaherner.pawcare.presentation.components.OwnerCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
