@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -61,16 +63,20 @@ fun MedicationFormScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
     var nombre by remember { mutableStateOf("") }
-    var fechaInicio by remember { mutableStateOf(fechaHoy()) }
+    var esUnicaDosis by remember { mutableStateOf(false) }
     var duracionDias by remember { mutableStateOf("") }
     var intervaloHoras by remember { mutableStateOf("") }
-    var recetadoPor by remember { mutableStateOf("") }
     var dosis by remember { mutableStateOf("") }
-    var esUnicaDosis by remember { mutableStateOf(false) }
-    var notas by remember { mutableStateOf("") }
+    var fechaInicio by remember { mutableStateOf(fechaHoy()) }
+    var recetadoPor by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<MedicationStatus>(MedicationStatus.ACTIVO) }
-    var dropdownExpanded by remember { mutableStateOf(false) }
+    var notas by remember { mutableStateOf("") }
 
+    //Dropdowns
+    var statusExpanded by remember { mutableStateOf(false) }
+    var dosisExpanded by remember { mutableStateOf(false) }
+
+    val opcionesDosis = listOf("1/8", "1/4", "1/2", "1", "1½", "2", "3", "4")
 
     // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
@@ -81,14 +87,13 @@ fun MedicationFormScreen(
     )
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
+    val medicationDetailState by viewModel.medicationDetailState.collectAsStateWithLifecycle()
 
     LaunchedEffect(nombreVeterinarioState) {
         if(recetadoPor.isNotBlank()) {
             recetadoPor = nombreVeterinarioState
         }
     }
-
-    val medicationDetailState by viewModel.medicationDetailState.collectAsStateWithLifecycle()
 
     LaunchedEffect(medicationId) {
         medicationId?.let { viewModel.loadMedicationById(it) }
@@ -155,53 +160,19 @@ fun MedicationFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // NOMBRE
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it},
-                label = { Text("Nombre")},
+                label = { Text("Nombre del medicamento")},
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // FECHA DE INICIO
-            OutlinedTextField(
-                value = fechaInicio,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Fecha de inicio")},
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true}) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Elegir fecha"
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable{ showDatePicker = true}
-
-            )
-
-            // NOMBRE DEL VETERINARIO
-            OutlinedTextField(
-                value = nombreVeterinarioState,
-                onValueChange = {},
-                label = { Text("Recetado por")},
-                modifier = Modifier.fillMaxWidth()
-            )
-
-
-            // DOSIS
-            OutlinedTextField(
-                value = dosis,
-                onValueChange = {dosis = it},
-                label = { Text("Cantidad de dosis: ")},
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Unica dosis
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -248,17 +219,71 @@ fun MedicationFormScreen(
                 )
             }
 
-            // NOTAS
+            // 4. Dosis — dropdown
+            ExposedDropdownMenuBox(
+                expanded = dosisExpanded,
+                onExpandedChange = { dosisExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = dosis,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Dosis") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dosisExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = dosisExpanded,
+                    onDismissRequest = { dosisExpanded = false }
+                ) {
+                    opcionesDosis.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text("$opcion comprimido/s") },
+                            onClick = {
+                                dosis = opcion
+                                dosisExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Fecha de inicio
             OutlinedTextField(
-                value = notas,
-                onValueChange = {notas = it},
-                label = { Text("Notas")},
+                value = fechaInicio,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha de inicio")},
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true}) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Elegir fecha"
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable{ showDatePicker = true}
+
+            )
+
+            // Recetado por
+            OutlinedTextField(
+                value = nombreVeterinarioState,
+                onValueChange = {},
+                label = { Text("Recetado por")},
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Estado
             ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it}
+                expanded = statusExpanded,
+                onExpandedChange = { statusExpanded = it}
             ) {
                 OutlinedTextField(
                     value = statusSeleccionado.displayName,
@@ -266,7 +291,7 @@ fun MedicationFormScreen(
                     readOnly = true,
                     label = { Text("Estado")},
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -274,20 +299,30 @@ fun MedicationFormScreen(
 
                 )
                 ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = {dropdownExpanded = false}
+                    expanded = statusExpanded,
+                    onDismissRequest = {statusExpanded = false}
                 ) {
                     MedicationStatus.entries.forEach { status ->
                         DropdownMenuItem(
                             text = { Text(status.displayName)},
                             onClick = {
                                 statusSeleccionado = status
-                                dropdownExpanded = false
+                                statusExpanded = false
                             }
                         )
                     }
                 }
             }
+
+            // Notas
+            OutlinedTextField(
+                value = notas,
+                onValueChange = {notas = it},
+                label = { Text("Notas")},
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
             Button(
                 onClick = {
                     val nuevoMedicamento = Medication(
@@ -295,12 +330,11 @@ fun MedicationFormScreen(
                         petId = petId,
                         nombre = nombre,
                         fechaInicio = fechaInicio,
-                        recetadoPor = recetadoPor.ifBlank { null },
-                        dosis = dosis,
-                        esUnicaDosis = esUnicaDosis,
                         duracionDias = if (esUnicaDosis) 1 else duracionDias.toIntOrNull() ?: 1,
                         intervaloHoras = if (esUnicaDosis) 0 else intervaloHoras.toIntOrNull() ?: 8,
+                        dosis = dosis,
                         notas = notas.ifBlank { null},
+                        recetadoPor = recetadoPor.ifBlank { null },
                         status = statusSeleccionado
                     )
                     if (medicationId == null) {
@@ -310,7 +344,8 @@ fun MedicationFormScreen(
                     }
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank(),
+                enabled = nombre.isNotBlank() && dosis.isNotBlank() &&
+                        (esUnicaDosis || (duracionDias.isNotBlank() && intervaloHoras.isNotBlank())),
                 modifier = Modifier.fillMaxWidth()
             ){
                 Text(if (medicationId == null) "Guardar" else "Actualizar")

@@ -5,6 +5,8 @@ import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.VaccineStatus
+import com.ignaherner.pawcare.domain.model.calcularFechaFin
+import com.ignaherner.pawcare.domain.model.diasHastaFecha
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,25 +36,25 @@ class WorkManagerSyncManager @Inject constructor(
             medicamentos
                 .filter { it.status == MedicationStatus.ACTIVO }
                 .forEach { medication ->
-                    workManagerHelper.programarRecordatorioMedicamento(
-                        medication, pet.nombre
+                    val fechaFin = calcularFechaFin(
+                        medication.fechaInicio,
+                        medication.duracionDias
                     )
-                    workManagerHelper.programarFinMedicamento(medication)
-                }
+                    val diasRestantes = diasHastaFecha(fechaFin)
 
-            // Vacuanas con proxima dosis
-            val vacunas = vaccineRepository
-                .getVaccinesByPetId(pet.id)
-                .firstOrNull() ?: emptyList()
-
-            vacunas
-                .filter {
-                    it.status is VaccineStatus.Aplicada && it.proximaDosis != null
-                }
-                .forEach { vaccine ->
-                    workManagerHelper.programarRecordatorioVacuna(
-                        vaccine, pet.nombre
-                    )
+                    if (diasRestantes <= 0) {
+                        // El tratamiento ya terminó — finalizar directamente
+                        val medicacionFinalizada = medication.copy(
+                            status = MedicationStatus.FINALIZADO
+                        )
+                        medicationRepository.updateMedication(medicacionFinalizada)
+                    } else {
+                        // Todavía activo — reprogramar Workers
+                        workManagerHelper.programarRecordatorioMedicamento(
+                            medication, pet.nombre
+                        )
+                        workManagerHelper.programarFinMedicamento(medication)
+                    }
                 }
         }
     }

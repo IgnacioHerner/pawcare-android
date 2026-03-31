@@ -9,6 +9,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.Vaccine
+import com.ignaherner.pawcare.domain.model.calcularFechaFin
 import com.ignaherner.pawcare.domain.model.diasHastaFecha
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
@@ -115,6 +116,16 @@ class WorkManagerHelper @Inject constructor(
         // No programar si es unica dosis - se finaliza inmediatamente
         if (medication.esUnicaDosis) return
 
+        val fechaFin = calcularFechaFin(medication.fechaInicio, medication.duracionDias)
+        val diasRestantes = diasHastaFecha(fechaFin)
+
+        // Si ya terminó el tratamiento, no programar
+        if (diasRestantes <= 0) {
+            // Finalizar inmediatamente si ya pasó la fecha
+            // Esto lo maneja WorkManagerSyncManager
+            return
+        }
+
         val inputData = Data.Builder()
             .putLong(MedicationFinishWorker.KEY_MEDICAITON_ID, medication.id)
             .putLong(MedicationFinishWorker.KEY_PET_ID, medication.petId)
@@ -123,12 +134,12 @@ class WorkManagerHelper @Inject constructor(
         val workRequest = OneTimeWorkRequestBuilder<MedicationFinishWorker>()
             .setInputData(inputData)
             // Producción
-//            .setInitialDelay(
-//                medication.duracionDias.toLong(),
-//                TimeUnit.DAYS
-//            )
+            .setInitialDelay(
+                diasRestantes,
+                TimeUnit.DAYS
+            )
             // Temporal para testear
-            .setInitialDelay(1L, TimeUnit.MINUTES)
+//            .setInitialDelay(1L, TimeUnit.MINUTES)
 
             .addTag("medication_finish_${medication.id}")
             .addTag("pet_${medication.petId}")
