@@ -57,6 +57,7 @@ fun MedicationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     viewModel: MedicationViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ) {
@@ -234,8 +235,8 @@ fun MedicationScreen(
                                 ) {
                                     MedicationCard(
                                         medication = medication,
-                                        onClick = {},
-                                        onDeleteClick = { viewModel.deleteMedication(medication)}
+                                        onClick = { onNavigateToDetail(medication.id)},
+                                        onDeleteClick = { medicationToDelete = medication}
                                     )
                                 }
                             }

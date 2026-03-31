@@ -110,4 +110,38 @@ class WorkManagerHelper @Inject constructor(
     fun cancelarTodosLosRecordatoriosDeMascota(petId: Long) {
         workManager.cancelAllWorkByTag("pet_$petId")
     }
+
+    fun programarFinMedicamento(medication: Medication) {
+        // No programar si es unica dosis - se finaliza inmediatamente
+        if (medication.esUnicaDosis) return
+
+        val inputData = Data.Builder()
+            .putLong(MedicationFinishWorker.KEY_MEDICAITON_ID, medication.id)
+            .putLong(MedicationFinishWorker.KEY_PET_ID, medication.petId)
+            .build()
+
+        val workRequest = OneTimeWorkRequestBuilder<MedicationFinishWorker>()
+            .setInputData(inputData)
+            // Producción
+//            .setInitialDelay(
+//                medication.duracionDias.toLong(),
+//                TimeUnit.DAYS
+//            )
+            // Temporal para testear
+            .setInitialDelay(1L, TimeUnit.MINUTES)
+
+            .addTag("medication_finish_${medication.id}")
+            .addTag("pet_${medication.petId}")
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "medication_finish_${medication.id}",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+    }
+
+    fun cancelarFinMedicamento(medicationId: Long) {
+        workManager.cancelAllWorkByTag("medication_finish_$medicationId")
+    }
 }

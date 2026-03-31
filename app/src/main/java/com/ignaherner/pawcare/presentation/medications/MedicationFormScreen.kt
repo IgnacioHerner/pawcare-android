@@ -5,6 +5,7 @@ import android.widget.DatePicker
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,8 +22,10 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -33,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -50,9 +54,9 @@ import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 @Composable
 fun MedicationFormScreen(
     petId: Long,
+    petName: String,
     medicationId: Long? = null,
     onNavigateBack: () -> Unit,
-    petName: String,
     viewModel: MedicationViewModel,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -62,6 +66,7 @@ fun MedicationFormScreen(
     var intervaloHoras by remember { mutableStateOf("") }
     var recetadoPor by remember { mutableStateOf("") }
     var dosis by remember { mutableStateOf("") }
+    var esUnicaDosis by remember { mutableStateOf(false) }
     var notas by remember { mutableStateOf("") }
     var statusSeleccionado by remember { mutableStateOf<MedicationStatus>(MedicationStatus.ACTIVO) }
     var dropdownExpanded by remember { mutableStateOf(false) }
@@ -98,6 +103,7 @@ fun MedicationFormScreen(
             intervaloHoras = medication.intervaloHoras.toString()
             recetadoPor = medication.recetadoPor ?: ""
             dosis = medication.dosis
+            esUnicaDosis = medication.esUnicaDosis
             notas = medication.notas ?: ""
             statusSeleccionado = medication.status
         }
@@ -152,6 +158,7 @@ fun MedicationFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // NOMBRE
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it},
@@ -159,6 +166,7 @@ fun MedicationFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // FECHA DE INICIO
             OutlinedTextField(
                 value = fechaInicio,
                 onValueChange = {},
@@ -178,14 +186,7 @@ fun MedicationFormScreen(
 
             )
 
-            OutlinedTextField(
-                value = duracionDias,
-                onValueChange = {duracionDias = it},
-                label = { Text("Duracion dias: ")},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
+            // NOMBRE DEL VETERINARIO
             OutlinedTextField(
                 value = nombreVeterinarioState,
                 onValueChange = {},
@@ -193,21 +194,61 @@ fun MedicationFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            OutlinedTextField(
-                value = intervaloHoras,
-                onValueChange = {intervaloHoras = it},
-                label = { Text("Intervalo de horas: ")},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
 
+            // DOSIS
             OutlinedTextField(
                 value = dosis,
                 onValueChange = {dosis = it},
                 label = { Text("Cantidad de dosis: ")},
                 modifier = Modifier.fillMaxWidth()
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "¿Es de única dosis?",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Se administra una sola vez",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = esUnicaDosis,
+                    onCheckedChange = {
+                        esUnicaDosis = it
+                        if (it) {
+                            duracionDias = "1"
+                            intervaloHoras = "0"
+                        }
+                    }
+                )
+            }
 
+            // Ocultar duracion e intervalo si es unica dosis
+            if (!esUnicaDosis) {
+                OutlinedTextField(
+                    value = duracionDias,
+                    onValueChange = { duracionDias = it},
+                    label = { Text("Duración de días")},
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = intervaloHoras,
+                    onValueChange = { intervaloHoras = it},
+                    label = { Text("Cada cuántas horas")},
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // NOTAS
             OutlinedTextField(
                 value = notas,
                 onValueChange = {notas = it},
@@ -254,10 +295,11 @@ fun MedicationFormScreen(
                         petId = petId,
                         nombre = nombre,
                         fechaInicio = fechaInicio,
-                        intervaloHoras = intervaloHoras.toInt(),
                         recetadoPor = recetadoPor.ifBlank { null },
-                        duracionDias = duracionDias.toInt(),
                         dosis = dosis,
+                        esUnicaDosis = esUnicaDosis,
+                        duracionDias = if (esUnicaDosis) 1 else duracionDias.toIntOrNull() ?: 1,
+                        intervaloHoras = if (esUnicaDosis) 0 else intervaloHoras.toIntOrNull() ?: 8,
                         notas = notas.ifBlank { null},
                         status = statusSeleccionado
                     )

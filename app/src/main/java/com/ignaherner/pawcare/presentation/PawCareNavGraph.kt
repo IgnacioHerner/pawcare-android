@@ -1,8 +1,12 @@
 package com.ignaherner.pawcare.presentation
 
+import android.R.attr.type
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -14,6 +18,7 @@ import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.home.HomeScreen
+import com.ignaherner.pawcare.presentation.medications.MedicationDetailScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
@@ -22,7 +27,6 @@ import com.ignaherner.pawcare.presentation.owners.OwnerFormScreen
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
-import com.ignaherner.pawcare.presentation.pets.PetListScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
@@ -38,7 +42,6 @@ object PawCareDestinations {
     const val HOME = "home"
 
     // Pets
-    const val PET_LIST = "pet_list"
     const val PET_DETAIL = "pet_detail/{petId}"
     const val PET_FORM = "pet_form?petId={petId}"
 
@@ -53,6 +56,7 @@ object PawCareDestinations {
     // Medications
     const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
     const val MEDICATION_FORM = "medication_form/{petId}/{petName}?medicationId={medicationId}"
+    const val MEDICATION_DETAIL = "medication_detail/{medicationId}/{petId}/{petName}"
 
     // Weights
     const val WEIGHT_LIST = "weight_list/{petId}"
@@ -97,6 +101,9 @@ object PawCareDestinations {
         else
             "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
+    fun medicationDetail(medicationId: Long, petId: Long, petName: String) =
+        "medication_detail/$medicationId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
     // Funciones para weights
     fun weightList(petId: Long) = "weight_list/$petId"
     fun weightForm(petId: Long, weightId: Long? = null) =
@@ -108,37 +115,21 @@ fun PawCareNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
 
-    val ownerViewModel: OwnerViewModel = hiltViewModel()
-    val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
-
-    if (ownerExist == null) return
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        android.util.Log.d("NavDebug", "Navegando a: ${destination.route}")
+    }
 
     NavHost(
         navController = navController,
         startDestination = PawCareDestinations.SPLASH
     ) {
 
-        composable(PawCareDestinations.HOME) {
-            HomeScreen(
-                onNavigateToPetDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId))
-                },
-                onNavigateToAddPet = {
-                    navController.navigate(PawCareDestinations.petForm())
-                },
-                onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS)
-                },
-                onNavigateToOwnerDetail = {
-                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
-                }
-            )
-        }
-
-
-
         composable(PawCareDestinations.SPLASH){
-            SplashScreen (
+
+            val ownerViewModel: OwnerViewModel = hiltViewModel()
+            val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+
+            SplashScreen(
                 onSplashFinished = {
                     navController.navigate(
                         if (ownerExist == true)
@@ -146,10 +137,57 @@ fun PawCareNavGraph(
                         else
                             PawCareDestinations.OWNER_FORM
                     ) {
-                        popUpTo(PawCareDestinations.SPLASH){inclusive = true}
+                        popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             )
+        }
+
+        composable(PawCareDestinations.HOME) {
+            var isNavigating by remember { mutableStateOf(false) }
+
+            HomeScreen(
+                onNavigateToPetDetail = { petId ->
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.petDetail(petId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToSettings = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.SETTINGS) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToOwnerDetail = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.OWNER_DETAIL) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onNavigateToAddPet = {
+                    if (!isNavigating) {
+                        isNavigating = true
+                        navController.navigate(PawCareDestinations.petForm()) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+
+            // Resetear cuando volvemos a HOME
+            LaunchedEffect(navController.currentDestination?.route) {
+                if (navController.currentDestination?.route == PawCareDestinations.HOME) {
+                    isNavigating = false
+                }
+            }
         }
 
         // Formulario - sirve para crear y editar
@@ -185,24 +223,6 @@ fun PawCareNavGraph(
         composable(PawCareDestinations.SETTINGS) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack()}
-            )
-        }
-
-        // Lista de mascotas
-        composable(PawCareDestinations.PET_LIST) {
-            PetListScreen(
-                onNavigateToDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId))
-                },
-                onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.petForm())
-                },
-                onNavigateToEdit = { petId ->
-                    navController.navigate(PawCareDestinations.petForm(petId))
-                },
-                onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS)
-                }
             )
         }
 
@@ -376,12 +396,24 @@ fun PawCareNavGraph(
                 viewModel = viewModel,
                 petId = petId,
                 petName = petName,
-                onNavigateBack = {navController.popBackStack()},
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { medicationId ->
-                    navController.navigate(PawCareDestinations.medicationForm(petId, petName, medicationId))},
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(
+                            petId,
+                            petName,
+                            medicationId
+                        )
+                    )
+                },
                 onNavigateToForm = {
                     navController.navigate(
                         PawCareDestinations.medicationForm(petId, petName)
+                    )
+                },
+                onNavigateToDetail = { medicationId ->
+                    navController.navigate(
+                        PawCareDestinations.medicationDetail(medicationId, petId, petName)
                     )
                 }
             )
@@ -414,6 +446,33 @@ fun PawCareNavGraph(
                 petName = petName,
                 medicationId = medicationId,
                 onNavigateBack = {navController.popBackStack()},
+            )
+        }
+
+        // Detalle de Medicacion
+        composable(
+            route = PawCareDestinations.MEDICATION_DETAIL,
+            arguments = listOf(
+                navArgument("medicationId") { type = NavType.LongType },
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val medicationId = backStackEntry.arguments?.getLong("medicationId")
+                ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId")
+                ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            MedicationDetailScreen(
+                medicationId = medicationId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id  ->
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(petId, petName, id)
+                    )
+                }
             )
         }
 
@@ -454,3 +513,4 @@ fun PawCareNavGraph(
         }
     }
 }
+

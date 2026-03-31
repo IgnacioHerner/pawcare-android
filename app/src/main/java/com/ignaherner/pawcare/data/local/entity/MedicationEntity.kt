@@ -27,6 +27,7 @@ data class MedicationEntity(
     val recetadoPor: String?,
     val intervaloHoras: Int,
     val dosis: String,
+    val esUnicaDosis: Int = 0,
     val notas: String?,
     val status: String
 )
