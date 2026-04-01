@@ -4,33 +4,44 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalPharmacy
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,13 +50,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
+import com.ignaherner.pawcare.domain.model.Owner
+import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.domain.model.calcularEdad
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.InfoRow
@@ -68,229 +84,194 @@ fun PetDetailScreen(
     onNavigateToVaccines: (Long, String) -> Unit,
     onNavigateToAppointments: (Long, String) -> Unit,
     onNavigateToWeight: (Long) -> Unit,
-    onNavigateToOwnerDetail: () -> Unit,
     onNavigateToMedication: (Long, String) -> Unit,
-    petViewModel: PetViewModel = hiltViewModel(),
+    onNavigateToOwnerDetail: () -> Unit,
+    viewModel: PetViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel(),
     weightViewModel: WeightViewModel = hiltViewModel()
-) {
-    val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
+){
+    val detailState by viewModel.detailState.collectAsStateWithLifecycle()
+    val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+    val weightState by weightViewModel.uiState.collectAsStateWithLifecycle()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    // Carga la mascota cuando aparece en la pantalla
     LaunchedEffect(petId) {
-        petViewModel.loadPetById(petId)
+        viewModel.loadPetById(petId)
+        ownerViewModel.loadOwner()
         weightViewModel.loadWeights(petId)
     }
 
-    val weightState by weightViewModel.uiState.collectAsStateWithLifecycle()
-
-    val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
-    LaunchedEffect(Unit) {
-        ownerViewModel.loadOwner()
-    }
-
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text("Perfil") },
+            LargeTopAppBar(
+                title = {
+                    when (val state = detailState) {
+                        is PetDetailState.Success -> Text(
+                            text = state.pet.nombre,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        else -> Text("")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
-                    IconButton(onClick = {onNavigateToEdit(petId) }) {
+                    IconButton(onClick = {
+                        if (detailState is PetDetailState.Success){
+                            onNavigateToEdit(petId)
+                        }
+                    }) {
                         Icon(Icons.Default.Edit, contentDescription = "Editar")
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when(val state = detailState) {
-                is PetDetailState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+        when (val state = detailState) {
+            is PetDetailState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-                is PetDetailState.Error -> {
-                    Text(
-                        text = state.mensaje,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+            }
+            is PetDetailState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = state.mensaje)
                 }
-                is PetDetailState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        // Foto circular
-                        Box(
-                            modifier = Modifier
-                                .size(140.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                        ) {
-                            if (state.pet.fotoUri != null) {
-                                AsyncImage(
-                                    model = state.pet.fotoUri,
-                                    contentDescription = "Foto de ${state.pet.nombre}",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Text(
-                                    text = state.pet.nombre.first().uppercaseChar().toString(),
-                                    style = MaterialTheme.typography.displayMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
+            }
+            is PetDetailState.Success -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Header - foto + datos rapidos
+                    item {
+                        PetHeaderSection(
+                            pet = state.pet,
+                            ultimoPeso = when (val ws = weightState) {
+                                is WeightUiState.Success -> ws.weights.firstOrNull()
+                                else -> null
                             }
-                        }
-
-                        // Nombre
-                        Text(
-                            text = state.pet.nombre,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
                         )
+                    }
 
-                        // Info de la mascota
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            state.pet.especie.let {
-                                InfoRow("Especie", it.displayName)
-                            }
-                            state.pet.raza?.let {
-                                InfoRow("Raza", it)
-                            }
-                            state.pet.sexo?.let {
-                                InfoRow("Sexo", it.displayName)
-                            }
-                            // Fecha nacimiento + edad
-                            when (state.pet.fechaNacimientoTipo) {
-                                FechaNacimientoTipo.DESCONOCIDA -> {
-                                    InfoRow("Nacimiento", "Desconocido")
-                                }
-                                FechaNacimientoTipo.APROXIMADA -> {
-                                    state.pet.fechaNacimiento?.let { fecha ->
-                                        val partes = fecha.split("/")
-                                        if (partes.size == 3) {
-                                            val mes = partes[1].toIntOrNull() ?: 1
-                                            val anio = partes[2]
-                                            val nombreMes = java.time.Month.of(mes)
-                                                .getDisplayName(
-                                                    java.time.format.TextStyle.FULL,
-                                                    java.util.Locale("es", "AR")
-                                                )
-                                            InfoRow(
-                                                label = "Nacimiento (aprox.)",
-                                                value = "$nombreMes $anio · ${calcularEdad(fecha, state.pet.fechaNacimientoTipo)}"
-                                            )
-                                        }
-                                    } ?: InfoRow("Nacimiento", "Desconocido")
-                                }
-                                FechaNacimientoTipo.EXACTA -> {
-                                    state.pet.fechaNacimiento?.let { fecha ->
-                                        InfoRow(
-                                            label = "Nacimiento",
-                                            value = "${fecha.toFriendlyDate()} · ${calcularEdad(fecha, state.pet.fechaNacimientoTipo)}"
-                                        )
-                                    }
-                                }
-                            }
-                            when (val wState = weightState) {
-                                is WeightUiState.Success -> {
-                                    val ultimoPeso = wState.weights.firstOrNull()
-                                    ultimoPeso?.let {
-                                        InfoRow(
-                                            label = "Peso actual",
-                                            value = "${it.peso} kg · ${it.fecha.toFriendlyDate()}"
-                                        )
-                                    }
-                                }
-                                else -> {}
-                            }
-                        }
-
-                        // Info del dueño
-                        when(val state = ownerState) {
+                    // Card del dueño
+                    item {
+                        when (val ownerS = ownerState) {
                             is OwnerState.Success -> {
-                                OwnerCard(
-                                    owner = state.owner,
-                                    onEditClick = {
-                                        onNavigateToOwnerDetail()
-                                    }
+                                OwnerContactCard(
+                                    owner = ownerS.owner,
+                                    onClick = onNavigateToOwnerDetail
                                 )
                             }
                             else -> {}
                         }
+                    }
 
-                        // Grilla de secciones
-                        val secciones = listOf(
-                            SeccionItem(
-                                titulo = "Vacunas",
-                                icono = Icons.Default.Favorite,
-                                color = VaccineColor,
-                                onClick = { onNavigateToVaccines(petId, state.pet.nombre)}
-                            ),
-                            SeccionItem(
-                                titulo = "Medicamentos",
-                                icono = Icons.Default.LocalPharmacy,
-                                color = MedicationColor,
-                                onClick = { onNavigateToMedication(petId, state.pet.nombre) }
-                            ),
-                            SeccionItem(
-                                titulo = "Visitas",
-                                icono = Icons.Default.CalendarMonth,
-                                color = AppointmentColor,
-                                onClick = { onNavigateToAppointments(petId, state.pet.nombre) }
-                            ),
-                            SeccionItem(
-                                titulo = "Peso",
-                                icono = Icons.Default.FitnessCenter,
-                                color = WeightColor,
-                                onClick = { onNavigateToWeight(petId) }
-                            )
-                        )
+                    // Historial Clínico
+                    item {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            SeccionCard(
-                                secciones[0],
-                                Modifier.weight(1f)
+                            Icon(
+                                imageVector = Icons.Default.MedicalServices,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
-                            SeccionCard(
-                                secciones[1],
-                                Modifier.weight(1f)
+                            Text(
+                                text = "Historial Clínico",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+
+                    item {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(160.dp),
+                                .height(120.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             SeccionCard(
-                                secciones[2],
-                                Modifier.weight(1f)
+                                seccion = SeccionItem(
+                                    titulo = "Vacunas",
+                                    icono = Icons.Default.Favorite,
+                                    color = VaccineColor,
+                                    onClick = { onNavigateToVaccines(petId, state.pet.nombre) }
+                                ),
+                                modifier = Modifier.weight(1f)
                             )
                             SeccionCard(
-                                secciones[3],
-                                Modifier.weight(1f)
+                                seccion = SeccionItem(
+                                    titulo = "Medicamentos",
+                                    icono = Icons.Default.LocalPharmacy,
+                                    color = MedicationColor,
+                                    onClick = { onNavigateToMedication(petId, state.pet.nombre) }
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    // Seguimiento
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.TrendingUp,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Seguimiento",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SeccionCard(
+                                seccion = SeccionItem(
+                                    titulo = "Peso",
+                                    icono = Icons.Default.FitnessCenter,
+                                    color = WeightColor,
+                                    onClick = { onNavigateToWeight(petId) }
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            SeccionCard(
+                                seccion = SeccionItem(
+                                    titulo = "Visitas",
+                                    icono = Icons.Default.CalendarMonth,
+                                    color = AppointmentColor,
+                                    onClick = { onNavigateToAppointments(petId, state.pet.nombre) }
+                                ),
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -300,8 +281,167 @@ fun PetDetailScreen(
     }
 }
 
+@Composable
+fun PetHeaderSection(
+    pet: Pet,
+    ultimoPeso: Weight?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Foto circular
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            if (pet.fotoUri != null) {
+                AsyncImage(
+                    model = pet.fotoUri,
+                    contentDescription = "Foto de ${pet.nombre}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Text(
+                    text = pet.nombre.first().uppercaseChar().toString(),
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
 
-// Data class para cada card de seccion
+        // Datos rapidos
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = pet.especie.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            pet.raza?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = calcularEdad(pet.fechaNacimiento, pet.fechaNacimientoTipo),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            pet.sexo?.let {
+                Text(
+                    text = it.displayName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Chip de peso
+            ultimoPeso?.let {
+                AssistChip(
+                    onClick = {},
+                    label = {
+                        Text(
+                            text = "⚖️ ${it.peso} kg",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = WeightColor.copy(alpha = 0.15f),
+                        labelColor = WeightColor
+                    )
+                )
+            }
+
+            // Chip castrado
+            if (pet.castrado){
+                AssistChip(
+                    onClick = {},
+                    label = {
+                        Text(
+                            text = "✂️ Castrado/a",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        labelColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OwnerContactCard(
+    owner: Owner,
+    onClick: () -> Unit
+) {
+    OutlinedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = owner.nombre.first().uppercaseChar().toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${owner.nombre} ${owner.apellido}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "📍 ${owner.ciudad}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "📞 ${owner.telefono}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
 data class SeccionItem(
     val titulo: String,
     val icono: ImageVector,
@@ -309,7 +449,6 @@ data class SeccionItem(
     val onClick: () -> Unit
 )
 
-// Card de seccion
 @Composable
 private fun SeccionCard(
     seccion: SeccionItem,

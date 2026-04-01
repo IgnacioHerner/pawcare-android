@@ -57,14 +57,16 @@ class PetViewModel @Inject constructor(
     fun loadPetById(id: Long) {
         viewModelScope.launch {
             try {
-                val pet = repository.getPetById(id)
-                _detailState.value = if (pet != null) {
-                    PetDetailState.Success(pet)
-                } else {
-                    PetDetailState.Error("Mascota no encontrada")
-                }
+                repository.getPetById(id)
+                    .collect { pet ->
+                        _detailState.value = if (pet != null) {
+                            PetDetailState.Success(pet)
+                        } else {
+                            PetDetailState.Error("Mascota no encontrada")
+                        }
+                    }
             } catch (e: Exception) {
-                _detailState.value = PetDetailState.Error(e.message ?: "Error desconocido")
+                _detailState.value = PetDetailState.Error(e.message ?: "Error")
             }
         }
     }

@@ -181,7 +181,11 @@ fun PetFormScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {fotoUri = it.toString()}
+        uri?.let { sourceUri ->
+            // Copiar la foto al almacenamiento interno
+            val savedUri = copyImageToInternalStorage(context, sourceUri)
+            savedUri?.let { fotoUri = it.toString() }
+        }
     }
 
     // Uri temporal para la camara
@@ -236,7 +240,7 @@ fun PetFormScreen(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .align(Alignment.CenterHorizontally)
-                    .clickable{}
+                    .clickable{ galleryLauncher.launch("image/*")}
             ){
                 if (fotoUri.isNotBlank()) {
                     AsyncImage(
@@ -568,7 +572,7 @@ fun PetFormScreen(
                         sexo = sexoSeleccionado,
                         fechaNacimientoTipo = fechaNacimientoTipo,
                         fechaNacimiento = if (fechaNacimientoTipo == FechaNacimientoTipo.DESCONOCIDA) null else fechaNacimiento.ifBlank { null },
-                        fotoUri = null,
+                        fotoUri = fotoUri.ifBlank { null },
                         castrado = castrado,
                         fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null,
 
@@ -599,4 +603,21 @@ fun createImageUri(context: Context): Uri {
         "${context.packageName}.fileprovider",
         imageFile
     )
+}
+
+fun copyImageToInternalStorage(context: Context, sourceUri: Uri): Uri? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(sourceUri)
+        val fileName = "pet_${System.currentTimeMillis()}.jpg"
+        val outputFile = File(context.filesDir, fileName)
+
+        inputStream?.use { input ->
+            outputFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        Uri.fromFile(outputFile)
+    } catch (e: Exception) {
+        null
+    }
 }

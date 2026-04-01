@@ -16,7 +16,7 @@ interface PetDao {
     fun getAllPets(): Flow<List<PetEntity>>
 
     @Query("SELECT * FROM pets WHERE id = :petId")
-    suspend fun getPetById(petId: Long): PetEntity?
+    fun getPetById(petId: Long): Flow<PetEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPet(pet: PetEntity)
