@@ -135,7 +135,7 @@ fun PetDetailScreen(
                         // Foto circular
                         Box(
                             modifier = Modifier
-                                .size(140.dp)
+                                .size(120.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primaryContainer)
                         ) {
