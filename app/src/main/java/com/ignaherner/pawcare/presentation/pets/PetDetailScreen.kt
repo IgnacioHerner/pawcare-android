@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -79,6 +80,7 @@ fun PetDetailScreen(
     onNavigateToMedication: (Long, String) -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
     onNavigateToConditions: (Long, String) -> Unit,
+    onNavigateToQR: (Long ) -> Unit,
     viewModel: PetViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel(),
     weightViewModel: WeightViewModel = hiltViewModel()
@@ -114,6 +116,9 @@ fun PetDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { onNavigateToQR(petId)}) {
+                        Icon(Icons.Default.QrCode, contentDescription = "Ver QR")
+                    }
                     IconButton(onClick = {
                         if (detailState is PetDetailState.Success) {
                             onNavigateToEdit(petId)

@@ -30,6 +30,7 @@ import com.ignaherner.pawcare.presentation.owners.OwnerFormScreen
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
+import com.ignaherner.pawcare.presentation.pets.QRScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
@@ -82,6 +83,8 @@ object PawCareDestinations {
     // Splash
     const val SPLASH = "splash"
 
+    const val QR_SCREEN = "qr_screen/{petId}"
+
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
@@ -129,6 +132,8 @@ object PawCareDestinations {
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?conditionId=$conditionId"
         else
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun qrScreen(petId: Long) = "qr_screen/$petId"
 
 }
 
@@ -253,6 +258,20 @@ fun PawCareNavGraph(
             )
         }
 
+        // QR
+        composable(
+            route = PawCareDestinations.QR_SCREEN,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType}
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            QRScreen(
+                petId = petId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         // Formulario - sirve para crear y editar
         composable(
             route = PawCareDestinations.PET_FORM,
@@ -305,6 +324,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToConditions = { id, nombre ->
                     navController.navigate(PawCareDestinations.conditionList(id, nombre))
+                },
+                onNavigateToQR = { petId ->
+                    navController.navigate(PawCareDestinations.qrScreen(petId))
                 }
             )
         }
