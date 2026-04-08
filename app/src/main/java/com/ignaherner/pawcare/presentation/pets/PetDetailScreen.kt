@@ -86,6 +86,7 @@ fun PetDetailScreen(
     onNavigateToWeight: (Long) -> Unit,
     onNavigateToMedication: (Long, String) -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
+    onNavigateToConditions: (Long, String) -> Unit,
     viewModel: PetViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel(),
     weightViewModel: WeightViewModel = hiltViewModel()
@@ -227,6 +228,15 @@ fun PetDetailScreen(
                                 ),
                                 modifier = Modifier.weight(1f)
                             )
+                            SeccionCard(
+                                seccion = SeccionItem(
+                                    titulo = "Condiciones",
+                                    icono = Icons.Default.MedicalServices,
+                                    color = Color(0xFFE91E63),
+                                    onClick = { onNavigateToConditions(petId, state.pet.nombre) }
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
 
@@ -273,6 +283,7 @@ fun PetDetailScreen(
                                 ),
                                 modifier = Modifier.weight(1f)
                             )
+
                         }
                     }
                 }
@@ -466,19 +477,19 @@ private fun SeccionCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = seccion.icono,
                 contentDescription = seccion.titulo,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(30.dp),
                 tint = seccion.color
             )
             Text(
                 text = seccion.titulo,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = seccion.color
             )

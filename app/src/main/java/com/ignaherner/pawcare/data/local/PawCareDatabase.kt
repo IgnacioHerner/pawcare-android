@@ -3,12 +3,14 @@ package com.ignaherner.pawcare.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
+import com.ignaherner.pawcare.data.local.dao.ConditionDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.OwnerDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import com.ignaherner.pawcare.data.local.dao.WeightDao
 import com.ignaherner.pawcare.data.local.entity.AppointmentEntity
+import com.ignaherner.pawcare.data.local.entity.ConditionEntity
 import com.ignaherner.pawcare.data.local.entity.MedicationEntity
 import com.ignaherner.pawcare.data.local.entity.OwnerEntity
 import com.ignaherner.pawcare.data.local.entity.PetEntity
@@ -22,9 +24,10 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         AppointmentEntity::class,
         MedicationEntity::class,
         WeightEntity::class,
-        OwnerEntity::class
+        OwnerEntity::class,
+        ConditionEntity::class
         ],
-    version = 15,
+    version = 17,
     exportSchema = false
 )
 abstract class PawCareDatabase : RoomDatabase() {
@@ -35,6 +38,8 @@ abstract class PawCareDatabase : RoomDatabase() {
     abstract fun weightDao(): WeightDao
 
     abstract fun ownerDao(): OwnerDao
+
+    abstract fun conditionDao() : ConditionDao
 }
 
 

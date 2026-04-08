@@ -7,6 +7,7 @@ import androidx.work.Configuration
 import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
+import com.ignaherner.pawcare.data.local.dao.ConditionDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.OwnerDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
@@ -80,5 +81,11 @@ abstract class AppModule {
         @Singleton
         fun provideOwnerDao(database: PawCareDatabase): OwnerDao =
             database.ownerDao()
+
+        @Provides
+        @Singleton
+        fun provideConditionDao(database: PawCareDatabase): ConditionDao =
+            database.conditionDao()
+
     }
 }

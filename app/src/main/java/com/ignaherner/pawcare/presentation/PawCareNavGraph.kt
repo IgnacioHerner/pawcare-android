@@ -17,6 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
+import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
+import com.ignaherner.pawcare.presentation.condition.ConditionScreen
+import com.ignaherner.pawcare.presentation.condition.ConditionViewModel
 import com.ignaherner.pawcare.presentation.home.HomeScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationDetailScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
@@ -70,6 +73,11 @@ object PawCareDestinations {
     const val OWNER_EDIT = "owner_edit"
     const val OWNER_DETAIL = "owner_detail"
 
+
+    // Condition
+    const val CONDITION_LIST = "condition_list/{petId}/{petName}"
+    const val CONDITION_FORM = "condition_form/{petId}/{petName}?conditionId={conditionId}"
+
     // Splash
     const val SPLASH = "splash"
 
@@ -108,6 +116,17 @@ object PawCareDestinations {
     fun weightList(petId: Long) = "weight_list/$petId"
     fun weightForm(petId: Long, weightId: Long? = null) =
         if(weightId != null) "weight_form/$petId?weightId=$weightId" else "weight_form/$petId"
+
+    // Funciones para conditions
+    fun conditionList(petId: Long, petName: String) =
+        "condition_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun conditionForm(petId: Long, petName: String, conditionId: Long? = null) =
+        if (conditionId != null)
+            "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?conditionId=$conditionId"
+        else
+            "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
 }
 
 @Composable
@@ -280,6 +299,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToOwnerDetail = {
                     navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                },
+                onNavigateToConditions = { id, nombre ->
+                    navController.navigate(PawCareDestinations.conditionList(id, nombre))
                 }
             )
         }
@@ -514,6 +536,66 @@ fun PawCareNavGraph(
                 petId = petId,
                 weightId = weightId,
                 onNavigateBack = {navController.popBackStack()},
+            )
+        }
+
+        // Lista de condiciones
+        composable(
+            route = PawCareDestinations.CONDITION_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: ConditionViewModel = hiltViewModel()
+            ConditionScreen(
+                petId = petId,
+                petName = petName,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.conditionForm(petId, petName))
+                },
+                onNavigateToEdit = { conditionId ->
+                    navController.navigate(
+                        PawCareDestinations.conditionForm(petId, petName, conditionId)
+                    )}
+            )
+        }
+
+        // Formulario de condiciones
+        composable(
+            route = PawCareDestinations.CONDITION_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
+                navArgument("conditionId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val conditionId = backStackEntry.arguments?.getLong("conditionId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(
+                    PawCareDestinations.conditionList(petId, petName)
+                )
+            }
+            val viewModel: ConditionViewModel = hiltViewModel(parentEntry)
+            ConditionFormScreen(
+                petId = petId,
+                petName = petName,
+                conditionId = conditionId,
+                onNavigateBack = { navController.popBackStack() },
+                viewModel = viewModel
             )
         }
     }
