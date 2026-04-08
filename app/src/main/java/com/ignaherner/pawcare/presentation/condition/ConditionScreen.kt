@@ -41,6 +41,8 @@ import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.Condition
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
+import com.ignaherner.pawcare.presentation.pets.PetDetailState
+import com.ignaherner.pawcare.presentation.pets.PetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,15 +52,19 @@ fun ConditionScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
-    viewModel: ConditionViewModel = hiltViewModel()
+    viewModel: ConditionViewModel = hiltViewModel(),
+    petViewModel: PetViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     var conditionToDelete by remember { mutableStateOf<Condition?>(null) }
 
+    val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
+
     LaunchedEffect(petId) {
         viewModel.loadConditions(petId)
+        petViewModel.loadPetById(petId)
     }
 
     LaunchedEffect(snackbarMessage) {
@@ -84,7 +90,26 @@ fun ConditionScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Condiciones de $petName")},
+                title = {
+                    Column {
+                        // Nombre + emoji si ya cargó
+                        val titulo = when (val state = detailState) {
+                            is PetDetailState.Success ->
+                                "${state.pet.nombre} ${state.pet.especie.emoji()}"
+                            else -> ""
+                        }
+                        Text(
+                            text = titulo,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Medicamentos \uD83C\uDFE5",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")

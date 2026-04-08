@@ -51,6 +51,7 @@ object PawCareDestinations {
     // Vaccines
     const val VACCINE_LIST = "vaccine_list/{petId}/{petName}"
     const val VACCINE_FORM = "vaccine_form/{petId}/{petName}?vaccineId={vaccineId}"
+    const val VACCINE_DETAIL = "vaccine_detail/{vaccineId}/{petId}/{petName}"
 
     // Appointments
     const val APPOINTMENT_LIST = "appointment_list/{petId}/{petName}"
@@ -92,6 +93,8 @@ object PawCareDestinations {
             "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?vaccineId=$vaccineId"
         else
             "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun vaccineDetail(vaccineId: Long, petId: Long, petName: String) =
+        "vaccine_detail/$vaccineId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para appoinments
     fun appointmentList(petId: Long, petName: String) = "appointment_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
@@ -327,7 +330,11 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
-                }
+                },
+                onNavigateToDetail = { vaccineId ->
+                    navController.navigate(
+                        PawCareDestinations.vaccineDetail(vaccineId, petId, petName)
+                    )}
             )
         }
 

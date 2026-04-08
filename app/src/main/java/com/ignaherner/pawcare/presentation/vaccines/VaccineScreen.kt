@@ -58,6 +58,7 @@ fun VaccineScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     viewModel: VaccineViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ) {
@@ -260,7 +261,7 @@ fun VaccineScreen(
                                 ) {
                                     VaccineCard(
                                         vaccine = vaccine,
-                                        onClick = { },
+                                        onClick = { onNavigateToDetail(vaccine.id)},
                                         onDeleteClick = { viewModel.deleteVaccine(vaccine) }
                                     )
                                 }
