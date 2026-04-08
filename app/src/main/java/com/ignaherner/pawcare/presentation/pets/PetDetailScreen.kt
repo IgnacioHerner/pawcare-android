@@ -175,11 +175,10 @@ fun PetDetailScreen(
 
 
                     item {
-
                         // Historial Clínico
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MedicalServices,
@@ -233,7 +232,7 @@ fun PetDetailScreen(
                         // Seguimiento
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.TrendingUp,
@@ -455,7 +454,7 @@ private fun SeccionCard(
         onClick = seccion.onClick,
         modifier = modifier
             .fillMaxSize(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = seccion.color.copy(alpha = 0.15f)
         )
