@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface OwnerDao {
 
     @Query("SELECT * FROM owners LIMIT 1")
-    suspend fun getOwner(): OwnerEntity?
+    fun getOwner(): Flow<OwnerEntity?>
 
     @Query("SELECT * FROM owners WHERE id = :ownerId")
     suspend fun getOwnerById(ownerId: Long): OwnerEntity?

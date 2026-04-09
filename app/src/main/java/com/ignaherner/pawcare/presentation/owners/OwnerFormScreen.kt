@@ -1,17 +1,27 @@
 package com.ignaherner.pawcare.presentation.owners
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,12 +32,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Owner
+import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +59,17 @@ fun OwnerFormScreen(
     var email by remember { mutableStateOf("") }
     var ciudad by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
+    var fotoUri by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { sourceUri ->
+            val savedUri = copyImageToInternalStorage(context, sourceUri)
+            savedUri?.let { fotoUri = it.toString() }
+        }
+    }
 
     LaunchedEffect(ownerId) {
         ownerId?.let { viewModel.loadOwner() }
@@ -60,7 +87,8 @@ fun OwnerFormScreen(
             telefono = owner.telefono
             email = owner.email ?: ""
             ciudad = owner.ciudad
-            telefono = owner.telefono ?: ""
+            direccion = owner.direccion ?: ""
+            fotoUri = owner.fotoUri ?: ""
         }
     }
 
@@ -85,6 +113,34 @@ fun OwnerFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Foto del dueno
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable{ galleryLauncher.launch("image/*")}
+            ) {
+                if(fotoUri.isNotBlank()) {
+                    AsyncImage(
+                        model = fotoUri,
+                        contentDescription = "Foto del dueño",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Agregar foto",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.Center),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
             // Nombre
             OutlinedTextField(
                 value = nombre,
@@ -142,7 +198,8 @@ fun OwnerFormScreen(
                         telefono = telefono,
                         email = email.ifBlank { null },
                         ciudad = ciudad,
-                        direccion = direccion.ifBlank { null }
+                        direccion = direccion.ifBlank { null },
+                        fotoUri = fotoUri.ifBlank { null }
                     )
                     if (ownerId == null) {
                         viewModel.insertOwner(nuevoOwner)

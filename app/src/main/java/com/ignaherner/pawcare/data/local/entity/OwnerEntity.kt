@@ -12,5 +12,6 @@ data class OwnerEntity(
     val telefono: String,
     val email: String?,
     val ciudad: String,
-    val direccion: String?
+    val direccion: String?,
+    val fotoUri: String? = null
 )

@@ -37,8 +37,10 @@ class OwnerViewModel @Inject constructor(
     fun checkOwnerExists() {
         viewModelScope.launch {
             try {
-                val owner = repository.getOwner()
-                _ownerExists.value = owner != null
+                repository.getOwner()
+                    .collect { owner ->
+                        _ownerExists.value = owner != null
+                    }
             } catch (e: Exception) {
                 _ownerExists.value = false
             }
@@ -48,14 +50,16 @@ class OwnerViewModel @Inject constructor(
     fun loadOwner() {
         viewModelScope.launch {
             try {
-                val owner = repository.getOwner()
-                _ownerState.value = if (owner != null) {
-                    OwnerState.Success(owner)
-                } else {
-                    OwnerState.Empty
-                }
+                repository.getOwner()
+                    .collect { owner ->
+                        _ownerState.value = if (owner != null) {
+                            OwnerState.Success(owner)
+                        } else {
+                            OwnerState.Empty
+                        }
+                    }
             } catch (e: Exception) {
-                _ownerState.value = OwnerState.Error(e.message ?: "Error desconocido")
+                _ownerState.value = OwnerState.Error(e.message ?: "Error")
             }
         }
     }

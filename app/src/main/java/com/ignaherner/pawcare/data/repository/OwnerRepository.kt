@@ -14,8 +14,8 @@ class OwnerRepository @Inject constructor(
     private val ownerDao: OwnerDao
 ){
 
-    suspend fun getOwner(): Owner? =
-        ownerDao.getOwner()?.toDomain()
+    fun getOwner(): Flow<Owner?> =
+        ownerDao.getOwner().map { it?.toDomain() }
 
     suspend fun getOwnerById(id: Long) : Owner? =
         ownerDao.getOwnerById(id)?.toDomain()

@@ -10,7 +10,8 @@ fun OwnerEntity.toDomain(): Owner = Owner(
     telefono = telefono,
     email = email,
     ciudad = ciudad,
-    direccion = direccion
+    direccion = direccion,
+    fotoUri = fotoUri
 )
 
 fun Owner.toEntity() : OwnerEntity = OwnerEntity(
@@ -20,5 +21,6 @@ fun Owner.toEntity() : OwnerEntity = OwnerEntity(
     telefono = telefono,
     email = email,
     ciudad = ciudad,
-    direccion = direccion
+    direccion = direccion,
+    fotoUri = fotoUri
 )
