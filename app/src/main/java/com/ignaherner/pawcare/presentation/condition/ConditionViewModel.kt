@@ -63,7 +63,7 @@ class ConditionViewModel @Inject constructor(
     fun insertCondition(condition: Condition) {
         viewModelScope.launch {
             try {
-                val id = repository.insertCondition(condition)
+                repository.insertCondition(condition)
                 _snackbarMessage.value = "${condition.nombre} agregada ✅"
             } catch (e: Exception) {
                 _snackbarMessage.value =  "Error al guardar"

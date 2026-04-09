@@ -8,6 +8,7 @@ import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.ConditionDao
+import com.ignaherner.pawcare.data.local.dao.DewormingDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
 import com.ignaherner.pawcare.data.local.dao.OwnerDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
@@ -87,5 +88,9 @@ abstract class AppModule {
         fun provideConditionDao(database: PawCareDatabase): ConditionDao =
             database.conditionDao()
 
+        @Provides
+        @Singleton
+        fun provideDewormingDao(database: PawCareDatabase) : DewormingDao =
+            database.dewormingDao()
     }
 }
