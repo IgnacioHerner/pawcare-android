@@ -52,6 +52,7 @@ fun DewormingScreen(
     petName: String,
     onNavigateBack: () -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     viewModel: DewormingViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ){
@@ -167,7 +168,7 @@ fun DewormingScreen(
                         ) { deworming ->
                             SwipeRevealCard(
                                 onDelete = { dewormingToDelete = deworming},
-                                onEdit = {}
+                                onEdit = {onNavigateToEdit(deworming.id)}
                             ) {
                                 DewormingCard(deworming = deworming)
                             }

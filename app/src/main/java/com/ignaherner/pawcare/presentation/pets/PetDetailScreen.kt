@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -80,6 +81,7 @@ fun PetDetailScreen(
     onNavigateToMedication: (Long, String) -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
     onNavigateToConditions: (Long, String) -> Unit,
+    onNavigateToDeworming: (Long, String) -> Unit,
     onNavigateToQR: (Long ) -> Unit,
     viewModel: PetViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel(),
@@ -226,6 +228,15 @@ fun PetDetailScreen(
                                     icono = Icons.Default.MedicalServices,
                                     color = Color(0xFFE91E63),
                                     onClick = { onNavigateToConditions(petId, state.pet.nombre) }
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            SeccionCard(
+                                seccion = SeccionItem(
+                                    titulo = "Desparasitación",
+                                    icono = Icons.Default.Vaccines,
+                                    color = Color(0xFF795548),
+                                    onClick = { onNavigateToDeworming(petId, state.pet.nombre) }
                                 ),
                                 modifier = Modifier.weight(1f)
                             )

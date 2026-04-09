@@ -20,6 +20,9 @@ import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionViewModel
+import com.ignaherner.pawcare.presentation.deworming.DewormingFormScreen
+import com.ignaherner.pawcare.presentation.deworming.DewormingScreen
+import com.ignaherner.pawcare.presentation.deworming.DewormingViewModel
 import com.ignaherner.pawcare.presentation.home.HomeScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationDetailScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
@@ -80,6 +83,10 @@ object PawCareDestinations {
     const val CONDITION_LIST = "condition_list/{petId}/{petName}"
     const val CONDITION_FORM = "condition_form/{petId}/{petName}?conditionId={conditionId}"
 
+    //
+    const val DEWORMING_LIST = "deworming_list/{petId}/{petName}"
+    const val DEWORMING_FORM = "deworming_form/{petId}/{petName}?dewormingId={dewormingId}"
+
     // Splash
     const val SPLASH = "splash"
 
@@ -132,6 +139,15 @@ object PawCareDestinations {
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?conditionId=$conditionId"
         else
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun dewormingList(petId: Long, petName: String) =
+        "deworming_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun dewormingForm(petId: Long, petName: String, dewormingId: Long? = null) =
+        if (dewormingId != null)
+            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?deworming=$dewormingId"
+        else
+            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     fun qrScreen(petId: Long) = "qr_screen/$petId"
 
@@ -327,6 +343,9 @@ fun PawCareNavGraph(
                 },
                 onNavigateToQR = { petId ->
                     navController.navigate(PawCareDestinations.qrScreen(petId))
+                },
+                onNavigateToDeworming = { id, nombre ->
+                    navController.navigate(PawCareDestinations.dewormingList(id, nombre))
                 }
             )
         }
@@ -624,6 +643,66 @@ fun PawCareNavGraph(
                 petName = petName,
                 conditionId = conditionId,
                 onNavigateBack = { navController.popBackStack() },
+                viewModel = viewModel
+            )
+        }
+
+        // Lista desparasitacion
+        composable(
+            route = PawCareDestinations.DEWORMING_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: DewormingViewModel = hiltViewModel()
+            DewormingScreen(
+                petId = petId,
+                petName = petName,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.dewormingForm(petId, petName))
+                },
+                onNavigateToEdit = { dewormingId ->
+                    navController.navigate(
+                        PawCareDestinations.dewormingForm(petId, petName, dewormingId)
+                    )
+                }
+            )
+        }
+
+        // Formulario desparasitacion
+        composable(
+            route = PawCareDestinations.DEWORMING_FORM,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType},
+                navArgument("dewormingId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8")
+            val dewormingId = backStackEntry.arguments?.getLong("dewormingId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember (backStackEntry) {
+                navController.getBackStackEntry(
+                    PawCareDestinations.dewormingList(petId, petName)
+                )
+            }
+            val viewModel: DewormingViewModel = hiltViewModel(parentEntry)
+            DewormingFormScreen(
+                petId = petId,
+                petName = petName,
+                dewormingId = dewormingId,
+                onNavigateBack = { navController.popBackStack()},
                 viewModel = viewModel
             )
         }
