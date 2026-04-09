@@ -57,6 +57,7 @@ fun AppointmentScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     viewModel: AppointmentViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ){
@@ -249,7 +250,7 @@ fun AppointmentScreen(
                                 ) {
                                     AppointmentCard(
                                         appointment = appointment,
-                                        onClick = {},
+                                        onClick = {onNavigateToDetail(appointment.id)},
                                         onDeleteClick = { viewModel.deleteAppointment(appointment) }
                                     )
                                 }

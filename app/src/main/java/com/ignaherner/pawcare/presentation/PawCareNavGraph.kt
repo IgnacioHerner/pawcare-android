@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ignaherner.pawcare.presentation.appointments.AppointmentDetailScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
@@ -35,6 +36,7 @@ import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.QRScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
+import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
@@ -60,6 +62,7 @@ object PawCareDestinations {
     // Appointments
     const val APPOINTMENT_LIST = "appointment_list/{petId}/{petName}"
     const val APPOINTMENT_FORM = "appointment_form/{petId}/{petName}?appointmentId={appointmentId}"
+    const val APPOINTMENT_DETAIL = "appointment_detail/{appointmentId}/{petId}/{petName}"
 
     // Medications
     const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
@@ -113,6 +116,8 @@ object PawCareDestinations {
             "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?appointmentId=$appointmentId"
         else
             "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun appointmentDetail(appointmentId: Long, petId: Long, petName: String) =
+        "appointment_detail/$appointmentId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 
     // Funciones para medications
     fun medicationList(petId: Long, petName: String) = "medication_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
@@ -410,6 +415,31 @@ fun PawCareNavGraph(
             )
         }
 
+        // Vacunas detalle
+        composable(
+            route = PawCareDestinations.VACCINE_DETAIL,
+            arguments = listOf(
+                navArgument("vaccineId") {type = NavType.LongType},
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val vaccineId = backStackEntry.arguments?.getLong("vaccineId") ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            VaccineDetailScreen(
+                vaccineId = vaccineId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { id ->
+                    navController.navigate(
+                        PawCareDestinations.vaccineForm(petId,petName, id)
+                    )
+                }
+            )
+        }
+
         // Lista de turnos
         composable(
             route = PawCareDestinations.APPOINTMENT_LIST,
@@ -429,6 +459,9 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.appointmentForm(petId, petName))
+                },
+                onNavigateToDetail = { appointmentId ->
+                    navController.navigate(PawCareDestinations.appointmentDetail(appointmentId, petId, petName))
                 }
             )
         }
@@ -451,6 +484,31 @@ fun PawCareNavGraph(
                 petId = petId,
                 appointmentId = appointmentId,
                 onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
+        // Turnos detalle
+        composable(
+            route = PawCareDestinations.APPOINTMENT_DETAIL,
+            arguments = listOf(
+                navArgument("appointmentId") {type = NavType.LongType},
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val appointmentId = backStackEntry.arguments?.getLong("appointmentId") ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            AppointmentDetailScreen(
+                appointmentId = appointmentId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { id ->
+                    navController.navigate(
+                        PawCareDestinations.appointmentForm(petId, petName, id)
+                    )
+                }
             )
         }
 
