@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -109,6 +109,7 @@ fun PetDetailScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
+
                         else -> Text("")
                     }
                 },
@@ -118,7 +119,7 @@ fun PetDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onNavigateToQR(petId)}) {
+                    IconButton(onClick = { onNavigateToQR(petId) }) {
                         Icon(Icons.Default.QrCode, contentDescription = "Ver QR")
                     }
                     IconButton(onClick = {
@@ -141,6 +142,7 @@ fun PetDetailScreen(
                 ) {
                     CircularProgressIndicator()
                 }
+
             is PetDetailState.Error ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -148,15 +150,16 @@ fun PetDetailScreen(
                 ) {
                     Text(text = state.mensaje)
                 }
+
             is PetDetailState.Success ->
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Header — foto + datos rápidos
+                    // Header
                     item {
                         PetHeaderSection(
                             pet = state.pet,
@@ -180,12 +183,14 @@ fun PetDetailScreen(
                         }
                     }
 
-
+                    // Título Historial Clínico
                     item {
-                        // Historial Clínico
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MedicalServices,
@@ -199,9 +204,14 @@ fun PetDetailScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
 
+                    // Historial fila 1
+                    item {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(110.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             SeccionCard(
@@ -222,6 +232,17 @@ fun PetDetailScreen(
                                 ),
                                 modifier = Modifier.weight(1f)
                             )
+                        }
+                    }
+
+                    // Historial fila 2
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(110.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             SeccionCard(
                                 seccion = SeccionItem(
                                     titulo = "Condiciones",
@@ -243,12 +264,14 @@ fun PetDetailScreen(
                         }
                     }
 
-
+                    // Título Seguimiento
                     item {
-                        // Seguimiento
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.TrendingUp,
@@ -262,10 +285,14 @@ fun PetDetailScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+
+                    // Seguimiento fila
+                    item {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp),
+                                .height(110.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             SeccionCard(
@@ -293,6 +320,7 @@ fun PetDetailScreen(
     }
 }
 
+
 @Composable
 private fun PetHeaderSection(
     pet: Pet,
@@ -301,7 +329,7 @@ private fun PetHeaderSection(
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         // Foto circular
         Box(
@@ -327,63 +355,48 @@ private fun PetHeaderSection(
             }
         }
 
-        // Datos rápidos
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        // Chips con FlowRow
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f)
         ) {
-            Text(
-                text = pet.especie.displayName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            AssistChip(
+                onClick = {},
+                label = { Text(pet.especie.displayName) }
             )
             pet.raza?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                AssistChip(
+                    onClick = {},
+                    label = { Text(it) }
                 )
             }
-            Text(
-                text = calcularEdad(pet.fechaNacimiento, pet.fechaNacimientoTipo),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
             pet.sexo?.let {
-                Text(
-                    text = it.displayName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                AssistChip(
+                    onClick = {},
+                    label = { Text(it.displayName) }
                 )
             }
-
-            // Chip de peso
+            AssistChip(
+                onClick = {},
+                label = {
+                    Text(calcularEdad(pet.fechaNacimiento, pet.fechaNacimientoTipo))
+                }
+            )
             ultimoPeso?.let {
                 AssistChip(
                     onClick = {},
-                    label = {
-                        Text(
-                            text = "⚖️ ${it.peso} kg",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    },
+                    label = { Text("⚖️ ${it.peso} kg") },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = WeightColor.copy(alpha = 0.15f),
                         labelColor = WeightColor
                     )
                 )
             }
-
-            // Chip castrado
             if (pet.castrado) {
                 AssistChip(
                     onClick = {},
-                    label = {
-                        Text(
-                            text = "✂️ Castrado/a",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    },
+                    label = { Text("✂️ Castrado/a") },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         labelColor = MaterialTheme.colorScheme.primary
