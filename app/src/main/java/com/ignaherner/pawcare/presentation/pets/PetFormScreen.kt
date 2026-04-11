@@ -170,8 +170,12 @@ fun PetFormScreen(
             nombre = pet.nombre
             especieSeleccionada = pet.especie
             castrado = pet.castrado
+            raza = pet.raza ?: ""
+            sexoSeleccionado = pet.sexo ?: Sex.MACHO
+            fechaNacimiento = pet.fechaNacimiento ?: ""
             fechaCastracion = pet.fechaCastracion ?: ""
             fechaNacimientoTipo = pet.fechaNacimientoTipo
+            fotoUri = pet.fotoUri ?: ""
         }
     }
 
