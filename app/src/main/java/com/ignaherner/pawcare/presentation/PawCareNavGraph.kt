@@ -18,6 +18,9 @@ import androidx.navigation.navArgument
 import com.ignaherner.pawcare.presentation.appointments.AppointmentDetailScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
+import com.ignaherner.pawcare.presentation.auth.AuthViewModel
+import com.ignaherner.pawcare.presentation.auth.LoginScreen
+import com.ignaherner.pawcare.presentation.auth.RegisterScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionViewModel
@@ -95,6 +98,11 @@ object PawCareDestinations {
 
     const val QR_SCREEN = "qr_screen/{petId}"
 
+    // Login y Register
+    const val LOGIN = "login"
+    const val REGISTER = "register"
+
+
     // Funciones para construir rutas con argumentos
     fun petDetail(petId: Long) = "pet_detail/$petId"
     fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
@@ -163,6 +171,8 @@ fun PawCareNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
 
+    val authViewModel: AuthViewModel = hiltViewModel()
+
     navController.addOnDestinationChangedListener { _, destination, _ ->
         android.util.Log.d("NavDebug", "Navegando a: ${destination.route}")
     }
@@ -179,19 +189,59 @@ fun PawCareNavGraph(
 
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate(
-                        if (ownerExist == true)
-                            PawCareDestinations.HOME
-                        else
-                            PawCareDestinations.OWNER_FORM
-                    ) {
-                        popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
-                        launchSingleTop = true
+                    when {
+                        // No esta logueado -> Login
+                        !authViewModel.isLoggedIn -> {
+                            navController.navigate(PawCareDestinations.LOGIN) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
+                            }
+                        }
+
+                        // Logueado pero sin Owner -> OwnerForm
+                        ownerExist == false -> {
+                            navController.navigate(PawCareDestinations.OWNER_FORM) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
+                            }
+                        }
+
+                        // Logueado con Owner -> Home
+                        else -> {
+                            navController.navigate(PawCareDestinations.HOME) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
+                            }
+                        }
                     }
                 }
             )
         }
 
+        // Login
+        composable(PawCareDestinations.LOGIN) {
+            LoginScreen(
+                onNavigateToRegister = {
+                    navController.navigate(PawCareDestinations.REGISTER)
+                },
+                onLoginSuccess = {
+                    navController.navigate(PawCareDestinations.HOME) {
+                        popUpTo(PawCareDestinations.LOGIN) { inclusive = true}
+                    }
+                }
+            )
+        }
+
+        // Register
+        composable(PawCareDestinations.REGISTER) {
+            RegisterScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+                onRegisterSuccess = {
+                    navController.navigate(PawCareDestinations.OWNER_FORM) {
+                        popUpTo(PawCareDestinations.REGISTER) { inclusive = true}
+                    }
+                }
+            )
+        }
         composable(PawCareDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }
 
