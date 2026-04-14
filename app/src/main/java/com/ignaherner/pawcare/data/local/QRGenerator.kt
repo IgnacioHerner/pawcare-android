@@ -14,6 +14,7 @@ class QRGenerator @Inject constructor() {
 
     fun generarQR(
         nombreMascota: String,
+        firestoreId: String,
         nombreDueno: String,
         telefono: String,
         medicamentosActivos: List<String> = emptyList()
@@ -21,6 +22,7 @@ class QRGenerator @Inject constructor() {
         val contenido = buildString {
             appendLine("🐾 PawCare")
             appendLine("Mascota: $nombreMascota")
+            appendLine("ID: $firestoreId")
             appendLine("Dueño: $nombreDueno")
             appendLine("Tel: $telefono")
             if (medicamentosActivos.isNotEmpty()) {

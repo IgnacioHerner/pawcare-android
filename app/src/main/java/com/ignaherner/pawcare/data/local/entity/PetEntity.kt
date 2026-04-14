@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class PetEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val firestoreId: String = "",
     val nombre: String,
     val especie: String,
     val raza: String?,

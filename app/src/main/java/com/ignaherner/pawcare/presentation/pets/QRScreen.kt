@@ -96,6 +96,7 @@ fun QRScreen(
                     val qrBitmap = remember(pet, owner, medicamentosActivos) {
                         qrGenerator.generarQR(
                             nombreMascota = pet.nombre,
+                            firestoreId = pet.firestoreId,
                             nombreDueno = "${owner.nombre} ${owner.apellido}",
                             telefono = owner.telefono,
                             medicamentosActivos = medicamentosActivos

@@ -3,6 +3,7 @@ package com.ignaherner.pawcare.presentation.pets
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.local.WorkManagerHelper
+import com.ignaherner.pawcare.data.repository.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Pet
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PetViewModel @Inject constructor(
     private val repository: PetRepository,
+    private val firestoreRepository: PetFirestoreRepository,
     private val workManagerHelper: WorkManagerHelper
 ): ViewModel() {
 
@@ -74,7 +76,17 @@ class PetViewModel @Inject constructor(
     fun insertPet(pet: Pet) {
         viewModelScope.launch {
             try {
-                repository.insertPet(pet)
+                // Guardar en Firestore -> Obtener id
+                val firestoreResult = firestoreRepository.guardarPet(pet)
+
+                if (firestoreResult.isSuccess) {
+                    val firestoreId = firestoreResult.getOrNull() ?: ""
+                    // Guardar en Room con el firestoreId
+                    val petConId = pet.copy(firestoreId = firestoreId)
+                    repository.insertPet(petConId)
+                } else {
+                    repository.insertPet(pet)
+                }
             } catch (e: Exception) {
                 _uiState.value = PetUiState.Error(e.message ?: "Error al guardar")
             }
@@ -84,7 +96,12 @@ class PetViewModel @Inject constructor(
     fun updatePet(pet: Pet) {
         viewModelScope.launch {
             try {
+                // Actualizar en Room
                 repository.updatePet(pet)
+                // Sincronizar con Firestore
+                if (pet.firestoreId.isNotBlank()) {
+                    firestoreRepository.actualizarPet(pet)
+                }
             } catch (e: Exception) {
                 _uiState.value = PetUiState.Error(e.message ?: "Error al actualizar")
             }
@@ -95,7 +112,12 @@ class PetViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
+                // Eliminar de Room
                 repository.deletePet(pet)
+                // Eliminar de Firestore
+                if(pet.firestoreId.isNotBlank()) {
+                    firestoreRepository.eliminarPet(pet.firestoreId)
+                }
                 _snackbarMessage.value = "${pet.nombre} eliminado"
             } catch (e: Exception) {
                 _snackbarMessage.value = "Error al eliminar"
