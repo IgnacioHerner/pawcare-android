@@ -207,7 +207,7 @@ fun RegisterScreen(
 
             // Boton registrar
             Button(
-                onClick = { viewModel.register(email, password)},
+                onClick = { viewModel.register(email, password, rolSeleccionado)},
                 enabled = email.isNotBlank() && password.isNotBlank() && password == confirmPassword && authState !is AuthState.Loading,
                 modifier = Modifier.fillMaxWidth()
             ) {

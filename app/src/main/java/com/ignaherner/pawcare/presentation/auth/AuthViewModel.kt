@@ -3,6 +3,8 @@ package com.ignaherner.pawcare.presentation.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.repository.AuthRepository
+import com.ignaherner.pawcare.data.repository.UserRepository
+import com.ignaherner.pawcare.domain.model.Rol
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel(){
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -31,14 +34,24 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String, rol: Rol) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
+
             val result = authRepository.register(email, password)
-            _authState.value = if (result.isSuccess) {
-                AuthState.Success
+
+            if(result.isSuccess) {
+                val rolResult = userRepository.guardarUsuario(rol)
+
+                _authState.value = if (rolResult.isSuccess) {
+                    AuthState.Success
+                } else {
+                    AuthState.Error("Error al guardar el perfil")
+                }
             } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Error al registrar")
+                _authState.value = AuthState.Error(
+                    result.exceptionOrNull()?.message ?: "Error al registrarse"
+                )
             }
         }
     }
