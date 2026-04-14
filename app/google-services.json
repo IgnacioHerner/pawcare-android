@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292196346724",
+    "project_id": "pawcare-215f9",
+    "storage_bucket": "pawcare-215f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292196346724:android:af540c965e609910a2e871",
+        "android_client_info": {
+          "package_name": "com.ignaherner.pawcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8clAv24tzhyl5eHRVmd6BPySOjIctQXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
