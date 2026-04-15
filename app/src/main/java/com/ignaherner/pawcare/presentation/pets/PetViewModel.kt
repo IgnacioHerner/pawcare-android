@@ -78,7 +78,7 @@ class PetViewModel @Inject constructor(
     fun insertPet(pet: Pet) {
         viewModelScope.launch {
             try {
-                withContext(NonCancellable) {  // ← no se cancela aunque el usuario navegue
+                withContext(NonCancellable) {
                     val firestoreResult = firestoreRepository.guardarPet(pet)
 
                     if (firestoreResult.isSuccess) {
