@@ -7,10 +7,12 @@ import com.ignaherner.pawcare.data.repository.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Pet
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -76,19 +78,19 @@ class PetViewModel @Inject constructor(
     fun insertPet(pet: Pet) {
         viewModelScope.launch {
             try {
-                // Guardar en Firestore -> Obtener id
-                val firestoreResult = firestoreRepository.guardarPet(pet)
+                withContext(NonCancellable) {  // ← no se cancela aunque el usuario navegue
+                    val firestoreResult = firestoreRepository.guardarPet(pet)
 
-                if (firestoreResult.isSuccess) {
-                    val firestoreId = firestoreResult.getOrNull() ?: ""
-                    // Guardar en Room con el firestoreId
-                    val petConId = pet.copy(firestoreId = firestoreId)
-                    repository.insertPet(petConId)
-                } else {
-                    repository.insertPet(pet)
+                    if (firestoreResult.isSuccess) {
+                        val firestoreId = firestoreResult.getOrNull() ?: ""
+                        val petConId = pet.copy(firestoreId = firestoreId)
+                        repository.insertPet(petConId)
+                    } else {
+                        repository.insertPet(pet)
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.value = PetUiState.Error(e.message ?: "Error al guardar")
+                _snackbarMessage.value = "Error al guardar"
             }
         }
     }

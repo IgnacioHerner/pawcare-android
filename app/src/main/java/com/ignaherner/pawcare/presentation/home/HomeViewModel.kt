@@ -2,7 +2,9 @@ package com.ignaherner.pawcare.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.local.WorkManagerHelper
 import com.ignaherner.pawcare.data.repository.MedicationRepository
+import com.ignaherner.pawcare.data.repository.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.data.repository.WeightRepository
@@ -22,6 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val petRepository: PetRepository,
+    private val petFirestoreRepository: PetFirestoreRepository,
+    private val workManagerHelper: WorkManagerHelper,
     private val vaccineRepository: VaccineRepository,
     private val medicationRepository: MedicationRepository,
     private val weightRepository: WeightRepository
@@ -77,7 +81,11 @@ class HomeViewModel @Inject constructor(
     fun deletePet(pet: Pet){
         viewModelScope.launch {
             try {
+                workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
                 petRepository.deletePet(pet)
+                if (pet.firestoreId.isNotBlank()){
+                    petFirestoreRepository.eliminarPet(pet.firestoreId)
+                }
             } catch (e: Exception) {
                 _uiState.value = HomeUiState.Error(e.message ?: "Error al eliminar")
             }
