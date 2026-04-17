@@ -73,7 +73,7 @@ fun OwnerCard(
                 }
 
                 Text(
-                    text = "👤 ${owner.nombre} ${owner.apellido}",
+                    text = "👤 ${owner.nombre}${owner.apellido}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )

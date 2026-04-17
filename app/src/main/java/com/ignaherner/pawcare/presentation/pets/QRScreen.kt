@@ -97,7 +97,7 @@ fun QRScreen(
                         qrGenerator.generarQR(
                             nombreMascota = pet.nombre,
                             firestoreId = pet.firestoreId,
-                            nombreDueno = "${owner.nombre} ${owner.apellido}",
+                            nombreDueno = "${owner.nombre}${owner.apellido}",
                             telefono = owner.telefono,
                             medicamentosActivos = medicamentosActivos
                         )
@@ -134,7 +134,7 @@ fun QRScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 InfoRow("🐾 Mascota", pet.nombre)
-                                InfoRow("👤 Dueño", "${owner.nombre} ${owner.apellido}")
+                                InfoRow("👤 Dueño", "${owner.nombre}${owner.apellido}")
                                 InfoRow("📞 Teléfono", owner.telefono)
                                 if (medicamentosActivos.isNotEmpty()) {
                                     InfoRow(

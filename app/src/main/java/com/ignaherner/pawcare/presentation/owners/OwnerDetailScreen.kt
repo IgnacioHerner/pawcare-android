@@ -140,7 +140,7 @@ fun OwnerDetailContent(
 
         // Header
         Text(
-            text = "${owner.nombre} ${owner.apellido}",
+            text = "${owner.nombre}${owner.apellido}",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )

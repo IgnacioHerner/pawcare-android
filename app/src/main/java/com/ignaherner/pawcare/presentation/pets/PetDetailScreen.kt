@@ -448,7 +448,7 @@ private fun OwnerContactCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${owner.nombre} ${owner.apellido}",
+                    text = "${owner.nombre}${owner.apellido}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
