@@ -45,10 +45,17 @@ class HomeViewModel @Inject constructor(
         try {
             val result = petFirestoreRepository.obtenerMascotasDueno()
             if (result.isSuccess) {
-                result.getOrNull()?.forEach { pet ->
-                    val existente = petRepository.getPetByFirestoreId(pet.firestoreId)
-                    if (existente == null) {
-                        petRepository.insertPet(pet)
+                result.getOrNull()?.forEach { petFirestore ->
+                    val petLocal = petRepository.getPetByFirestoreId(petFirestore.firestoreId)
+
+                    if (petLocal == null) {
+                        petRepository.insertPet(petFirestore)
+                    } else {
+                        val petActualizado = petFirestore.copy(
+                            id = petLocal.id,
+                            fotoUri = petLocal.fotoUri ?: petFirestore.fotoUri // ← mantener local
+                        )
+                        petRepository.updatePet(petActualizado)
                     }
                 }
             }

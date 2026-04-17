@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.domain.model.Rol
+import com.ignaherner.pawcare.domain.model.Veterinario
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,6 +59,58 @@ class UserRepository @Inject constructor() {
             Result.success(Rol.valueOf(rolString))
         } catch (e: Exception) {
             android.util.Log.e("RolDebug", "Error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getVeterinario(): Veterinario? {
+        return try {
+            val uid = auth.currentUser?.uid ?: return null
+            val documento = firestore.collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            if (!documento.exists()) return null
+            if (documento.getString("matricula") == null) return null
+
+            Veterinario(
+                id = uid,
+                nombre = documento.getString("nombre") ?: "",
+                apellido = documento.getString("apellido") ?: "",
+                matricula = documento.getString("matricula") ?: "",
+                telefono = documento.getString("telefono") ?: "",
+                direccionVet = documento.getString("direccionVet"),
+                ciudadVet = documento.getString("ciudadVet"),
+                especialidad = documento.getString("especialidad")
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun vetExists(): Boolean = getVeterinario() != null
+
+    suspend fun guardarVeterinario(vet: Veterinario): Result<Unit> {
+        return try {
+            val uid = auth.currentUser?.uid ?: return Result.failure(
+                Exception("Usuario no autenticado")
+            )
+            val vetData = hashMapOf(
+                "nombre" to vet.nombre,
+                "apellido" to vet.apellido,
+                "matricula" to vet.matricula,
+                "telefono" to vet.telefono,
+                "direccionVet" to vet.direccionVet,
+                "ciudadVet" to vet.ciudadVet,
+                "especialidad" to vet.especialidad
+            )
+            firestore.collection("users")
+                .document(uid)
+                .set(vetData, SetOptions.merge())
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

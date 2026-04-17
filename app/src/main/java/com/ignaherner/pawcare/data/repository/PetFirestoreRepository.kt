@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
@@ -65,7 +66,7 @@ class PetFirestoreRepository @Inject constructor(){
 
             firestore.collection("pets")
                 .document(pet.firestoreId)
-                .update(petData as Map<String, Any>)
+                .set(petData, SetOptions.merge())
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {

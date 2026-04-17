@@ -44,8 +44,10 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
+import com.ignaherner.pawcare.presentation.vet.VetFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
 import kotlinx.coroutines.delay
@@ -109,6 +111,8 @@ object PawCareDestinations {
     // VETERINARIO
     const val VET_HOME = "vet_home"
     const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
+
+    const val VET_FORM = "vet_form"
 
     const val LOADING = "loading"
 
@@ -212,15 +216,24 @@ fun PawCareNavGraph(
 
         composable(PawCareDestinations.LOADING) {
             val ownerViewModel: OwnerViewModel = hiltViewModel()
+            val vetViewModel: VetProfileViewModel = hiltViewModel()
             val rol by authViewModel.rol.collectAsStateWithLifecycle()
             val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+            val vetExists by vetViewModel.vetExists.collectAsStateWithLifecycle()
 
-            LaunchedEffect(rol, ownerExists) {
+            LaunchedEffect(rol, ownerExists, vetExists) {
+                android.util.Log.d("LoadingDebug", "rol: $rol, vetExists: $vetExists, ownerExists: $ownerExists")
 
                 if (rol == null) return@LaunchedEffect
 
                 when {
-                    rol == Rol.VETERINARIO -> {
+                    rol == Rol.VETERINARIO && vetExists == null -> return@LaunchedEffect
+                    rol == Rol.VETERINARIO && vetExists == false -> {
+                        navController.navigate(PawCareDestinations.VET_FORM) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    rol == Rol.VETERINARIO && vetExists == true -> {
                         navController.navigate(PawCareDestinations.VET_HOME) {
                             popUpTo(PawCareDestinations.LOADING) { inclusive = true }
                         }
@@ -297,6 +310,16 @@ fun PawCareNavGraph(
             VetPetDetailScreen(
                 firestoreId = firestoreId,
                 onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
+        composable(PawCareDestinations.VET_FORM) {
+            VetFormScreen(
+                onNavigateBack = {
+                    navController.navigate(PawCareDestinations.VET_HOME) {
+                        popUpTo(PawCareDestinations.VET_FORM) { inclusive = true }
+                    }
+                }
             )
         }
 

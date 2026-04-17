@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.hilt.common)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     ksp(libs.androidx.room.compiler)
 
     // Hilt
