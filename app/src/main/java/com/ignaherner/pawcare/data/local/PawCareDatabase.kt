@@ -6,7 +6,6 @@ import com.ignaherner.pawcare.data.local.dao.AppointmentDao
 import com.ignaherner.pawcare.data.local.dao.ConditionDao
 import com.ignaherner.pawcare.data.local.dao.DewormingDao
 import com.ignaherner.pawcare.data.local.dao.MedicationDao
-import com.ignaherner.pawcare.data.local.dao.OwnerDao
 import com.ignaherner.pawcare.data.local.dao.PetDao
 import com.ignaherner.pawcare.data.local.dao.VaccineDao
 import com.ignaherner.pawcare.data.local.dao.WeightDao
@@ -14,7 +13,6 @@ import com.ignaherner.pawcare.data.local.entity.AppointmentEntity
 import com.ignaherner.pawcare.data.local.entity.ConditionEntity
 import com.ignaherner.pawcare.data.local.entity.DewormingEntity
 import com.ignaherner.pawcare.data.local.entity.MedicationEntity
-import com.ignaherner.pawcare.data.local.entity.OwnerEntity
 import com.ignaherner.pawcare.data.local.entity.PetEntity
 import com.ignaherner.pawcare.data.local.entity.VaccineEntity
 import com.ignaherner.pawcare.data.local.entity.WeightEntity
@@ -26,11 +24,10 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         AppointmentEntity::class,
         MedicationEntity::class,
         WeightEntity::class,
-        OwnerEntity::class,
         ConditionEntity::class,
         DewormingEntity::class
         ],
-    version = 22,
+    version = 23,
     exportSchema = false
 )
 abstract class PawCareDatabase : RoomDatabase() {
@@ -40,7 +37,6 @@ abstract class PawCareDatabase : RoomDatabase() {
     abstract fun medicationDao(): MedicationDao
     abstract fun weightDao(): WeightDao
 
-    abstract fun ownerDao(): OwnerDao
 
     abstract fun conditionDao() : ConditionDao
 

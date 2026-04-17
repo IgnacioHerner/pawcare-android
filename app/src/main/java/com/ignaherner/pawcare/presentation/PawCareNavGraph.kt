@@ -215,12 +215,6 @@ fun PawCareNavGraph(
             val rol by authViewModel.rol.collectAsStateWithLifecycle()
             val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
 
-            LaunchedEffect(rol) {
-                if (rol == Rol.DUENO) {
-                    ownerViewModel.sincronizarOwner() // ← suspend, espera hasta terminar
-                }
-            }
-
             LaunchedEffect(rol, ownerExists) {
 
                 if (rol == null) return@LaunchedEffect
