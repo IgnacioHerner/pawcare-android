@@ -166,6 +166,10 @@ fun DewormingFormScreen(
                 onClick = {
                     val nuevaDesparasitacion = Deworming(
                         id = dewormingId ?: 0L,
+                        firestoreId = when (val state = dewormingDetailState) {
+                            is DewormingDetailState.Success -> state.deworming.firestoreId
+                            else -> ""
+                        },
                         petId = petId,
                         fecha = fecha,
                         producto = producto.ifBlank { null },

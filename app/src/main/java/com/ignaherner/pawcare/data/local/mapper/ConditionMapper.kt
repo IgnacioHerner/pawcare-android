@@ -1,11 +1,12 @@
 package com.ignaherner.pawcare.data.local.mapper
 
 import com.ignaherner.pawcare.data.local.entity.ConditionEntity
-import com.ignaherner.pawcare.presentation.components.Condition
+import com.ignaherner.pawcare.domain.model.Condition
 
 
 fun ConditionEntity.toDomain(): Condition = Condition(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fechaDiagnostico = fechaDiagnostico,
@@ -14,6 +15,7 @@ fun ConditionEntity.toDomain(): Condition = Condition(
 
 fun Condition.toEntity(): ConditionEntity = ConditionEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fechaDiagnostico = fechaDiagnostico,

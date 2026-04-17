@@ -6,6 +6,7 @@ import com.ignaherner.pawcare.domain.model.AppointmentStatus
 
 fun AppointmentEntity.toDomain(): Appointment = Appointment(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     fecha = fecha,
     veterinario = veterinario,
@@ -20,6 +21,7 @@ fun AppointmentEntity.toDomain(): Appointment = Appointment(
 
 fun Appointment.toEntity(): AppointmentEntity = AppointmentEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     fecha = fecha,
     veterinario = veterinario,

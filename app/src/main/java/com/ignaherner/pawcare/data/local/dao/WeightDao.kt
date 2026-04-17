@@ -19,7 +19,7 @@ interface WeightDao {
     suspend fun getWeightById(weightId: Long): WeightEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWeight(weight: WeightEntity)
+    suspend fun insertWeight(weight: WeightEntity) : Long
 
     @Update
     suspend fun updateWeight(weight: WeightEntity)

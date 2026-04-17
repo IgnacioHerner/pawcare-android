@@ -78,13 +78,7 @@ fun MedicationFormScreen(
 
     val opcionesDosis = listOf("1/8", "1/4", "1/2", "1", "1½", "2", "3", "4")
 
-    // Estado para controlar si el dialog esta abierto
-    var showDatePicker by remember { mutableStateOf(false) }
 
-    // DatePickerState
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
-    )
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
     val medicationDetailState by viewModel.medicationDetailState.collectAsStateWithLifecycle()
@@ -113,6 +107,14 @@ fun MedicationFormScreen(
             statusSeleccionado = medication.status
         }
     }
+
+    // Estado para controlar si el dialog esta abierto
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // DatePickerState
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
 
     // Dialog
     if (showDatePicker) {

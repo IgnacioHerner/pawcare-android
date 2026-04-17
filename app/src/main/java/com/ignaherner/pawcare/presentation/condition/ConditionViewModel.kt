@@ -2,18 +2,25 @@ package com.ignaherner.pawcare.presentation.condition
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.remote.firestore.ConditionFirestoreRepository
 import com.ignaherner.pawcare.data.repository.ConditionRepository
-import com.ignaherner.pawcare.presentation.components.Condition
+import com.ignaherner.pawcare.data.repository.PetRepository
+import com.ignaherner.pawcare.domain.model.Condition
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class ConditionViewModel @Inject constructor(
-    private val repository: ConditionRepository
+    private val repository: ConditionRepository,
+    private val firestoreRepository: ConditionFirestoreRepository,
+    private val petRepository: PetRepository
 ): ViewModel(){
     private val _uiState = MutableStateFlow<ConditionUiState>(ConditionUiState.Loading)
     val uiState: StateFlow<ConditionUiState> = _uiState.asStateFlow()
@@ -63,7 +70,22 @@ class ConditionViewModel @Inject constructor(
     fun insertCondition(condition: Condition) {
         viewModelScope.launch {
             try {
-                repository.insertCondition(condition)
+                val id = repository.insertCondition(condition)
+                val conditionConId = condition.copy(id = id)
+
+                withContext(NonCancellable){
+                    val pet = petRepository.getPetById(conditionConId.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if (petFirestoreId.isNotBlank()) {
+                        val firestoreResult = firestoreRepository.guardarCondicion(
+                            conditionConId, petFirestoreId
+                        )
+                        if (firestoreResult.isSuccess) {
+                            val firestoreId = firestoreResult.getOrNull() ?: ""
+                            repository.updateCondition(conditionConId.copy(firestoreId = firestoreId))
+                        }
+                    }
+                }
                 _snackbarMessage.value = "${condition.nombre} agregada ✅"
             } catch (e: Exception) {
                 _snackbarMessage.value =  "Error al guardar"
@@ -75,6 +97,13 @@ class ConditionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.updateCondition(condition)
+                if (condition.firestoreId.isNotBlank()){
+                    val pet = petRepository.getPetById(condition.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if(petFirestoreId.isNotBlank()){
+                        firestoreRepository.actualizarCondicion(condition, petFirestoreId)
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = ConditionUiState.Error(e.message ?: "Error al actualizar")
             }
@@ -85,6 +114,11 @@ class ConditionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteCondition(condition)
+                val pet = petRepository.getPetById(condition.petId).firstOrNull()
+                val petFirestoreId = pet?.firestoreId ?: ""
+                if (condition.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
+                    firestoreRepository.eliminarCondicion(condition.firestoreId, petFirestoreId)
+                }
                 _snackbarMessage.value = "${condition.nombre} eliminada"
             } catch (e: Exception) {
                 _uiState.value = ConditionUiState.Error(e.message ?: "Error al eliminar")

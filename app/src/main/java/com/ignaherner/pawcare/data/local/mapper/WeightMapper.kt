@@ -5,6 +5,7 @@ import com.ignaherner.pawcare.domain.model.Weight
 
 fun WeightEntity.toDomain(): Weight = Weight(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     peso = peso,
     fecha = fecha,
@@ -12,6 +13,7 @@ fun WeightEntity.toDomain(): Weight = Weight(
 )
 fun Weight.toEntity(): WeightEntity = WeightEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     peso = peso,
     fecha = fecha,

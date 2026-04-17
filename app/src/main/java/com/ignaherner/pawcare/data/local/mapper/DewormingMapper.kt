@@ -5,6 +5,7 @@ import com.ignaherner.pawcare.domain.model.Deworming
 
 fun DewormingEntity.toDomain(): Deworming = Deworming(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     fecha = fecha,
     producto = producto,
@@ -14,6 +15,7 @@ fun DewormingEntity.toDomain(): Deworming = Deworming(
 
 fun Deworming.toEntity(): DewormingEntity = DewormingEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     fecha = fecha,
     producto = producto,

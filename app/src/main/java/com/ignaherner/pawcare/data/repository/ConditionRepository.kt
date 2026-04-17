@@ -3,7 +3,7 @@ package com.ignaherner.pawcare.data.repository
 import com.ignaherner.pawcare.data.local.dao.ConditionDao
 import com.ignaherner.pawcare.data.local.mapper.toDomain
 import com.ignaherner.pawcare.data.local.mapper.toEntity
-import com.ignaherner.pawcare.presentation.components.Condition
+import com.ignaherner.pawcare.domain.model.Condition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

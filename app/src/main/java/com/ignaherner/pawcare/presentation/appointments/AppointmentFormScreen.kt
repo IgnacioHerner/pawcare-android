@@ -220,6 +220,10 @@ fun AppointmentFormScreen(
                 onClick = {
                     val nuevoTurno = Appointment(
                         id = appointmentId ?: 0L,
+                        firestoreId = when(val state = appointmentDetailState) {
+                            is AppointmentDetailState.Success -> state.appointments.firestoreId
+                            else -> ""
+                        },
                         petId = petId,
                         fecha = fecha,
                         veterinario = veterinario.ifBlank { null },

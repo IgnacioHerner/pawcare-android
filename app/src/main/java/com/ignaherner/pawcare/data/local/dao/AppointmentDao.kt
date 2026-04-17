@@ -19,7 +19,7 @@ interface AppointmentDao {
     suspend fun getAppointmentById(appointmentId: Long): AppointmentEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAppointment(appointment: AppointmentEntity)
+    suspend fun insertAppointment(appointment: AppointmentEntity): Long
 
     @Update
     suspend fun updateAppointment(appointment: AppointmentEntity)

@@ -21,7 +21,7 @@ class AppointmentRepository @Inject constructor(
 
     suspend fun getAppointmentById(id: Long) : Appointment? =
         appointmentDao.getAppointmentById(id)?.toDomain()
-    suspend fun insertAppointment(appointment: Appointment) =
+    suspend fun insertAppointment(appointment: Appointment): Long =
         appointmentDao.insertAppointment(appointment.toEntity())
 
     suspend fun updateAppointment(appointment: Appointment) =

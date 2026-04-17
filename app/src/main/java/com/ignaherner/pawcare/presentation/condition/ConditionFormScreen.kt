@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.fechaHoy
 import com.ignaherner.pawcare.domain.model.toFormattedString
-import com.ignaherner.pawcare.presentation.components.Condition
+import com.ignaherner.pawcare.domain.model.Condition
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,6 +150,10 @@ fun ConditionFormScreen(
                 onClick = {
                     val nuevaCondicion = Condition(
                         id = conditionId ?: 0L,
+                        firestoreId = when(val state = conditionDetailState) {
+                            is ConditionDetailState.Success -> state.condition.firestoreId
+                            else -> ""
+                        },
                         petId = petId,
                         nombre = nombre,
                         fechaDiagnostico = fechaDiagnostico,

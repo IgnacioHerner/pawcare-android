@@ -20,6 +20,7 @@ import androidx.room.PrimaryKey
 data class WeightEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val firestoreId: String,
     val petId: Long,
     val peso: Double,
     val fecha: String,

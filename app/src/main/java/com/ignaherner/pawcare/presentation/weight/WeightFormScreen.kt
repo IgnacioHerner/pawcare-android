@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.domain.model.fechaHoy
 import com.ignaherner.pawcare.domain.model.toFormattedString
@@ -49,6 +51,21 @@ fun WeightFormScreen(
 
     // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val weightDetailState by viewModel.weightDetailState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(weightId) {
+        weightId?.let { viewModel.loadWeightById(it) }
+    }
+
+    LaunchedEffect(weightDetailState) {
+        if (weightDetailState is WeightDetailState.Success){
+            val weight = (weightDetailState as WeightDetailState.Success).weight
+            peso = weight.peso.toString()
+            fecha = weight.fecha
+            notas = weight.notas ?: ""
+        }
+    }
 
     // DatePickerState
     val datePickerState = rememberDatePickerState(
@@ -141,6 +158,10 @@ fun WeightFormScreen(
                 onClick = {
                     val nuevoPeso = Weight(
                         id = weightId ?: 0L,
+                        firestoreId = when (val state = weightDetailState) {
+                            is WeightDetailState.Success -> state.weight.firestoreId
+                            else -> ""
+                        },
                         petId = petId,
                         peso = peso.toDoubleOrNull() ?: 0.0,
                         fecha = fecha,

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
-import com.ignaherner.pawcare.presentation.components.Condition
+import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState

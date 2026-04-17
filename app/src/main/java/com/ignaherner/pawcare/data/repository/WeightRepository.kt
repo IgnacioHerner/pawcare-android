@@ -22,7 +22,10 @@ class WeightRepository @Inject constructor(
                     .sortedByDescending { it.fecha.toLocalDate() }
             }
 
-    suspend fun insertWeight(weight: Weight) =
+    suspend fun getWeightById(id: Long): Weight? =
+        weightDao.getWeightById(id)?.toDomain()
+
+    suspend fun insertWeight(weight: Weight): Long =
         weightDao.insertWeight(weight.toEntity())
 
     suspend fun updateWeight(weight: Weight) =
