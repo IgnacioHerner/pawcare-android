@@ -3,17 +3,21 @@ package com.ignaherner.pawcare.presentation.owners
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.repository.OwnerRepository
+import com.ignaherner.pawcare.data.repository.UserRepository
 import com.ignaherner.pawcare.domain.model.Owner
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class OwnerViewModel @Inject constructor(
-    private val repository: OwnerRepository
+    private val repository: OwnerRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _ownerState = MutableStateFlow<OwnerState>(OwnerState.Loading)
@@ -47,9 +51,24 @@ class OwnerViewModel @Inject constructor(
         }
     }
 
+    suspend fun sincronizarOwner() {
+        try {
+            val result = userRepository.obtenerPerfilDueno()
+            if (result.isSuccess) {
+                result.getOrNull()?.let { owner ->
+                    repository.insertOwner(owner)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("OwnerDebug", "Error: ${e.message}")
+        }
+    }
+
     fun loadOwner() {
         viewModelScope.launch {
             try {
+                sincronizarOwner()
+
                 repository.getOwner()
                     .collect { owner ->
                         _ownerState.value = if (owner != null) {
@@ -67,7 +86,10 @@ class OwnerViewModel @Inject constructor(
     fun insertOwner(owner: Owner) {
         viewModelScope.launch {
             try {
-                repository.insertOwner(owner)
+                withContext(NonCancellable){
+                    repository.insertOwner(owner)
+                    userRepository.guardarPerfilDueno(owner)
+                }
                 _ownerExists.value = true
                 _ownerState.value = OwnerState.Success(owner)
                 _snackbarMessage.value = "Perfil creado ✅"
@@ -80,7 +102,10 @@ class OwnerViewModel @Inject constructor(
     fun updateOwner(owner: Owner) {
         viewModelScope.launch {
             try {
-                repository.updateOwner(owner)
+                withContext(NonCancellable){
+                    repository.updateOwner(owner)
+                    userRepository.guardarPerfilDueno(owner)
+                }
                 _ownerState.value = OwnerState.Success(owner)
                 _snackbarMessage.value = "Perfil actualizado ✅"
             } catch (e: Exception) {

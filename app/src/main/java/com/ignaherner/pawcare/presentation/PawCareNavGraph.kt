@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.presentation.appointments.AppointmentDetailScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
@@ -43,8 +44,11 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
+import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
+import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
+import kotlinx.coroutines.delay
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -101,6 +105,13 @@ object PawCareDestinations {
     // Login y Register
     const val LOGIN = "login"
     const val REGISTER = "register"
+
+    // VETERINARIO
+    const val VET_HOME = "vet_home"
+    const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
+
+    const val LOADING = "loading"
+
 
 
     // Funciones para construir rutas con argumentos
@@ -164,6 +175,8 @@ object PawCareDestinations {
 
     fun qrScreen(petId: Long) = "qr_screen/$petId"
 
+    fun vetPetDetail(firestoreId: String) = "vet_pet_detail/$firestoreId"
+
 }
 
 @Composable
@@ -181,49 +194,70 @@ fun PawCareNavGraph(
         navController = navController,
         startDestination = PawCareDestinations.SPLASH
     ) {
-
-        composable(PawCareDestinations.SPLASH){
-
-            val ownerViewModel: OwnerViewModel = hiltViewModel()
-            val ownerExist by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
-
+        composable(PawCareDestinations.SPLASH) {
             SplashScreen(
                 onSplashFinished = {
-                    when {
-                        // No esta logueado -> Login
-                        !authViewModel.isLoggedIn -> {
-                            navController.navigate(PawCareDestinations.LOGIN) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
-                            }
+                    if (authViewModel.isLoggedIn) {
+                        navController.navigate(PawCareDestinations.LOADING) {
+                            popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
                         }
-
-                        // Logueado pero sin Owner -> OwnerForm
-                        ownerExist == false -> {
-                            navController.navigate(PawCareDestinations.OWNER_FORM) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
-                            }
-                        }
-
-                        // Logueado con Owner -> Home
-                        else -> {
-                            navController.navigate(PawCareDestinations.HOME) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true}
-                            }
+                    } else {
+                        navController.navigate(PawCareDestinations.LOGIN) {
+                            popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
                         }
                     }
                 }
             )
         }
 
+        composable(PawCareDestinations.LOADING) {
+            val ownerViewModel: OwnerViewModel = hiltViewModel()
+            val rol by authViewModel.rol.collectAsStateWithLifecycle()
+            val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+
+            LaunchedEffect(rol) {
+                if (rol == Rol.DUENO) {
+                    ownerViewModel.sincronizarOwner() // ← suspend, espera hasta terminar
+                }
+            }
+
+            LaunchedEffect(rol, ownerExists) {
+
+                if (rol == null) return@LaunchedEffect
+
+                when {
+                    rol == Rol.VETERINARIO -> {
+                        navController.navigate(PawCareDestinations.VET_HOME) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    ownerExists == null -> return@LaunchedEffect
+                    ownerExists == false -> {
+                        navController.navigate(PawCareDestinations.OWNER_FORM) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    else -> {
+                        navController.navigate(PawCareDestinations.HOME) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                }
+            }
+
+            LoadingScreen()
+        }
+
         // Login
         composable(PawCareDestinations.LOGIN) {
             LoginScreen(
+                viewModel = authViewModel,
                 onNavigateToRegister = {
                     navController.navigate(PawCareDestinations.REGISTER)
                 },
                 onLoginSuccess = {
-                    navController.navigate(PawCareDestinations.HOME) {
-                        popUpTo(PawCareDestinations.LOGIN) { inclusive = true}
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.LOGIN) { inclusive = true }
                     }
                 }
             )
@@ -232,16 +266,47 @@ fun PawCareNavGraph(
         // Register
         composable(PawCareDestinations.REGISTER) {
             RegisterScreen(
+                viewModel = authViewModel,
                 onNavigateToLogin = {
-                    navController.popBackStack()
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 },
                 onRegisterSuccess = {
-                    navController.navigate(PawCareDestinations.OWNER_FORM) {
-                        popUpTo(PawCareDestinations.REGISTER) { inclusive = true}
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.REGISTER) { inclusive = true }
                     }
                 }
             )
         }
+
+        // VetHome
+        composable(PawCareDestinations.VET_HOME) {
+            VetHomeScreen(
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS)
+                },
+                onNavigateToPetDetail = { firestoreId ->
+                    navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                }
+            )
+        }
+
+        // VetPetDetail
+        composable(
+            route = PawCareDestinations.VET_PET_DETAIL,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetPetDetailScreen(
+                firestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack()}
+            )
+        }
+
+
         composable(PawCareDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }
 
@@ -325,7 +390,14 @@ fun PawCareNavGraph(
         // Settings DataStore
         composable(PawCareDestinations.SETTINGS) {
             SettingsScreen(
-                onNavigateBack = { navController.popBackStack()}
+                viewModel = hiltViewModel(),
+                authViewModel = authViewModel,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToLogin = {
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 

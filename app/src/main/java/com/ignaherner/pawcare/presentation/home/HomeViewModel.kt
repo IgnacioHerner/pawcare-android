@@ -35,7 +35,26 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadHome()
+        viewModelScope.launch {
+            sincronizarMascotas()
+            loadHome()
+        }
+    }
+
+    private suspend fun sincronizarMascotas() {
+        try {
+            val result = petFirestoreRepository.obtenerMascotasDueno()
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { pet ->
+                    val existente = petRepository.getPetByFirestoreId(pet.firestoreId)
+                    if (existente == null) {
+                        petRepository.insertPet(pet)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error: ${e.message}")
+        }
     }
 
     fun loadHome() {

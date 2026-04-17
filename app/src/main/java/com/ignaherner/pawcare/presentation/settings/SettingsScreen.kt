@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,12 +29,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    onNavigateToLogin: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel
 ){
 
     //Colectas los StateFlow
@@ -90,6 +94,20 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Guardar")
+            }
+
+            Button(
+                onClick = {
+                    viewModel.logout()
+                    authViewModel.logout()
+                    onNavigateToLogin()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cerrar sesión")
             }
         }
     }

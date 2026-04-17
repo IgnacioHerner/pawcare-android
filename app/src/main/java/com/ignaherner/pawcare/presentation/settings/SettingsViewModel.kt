@@ -2,8 +2,13 @@ package com.ignaherner.pawcare.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
+import com.ignaherner.pawcare.data.repository.AuthRepository
+import com.ignaherner.pawcare.data.repository.OwnerRepository
+import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -12,7 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val authRepository: AuthRepository,
+    private val database: PawCareDatabase,
 ) : ViewModel() {
 
     val nombreVeterinario: StateFlow<String> = settingsDataStore.nombreVeterinario
@@ -29,4 +36,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun logout() {
+        viewModelScope.launch(Dispatchers.IO) {
+            database.clearAllTables()
+            authRepository.logout()
+        }
+    }
 }

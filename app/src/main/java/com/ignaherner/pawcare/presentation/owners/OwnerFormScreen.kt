@@ -71,8 +71,8 @@ fun OwnerFormScreen(
         }
     }
 
-    LaunchedEffect(ownerId) {
-        ownerId?.let { viewModel.loadOwner() }
+    LaunchedEffect(Unit) {
+        viewModel.loadOwner()
     }
 
     // cuando ownerState cambia, actualizamos los campos

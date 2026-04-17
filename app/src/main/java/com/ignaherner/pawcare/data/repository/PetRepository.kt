@@ -32,4 +32,7 @@ class PetRepository @Inject constructor(
 
     suspend fun deletePet(pet: Pet) =
         petDao.deletePet(pet.toEntity())
+
+    suspend fun getPetByFirestoreId(firestoreId: String): Pet? =
+        petDao.getPetByFirestoreId(firestoreId)?.toDomain()
 }

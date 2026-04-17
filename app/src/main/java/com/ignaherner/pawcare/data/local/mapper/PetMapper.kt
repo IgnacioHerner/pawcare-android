@@ -9,6 +9,7 @@ import com.ignaherner.pawcare.domain.model.Sex
 fun PetEntity.toDomain(): Pet = Pet(
     id = id,
     firestoreId = firestoreId,
+    ownerId = ownerId,
     nombre = nombre,
     especie = Especie.valueOf(especie),
     raza = raza,
@@ -34,6 +35,7 @@ fun PetEntity.toDomain(): Pet = Pet(
 fun Pet.toEntity(): PetEntity = PetEntity(
     id = id,
     firestoreId = firestoreId,
+    ownerId = ownerId,
     nombre = nombre,
     especie = especie.name,
     raza = raza,

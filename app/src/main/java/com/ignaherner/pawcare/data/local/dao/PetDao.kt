@@ -26,4 +26,7 @@ interface PetDao {
 
     @Delete
     suspend fun deletePet(pet: PetEntity)
+
+    @Query("SELECT * FROM pets WHERE firestoreId = :firestoreId LIMIT 1")
+    suspend fun getPetByFirestoreId(firestoreId: String): PetEntity?
 }
