@@ -1,10 +1,11 @@
-package com.ignaherner.pawcare.data.local
+package com.ignaherner.pawcare.data.local.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Data
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ignaherner.pawcare.domain.model.Medication
@@ -55,14 +56,14 @@ class WorkManagerHelper @Inject constructor(
 
         workManager.enqueueUniquePeriodicWork(
             "medication_${medication.id}",
-            androidx.work.ExistingPeriodicWorkPolicy.REPLACE,
+            ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
         )
 
     }
 
     fun cancelarRecordatorioMedicamento(medicationId: Long) {
-        android.util.Log.d("WorkManager", "Cancelando medication_$medicationId")
+        Log.d("WorkManager", "Cancelando medication_$medicationId")
         workManager.cancelAllWorkByTag("medication_${medicationId}")
     }
 
@@ -104,7 +105,7 @@ class WorkManagerHelper @Inject constructor(
     }
 
     fun cancelarRecordatorioVacuna(vaccineId: Long) {
-        android.util.Log.d("WorkManager", "Cancelando vaccine_$vaccineId")
+        Log.d("WorkManager", "Cancelando vaccine_$vaccineId")
         workManager.cancelAllWorkByTag("vaccine_${vaccineId}")
     }
 

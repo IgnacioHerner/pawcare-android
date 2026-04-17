@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -170,7 +171,7 @@ fun MedicationCard(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    fontStyle = FontStyle.Italic
                 )
             }
 
@@ -195,28 +196,5 @@ fun MedicationCard(
                 }
             }
         }
-    }
-}
-
-@PreviewLightDark
-@Composable
-fun MedicationCardPreview(){
-    PawCareTheme {
-        MedicationCard(
-            medication = Medication (
-                id = 1,
-                petId = 1,
-                nombre = "Corticoides",
-                fechaInicio = "14-03-2026",
-                duracionDias = 4,
-                intervaloHoras = 12,
-                recetadoPor = "Agustina Ochoa",
-                dosis = "1/2",
-                notas = "Alergia",
-                status = MedicationStatus.ACTIVO
-            ),
-            onClick = {},
-            onDeleteClick = {}
-        )
     }
 }

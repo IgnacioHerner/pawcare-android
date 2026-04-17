@@ -1,10 +1,9 @@
-package com.ignaherner.pawcare.data.repository
+package com.ignaherner.pawcare.data.remote.firestore
 
-import androidx.compose.material3.darkColorScheme
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.domain.model.Veterinario
 import kotlinx.coroutines.tasks.await
@@ -18,7 +17,7 @@ class UserRepository @Inject constructor() {
 
     suspend fun guardarUsuario(rol: Rol, uid: String): Result<Unit> {
         return try {
-            android.util.Log.d("AuthDebug", "Guardando rol: ${rol.name} para uid: $uid")
+            Log.d("AuthDebug", "Guardando rol: ${rol.name} para uid: $uid")
 
             val usuario = hashMapOf(
                 "uid" to uid,
@@ -32,10 +31,10 @@ class UserRepository @Inject constructor() {
                 .set(usuario)
                 .await()
 
-            android.util.Log.d("AuthDebug", "Guardado exitosamente")
+            Log.d("AuthDebug", "Guardado exitosamente")
             Result.success(Unit)
         } catch (e: Exception) {
-            android.util.Log.e("AuthDebug", "Error: ${e.message}")
+            Log.e("AuthDebug", "Error: ${e.message}")
             Result.failure(e)
         }
     }
@@ -45,20 +44,20 @@ class UserRepository @Inject constructor() {
             val uid = auth.currentUser?.uid ?: return Result.failure(
                 Exception("Usuario no autenticado")
             )
-            android.util.Log.d("RolDebug", "Buscando rol para uid: $uid")
+            Log.d("RolDebug", "Buscando rol para uid: $uid")
             val documento = firestore.collection("users")
                 .document(uid)
                 .get()
                 .await()
-            android.util.Log.d("RolDebug", "Documento existe: ${documento.exists()}")
-            android.util.Log.d("RolDebug", "Datos: ${documento.data}")
+            Log.d("RolDebug", "Documento existe: ${documento.exists()}")
+            Log.d("RolDebug", "Datos: ${documento.data}")
             val rolString = documento.getString("rol") ?: return Result.failure(
                 Exception("Rol no encontrado")
             )
-            android.util.Log.d("RolDebug", "Rol encontrado: $rolString")
+            Log.d("RolDebug", "Rol encontrado: $rolString")
             Result.success(Rol.valueOf(rolString))
         } catch (e: Exception) {
-            android.util.Log.e("RolDebug", "Error: ${e.message}")
+            Log.e("RolDebug", "Error: ${e.message}")
             Result.failure(e)
         }
     }

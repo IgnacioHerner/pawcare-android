@@ -3,7 +3,6 @@ package com.ignaherner.pawcare.presentation.owners
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.repository.OwnerRepository
-import com.ignaherner.pawcare.data.repository.UserRepository
 import com.ignaherner.pawcare.domain.model.Owner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable

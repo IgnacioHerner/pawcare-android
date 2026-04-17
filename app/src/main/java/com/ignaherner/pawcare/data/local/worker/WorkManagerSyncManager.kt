@@ -1,10 +1,10 @@
-package com.ignaherner.pawcare.data.local
+package com.ignaherner.pawcare.data.local.worker
 
+import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.repository.MedicationRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.MedicationStatus
-import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.domain.model.calcularFechaFin
 import com.ignaherner.pawcare.domain.model.diasHastaFecha
 import kotlinx.coroutines.flow.firstOrNull

@@ -2,20 +2,27 @@ package com.ignaherner.pawcare.presentation.medications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.local.WorkManagerHelper
+import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
+import com.ignaherner.pawcare.data.remote.firestore.MedicationFirestoreRepository
 import com.ignaherner.pawcare.data.repository.MedicationRepository
+import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MedicationViewModel @Inject constructor(
     private val repository: MedicationRepository,
+    private val firestoreRepository: MedicationFirestoreRepository,
+    private val petRepository: PetRepository,
     private val workManagerHelper: WorkManagerHelper
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<MedicationUiState>(MedicationUiState.Loading)
@@ -69,6 +76,21 @@ class MedicationViewModel @Inject constructor(
                 val id = repository.insertMedication(medication)
                 val medicationConId = medication.copy(id = id)
 
+                // Sincronizar con Firestore
+                withContext(NonCancellable){
+                    val pet = petRepository.getPetById(medicationConId.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if (petFirestoreId.isNotBlank()){
+                        val firestoreResult = firestoreRepository.guardarMedicamento(
+                            medicationConId, petFirestoreId
+                        )
+                        if (firestoreResult.isSuccess) {
+                            val firestoreId = firestoreResult.getOrNull() ?: ""
+                            repository.updateMedication(medicationConId.copy(firestoreId = firestoreId))
+                        }
+                    }
+                }
+
                 if (medication.status == MedicationStatus.ACTIVO) {
                     if (!medicationConId.esUnicaDosis) {
                         // Recordatorio periodico
@@ -99,6 +121,14 @@ class MedicationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.updateMedication(medication)
+                if(medication.firestoreId.isNotBlank()){
+                    // Obtener petFirestoreId desde Room
+                    val pet = petRepository.getPetById(medication.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if (petFirestoreId.isNotBlank()){
+                        firestoreRepository.actualizarMedicamento(medication, petFirestoreId)
+                    }
+                }
                 if (medication.status == MedicationStatus.ACTIVO) {
                     workManagerHelper.programarRecordatorioMedicamento(medication, petName)
                 } else {
@@ -116,6 +146,11 @@ class MedicationViewModel @Inject constructor(
                 workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
                 workManagerHelper.cancelarFinMedicamento(medication.id)
                 repository.deleteMedication(medication)
+                val pet = petRepository.getPetById(medication.petId).firstOrNull()
+                val petFirestoreId = pet?.firestoreId ?: ""
+                if (medication.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
+                    firestoreRepository.eliminarMedicamento(medication.firestoreId, petFirestoreId)
+                }
                 _snackbarMessage.value = "${medication.nombre} eliminada"
             }catch (e: Exception) {
                 _snackbarMessage.value = "Error al eliminar"

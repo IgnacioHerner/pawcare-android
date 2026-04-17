@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.domain.model
 
 data class Vaccine(
     val id: Long = 0,
+    val firestoreId: String = "",
     val petId: Long,
     val nombre: String,
     val fecha: String?,

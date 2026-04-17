@@ -2,8 +2,8 @@ package com.ignaherner.pawcare.presentation.pets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.local.WorkManagerHelper
-import com.ignaherner.pawcare.data.repository.PetFirestoreRepository
+import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
+import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Pet
 import dagger.hilt.android.lifecycle.HiltViewModel

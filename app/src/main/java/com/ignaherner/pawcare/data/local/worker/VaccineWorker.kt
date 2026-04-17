@@ -1,4 +1,4 @@
-package com.ignaherner.pawcare.data.local
+package com.ignaherner.pawcare.data.local.worker
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker

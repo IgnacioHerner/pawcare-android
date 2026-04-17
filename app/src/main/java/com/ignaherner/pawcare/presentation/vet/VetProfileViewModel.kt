@@ -2,7 +2,7 @@ package com.ignaherner.pawcare.presentation.vet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.repository.UserRepository
+import com.ignaherner.pawcare.data.remote.firestore.UserRepository
 import com.ignaherner.pawcare.domain.model.Veterinario
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable

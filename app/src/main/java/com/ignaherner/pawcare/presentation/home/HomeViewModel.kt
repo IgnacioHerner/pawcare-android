@@ -2,17 +2,15 @@ package com.ignaherner.pawcare.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.local.WorkManagerHelper
+import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
 import com.ignaherner.pawcare.data.repository.MedicationRepository
-import com.ignaherner.pawcare.data.repository.PetFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.data.repository.WeightRepository
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.PetSummary
-import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
-import com.ignaherner.pawcare.presentation.weight.WeightViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

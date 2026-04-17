@@ -2,21 +2,28 @@ package com.ignaherner.pawcare.presentation.vaccines
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.local.WorkManagerHelper
+import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
+import com.ignaherner.pawcare.data.repository.PetRepository
+import com.ignaherner.pawcare.data.remote.firestore.VaccineFirestoreRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class VaccineViewModel @Inject constructor(
     private val repository: VaccineRepository,
+    private val firestoreRepository: VaccineFirestoreRepository,
+    private val petRepository: PetRepository,
     private val workManagerHelper: WorkManagerHelper
 ): ViewModel(){
     private val _uiState = MutableStateFlow<VaccineUiState>(VaccineUiState.Loading)
@@ -67,8 +74,25 @@ class VaccineViewModel @Inject constructor(
     fun insertVaccine(vaccine: Vaccine, petName: String) {
         viewModelScope.launch {
             try {
+                val pet = petRepository.getPetById(vaccine.petId).firstOrNull()
+                val petFirestoreId = pet?.firestoreId ?: ""
+
                 val id = repository.insertVaccine(vaccine)
                 val vaccineConId = vaccine.copy(id = id)
+
+                // Sincronizar con Firestore
+                withContext(NonCancellable){
+                    if (petFirestoreId.isNotBlank()) {
+                        val firestoreResult = firestoreRepository.guardarVacuna(
+                            vaccineConId, petFirestoreId
+                        )
+                        if (firestoreResult.isSuccess) {
+                            val firestoreId = firestoreResult.getOrNull() ?: ""
+                            repository.updateVaccine(vaccineConId.copy(firestoreId = firestoreId))
+                        }
+                    }
+                }
+
                 if(vaccine.status is VaccineStatus.Aplicada && vaccine.proximaDosis != null) {
                     workManagerHelper.programarRecordatorioVacuna(vaccineConId, petName)
                     _snackbarMessage.value = "Próxima dosis: ${vaccineConId.proximaDosis?.toFriendlyDate()} 💉"
@@ -84,13 +108,21 @@ class VaccineViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.updateVaccine(vaccine)
+                if (vaccine.firestoreId.isNotBlank()) {
+                    // Obtener petFirestoreId desde Room
+                    val pet = petRepository.getPetById(vaccine.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if (petFirestoreId.isNotBlank()) {
+                        firestoreRepository.actualizarVacuna(vaccine, petFirestoreId)
+                    }
+                }
                 if (vaccine.status is VaccineStatus.Aplicada && vaccine.proximaDosis != null) {
                     workManagerHelper.programarRecordatorioVacuna(vaccine, petName)
-                }else {
+                } else {
                     workManagerHelper.cancelarRecordatorioVacuna(vaccine.id)
                 }
-            }catch (e: Exception) {
-                _uiState.value = VaccineUiState.Error(e.message ?: "Error al actualizar")
+            } catch (e: Exception) {
+                _snackbarMessage.value = "Error al actualizar"
             }
         }
     }
@@ -100,8 +132,15 @@ class VaccineViewModel @Inject constructor(
             try {
                 workManagerHelper.cancelarRecordatorioVacuna(vaccine.id)
                 repository.deleteVaccine(vaccine)
+                if (vaccine.firestoreId.isNotBlank()) {
+                    val pet = petRepository.getPetById(vaccine.petId).firstOrNull()
+                    val petFirestoreId = pet?.firestoreId ?: ""
+                    if (petFirestoreId.isNotBlank()) {
+                        firestoreRepository.eliminarVacuna(vaccine.firestoreId, petFirestoreId)
+                    }
+                }
                 _snackbarMessage.value = "${vaccine.nombre} eliminada"
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 _snackbarMessage.value = "Error al eliminar"
             }
         }

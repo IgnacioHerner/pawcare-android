@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
-import com.ignaherner.pawcare.data.repository.AuthRepository
-import com.ignaherner.pawcare.data.repository.OwnerRepository
-import com.ignaherner.pawcare.presentation.auth.AuthViewModel
+import com.ignaherner.pawcare.data.remote.firestore.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted

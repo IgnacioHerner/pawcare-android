@@ -1,4 +1,4 @@
-package com.ignaherner.pawcare.data.local
+package com.ignaherner.pawcare.data.local.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

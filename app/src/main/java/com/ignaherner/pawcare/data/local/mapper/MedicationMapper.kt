@@ -6,6 +6,7 @@ import com.ignaherner.pawcare.domain.model.MedicationStatus
 
 fun MedicationEntity.toDomain(): Medication = Medication(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fechaInicio = fechaInicio,
@@ -23,6 +24,7 @@ fun MedicationEntity.toDomain(): Medication = Medication(
 
 fun Medication.toEntity(): MedicationEntity = MedicationEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fechaInicio = fechaInicio,

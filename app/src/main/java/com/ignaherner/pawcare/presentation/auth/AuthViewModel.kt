@@ -2,8 +2,8 @@ package com.ignaherner.pawcare.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.pawcare.data.repository.AuthRepository
-import com.ignaherner.pawcare.data.repository.UserRepository
+import com.ignaherner.pawcare.data.remote.firestore.AuthRepository
+import com.ignaherner.pawcare.data.remote.firestore.UserRepository
 import com.ignaherner.pawcare.domain.model.Rol
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

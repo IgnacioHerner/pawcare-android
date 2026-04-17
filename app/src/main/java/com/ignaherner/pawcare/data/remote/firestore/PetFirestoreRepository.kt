@@ -1,4 +1,4 @@
-package com.ignaherner.pawcare.data.repository
+package com.ignaherner.pawcare.data.remote.firestore
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

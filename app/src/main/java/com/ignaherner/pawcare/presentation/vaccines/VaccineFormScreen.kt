@@ -279,6 +279,10 @@ fun VaccineFormScreen(
                 onClick = {
                     val nuevaVacuna = Vaccine(
                         id = vaccineId ?: 0L,
+                        firestoreId = when (val state = vaccineDetailState) {
+                            is VaccineDetailState.Success -> state.vaccine.firestoreId
+                            else -> ""
+                        },
                         petId = petId,
                         nombre = nombre,
                         fecha = fecha.ifBlank { null },

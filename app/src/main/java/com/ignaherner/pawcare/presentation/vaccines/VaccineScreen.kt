@@ -217,7 +217,7 @@ fun VaccineScreen(
                                 style = MaterialTheme.typography.displayLarge
                             )
                             Text(
-                                text = "Todavía no tenés vacnas para tus mascotas",
+                                text = "Todavía no tenés vacunas para tus mascotas",
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(

@@ -3,7 +3,7 @@ package com.ignaherner.pawcare
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import com.ignaherner.pawcare.data.local.WorkManagerSyncManager
+import com.ignaherner.pawcare.data.local.worker.WorkManagerSyncManager
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.launch
 import javax.inject.Inject

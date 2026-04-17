@@ -6,6 +6,7 @@ import com.ignaherner.pawcare.domain.model.VaccineStatus
 
 fun VaccineEntity.toDomain(): Vaccine = Vaccine(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fecha = fecha,
@@ -22,6 +23,7 @@ fun VaccineEntity.toDomain(): Vaccine = Vaccine(
 
 fun Vaccine.toEntity(): VaccineEntity = VaccineEntity(
     id = id,
+    firestoreId = firestoreId,
     petId = petId,
     nombre = nombre,
     fecha = fecha,
@@ -35,3 +37,15 @@ fun Vaccine.toEntity(): VaccineEntity = VaccineEntity(
         is VaccineStatus.Aplicada -> "APLICADA"
     }
 )
+
+fun VaccineStatus.toFirestoreString(): String = when (this) {
+    is VaccineStatus.Aplicada -> "Aplicada"
+    is VaccineStatus.Pendiente -> "Pendiente"
+    is VaccineStatus.Programada -> "Programada"
+}
+
+fun String.toVaccineStatus(): VaccineStatus = when (this) {
+    "Aplicada" -> VaccineStatus.Aplicada(fechaAplicacion = "")
+    "Programada" -> VaccineStatus.Programada(fechaProgramada = "")
+    else -> VaccineStatus.Pendiente
+}

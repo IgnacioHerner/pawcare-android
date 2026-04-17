@@ -327,6 +327,10 @@ fun MedicationFormScreen(
                 onClick = {
                     val nuevoMedicamento = Medication(
                         id = medicationId ?: 0L,
+                        firestoreId = when (val state = medicationDetailState) {
+                            is MedicationDetailState.Success -> state.medication.firestoreId
+                            else -> ""
+                        }, // ← preservar firestoreId al editar
                         petId = petId,
                         nombre = nombre,
                         fechaInicio = fechaInicio,
