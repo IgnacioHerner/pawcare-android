@@ -82,7 +82,7 @@ class AppointmentFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun obtenerTurnoPorMascota(petFirestoreId: String): Result<List<Appointment>> {
+    suspend fun obtenerTurnosPorMascota(petFirestoreId: String): Result<List<Appointment>> {
         return try {
             val documentos = firestore.collection("pets")
                 .document(petFirestoreId)

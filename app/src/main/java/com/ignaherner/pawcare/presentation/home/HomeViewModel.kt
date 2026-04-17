@@ -3,8 +3,17 @@ package com.ignaherner.pawcare.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
+import com.ignaherner.pawcare.data.remote.firestore.AppointmentFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.ConditionFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.DewormingFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.MedicationFirestoreRepository
 import com.ignaherner.pawcare.data.repository.MedicationRepository
 import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.VaccineFirestoreRepository
+import com.ignaherner.pawcare.data.remote.firestore.WeightFirestoreRepository
+import com.ignaherner.pawcare.data.repository.AppointmentRepository
+import com.ignaherner.pawcare.data.repository.ConditionRepository
+import com.ignaherner.pawcare.data.repository.DewormingRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.data.repository.WeightRepository
@@ -25,8 +34,17 @@ class HomeViewModel @Inject constructor(
     private val petFirestoreRepository: PetFirestoreRepository,
     private val workManagerHelper: WorkManagerHelper,
     private val vaccineRepository: VaccineRepository,
+    private val vaccineFirestoreRepository: VaccineFirestoreRepository,
     private val medicationRepository: MedicationRepository,
-    private val weightRepository: WeightRepository
+    private val medicationFirestoreRepository: MedicationFirestoreRepository,
+    private val weightRepository: WeightRepository,
+    private val weightFirestoreRepository: WeightFirestoreRepository,
+    private val appointmentRepository: AppointmentRepository,
+    private val appointmentFirestoreRepository: AppointmentFirestoreRepository,
+    private val conditionRepository: ConditionRepository,
+    private val conditionFirestoreRepository: ConditionFirestoreRepository,
+    private val dewormingRepository: DewormingRepository,
+    private val dewormingFirestoreRepository: DewormingFirestoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -51,14 +69,163 @@ class HomeViewModel @Inject constructor(
                     } else {
                         val petActualizado = petFirestore.copy(
                             id = petLocal.id,
-                            fotoUri = petLocal.fotoUri ?: petFirestore.fotoUri // ← mantener local
+                            fotoUri = petLocal.fotoUri ?: petFirestore.fotoUri
                         )
                         petRepository.updatePet(petActualizado)
+                    }
+
+                    // Sincronizar subcolecciones
+                    val localPet = petRepository.getPetByFirestoreId(petFirestore.firestoreId)
+                    localPet?.let { pet ->
+                        sincronizarVacunas(pet, petFirestore.firestoreId)
+                        sincronizarMedicamentos(pet, petFirestore.firestoreId)
+                        sincronizarPesos(pet, petFirestore.firestoreId)
+                        sincronizarTurnos(pet, petFirestore.firestoreId)
+                        sincronizarCondiciones(pet, petFirestore.firestoreId)
+                        sincronizarDesparasitaciones(pet, petFirestore.firestoreId)
                     }
                 }
             }
         } catch (e: Exception) {
             android.util.Log.e("SyncDebug", "Error: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarVacunas(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = vaccineFirestoreRepository.obtenerVacunasPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { vaccineFirestore ->
+                    val vaccineConPetId = vaccineFirestore.copy(petId = pet.id)
+                    val local = vaccineRepository.getVaccinesByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == vaccineFirestore.firestoreId }
+
+                    if (local == null) {
+                        vaccineRepository.insertVaccine(vaccineConPetId)
+                    } else {
+                        vaccineRepository.updateVaccine(vaccineConPetId.copy(id = local.id))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error vacunas: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarMedicamentos(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = medicationFirestoreRepository.obtenerMedicamentosPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { medicationFirestore ->
+                    val medicationConPetId = medicationFirestore.copy(petId = pet.id)
+                    val local = medicationRepository.getMedicationByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == medicationFirestore.firestoreId }
+
+                    if (local == null) {
+                        medicationRepository.insertMedication(medicationConPetId)
+                    } else {
+                        medicationRepository.updateMedication(medicationConPetId.copy(id = local.id))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error medicamentos: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarPesos(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = weightFirestoreRepository.obtenerPesosPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { weightFirestore ->
+                    val weightConPetId = weightFirestore.copy(petId = pet.id)
+                    val local = weightRepository.getWeightByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == weightFirestore.firestoreId }
+
+                    if (local == null) {
+                        weightRepository.insertWeight(weightConPetId)
+                    } else {
+                        weightRepository.updateWeight(weightConPetId.copy(id = local.id))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error pesos: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarTurnos(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = appointmentFirestoreRepository.obtenerTurnosPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { appointmentFirestore ->
+                    val appointmentConPetId = appointmentFirestore.copy(petId = pet.id)
+                    val local = appointmentRepository.getAppointmentsByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == appointmentFirestore.firestoreId }
+
+                    if (local == null) {
+                        appointmentRepository.insertAppointment(appointmentConPetId)
+                    } else {
+                        appointmentRepository.updateAppointment(
+                            appointmentConPetId.copy(id = local.id)
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error turnos: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarCondiciones(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = conditionFirestoreRepository.obtenerCondicionesPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { conditionFirestore ->
+                    val conditionConPetId = conditionFirestore.copy(petId = pet.id)
+                    val local = conditionRepository.getConditionsByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == conditionFirestore.firestoreId }
+
+                    if (local == null) {
+                        conditionRepository.insertCondition(conditionConPetId)
+                    } else {
+                        conditionRepository.updateCondition(
+                            conditionConPetId.copy(id = local.id)
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error condiciones: ${e.message}")
+        }
+    }
+
+    private suspend fun sincronizarDesparasitaciones(pet: Pet, petFirestoreId: String) {
+        try {
+            val result = dewormingFirestoreRepository.obtenerDesparasitacionesPorMascota(petFirestoreId)
+            if (result.isSuccess) {
+                result.getOrNull()?.forEach { dewormingFirestore ->
+                    val dewormingConPetId = dewormingFirestore.copy(petId = pet.id)
+                    val local = dewormingRepository.getDewormingsByPetId(pet.id)
+                        .firstOrNull()
+                        ?.find { it.firestoreId == dewormingFirestore.firestoreId }
+
+                    if (local == null) {
+                        dewormingRepository.insertDeworming(dewormingConPetId)
+                    } else {
+                        dewormingRepository.updateDeworming(
+                            dewormingConPetId.copy(id = local.id)
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SyncDebug", "Error desparasitaciones: ${e.message}")
         }
     }
 

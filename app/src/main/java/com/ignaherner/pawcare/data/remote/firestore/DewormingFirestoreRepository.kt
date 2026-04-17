@@ -79,7 +79,7 @@ class DewormingFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun obtenerDesparasitacionPorMascota(petFirestoreId: String): Result<List<Deworming>> {
+    suspend fun obtenerDesparasitacionesPorMascota(petFirestoreId: String): Result<List<Deworming>> {
         return try {
             val documentos = firestore.collection("pets")
                 .document(petFirestoreId)

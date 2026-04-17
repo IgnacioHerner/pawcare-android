@@ -77,7 +77,7 @@ class WeightFirestoreRepository @Inject constructor() {
         }
     }
 
-    suspend fun obtenerPesoPorMascota(petFirestoreId: String): Result<List<Weight>> {
+    suspend fun obtenerPesosPorMascota(petFirestoreId: String): Result<List<Weight>> {
         return try {
             val documentos = firestore.collection("pets")
                 .document(petFirestoreId)
