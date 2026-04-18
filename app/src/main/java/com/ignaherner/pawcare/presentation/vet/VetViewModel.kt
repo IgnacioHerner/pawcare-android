@@ -123,6 +123,78 @@ class VetViewModel @Inject constructor(
         }
     }
 
+    fun guardarVacuna(vaccine: Vaccine, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                vaccineFirestoreRepository.guardarVacuna(vaccine, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.VACUNAS)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar vacuna")
+            }
+        }
+    }
+
+    fun guardarMedicamento(medication: Medication, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                medicationFirestoreRepository.guardarMedicamento(medication, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.MEDICAMENTOS)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar medicamento")
+            }
+        }
+    }
+
+    fun guardarPeso(weight: Weight, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                weightFirestoreRepository.guardarPeso(weight, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.PESOS)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar el peso")
+            }
+        }
+    }
+
+    fun guardarTurno(appointment: Appointment, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                appointmentFirestoreRepository.guardarTurno(appointment, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.TURNOS)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar el turno")
+            }
+        }
+    }
+
+    fun guardarCondicion(condition: Condition, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                conditionFirestoreRepository.guardarCondicion(condition, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.CONDICIONES)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar la condicion")
+            }
+        }
+    }
+
+    fun guardarDesparasitacion(deworming: Deworming, petFirestoreId: String){
+        viewModelScope.launch {
+            try {
+                dewormingFirestoreRepository.guardarDesparasitacion(deworming, petFirestoreId)
+                cargarHistorial(petFirestoreId, VetHistorialTipo.DESPARASITACIONES)
+            }catch (e: Exception){
+                android.util.Log.e("VetDebug", "Error: ${e.message}")
+                _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar la desparasitacion")
+            }
+        }
+    }
+
     fun cargarResumen(firestoreId: String) {
         viewModelScope.launch {
             _summaryState.value = VetSummaryState.Loading

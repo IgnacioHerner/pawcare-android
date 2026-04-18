@@ -45,11 +45,17 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
+import com.ignaherner.pawcare.presentation.vet.VetAppointmentFormScreen
+import com.ignaherner.pawcare.presentation.vet.VetConditionFormScreen
+import com.ignaherner.pawcare.presentation.vet.VetDewormingFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetHistorialScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
+import com.ignaherner.pawcare.presentation.vet.VetMedicationFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetVaccineFormScreen
+import com.ignaherner.pawcare.presentation.vet.VetWeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
 import kotlinx.coroutines.delay
@@ -115,6 +121,12 @@ object PawCareDestinations {
     const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
     const val VET_FORM = "vet_form"
     const val VET_HISTORIAL = "vet_historial/{firestoreId}/{tipo}"
+    const val VET_VACCINE_FORM = "vet_vaccine_form/{firestoreId}"
+    const val VET_MEDICATION_FORM = "vet_medication_form/{firestoreId}"
+    const val VET_WEIGHT_FORM = "vet_weight_form/{firestoreId}"
+    const val VET_APPOINTMENT_FORM = "vet_appointment_form/{firestoreId}"
+    const val VET_CONDITION_FORM = "vet_condition_form/{firestoreId}"
+    const val VET_DEWORMING_FORM = "vet_deworming_form/{firestoreId}"
 
     const val LOADING = "loading"
 
@@ -185,6 +197,12 @@ object PawCareDestinations {
 
     fun vetHistorial(firestoreId: String, tipo: VetHistorialTipo) = "vet_historial/$firestoreId/${tipo.name}"
 
+    fun vetVaccineForm(firestoreId: String) = "vet_vaccine_form/$firestoreId"
+    fun vetMedicationForm(firestoreId: String) = "vet_medication_form/$firestoreId"
+    fun vetWeightForm(firestoreId: String) = "vet_weight_form/$firestoreId"
+    fun vetAppointmentForm(firestoreId: String) = "vet_appointment_form/$firestoreId"
+    fun vetConditionForm(firestoreId: String) = "vet_condition_form/$firestoreId"
+    fun vetDewormingForm(firestoreId: String) = "vet_deworming_form/$firestoreId"
 }
 
 @Composable
@@ -331,6 +349,90 @@ fun PawCareNavGraph(
             )
         }
 
+        // VetVaccineForm
+        composable(
+            route = PawCareDestinations.VET_VACCINE_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetVaccineFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // VetMedicationForm
+        composable(
+            route = PawCareDestinations.VET_MEDICATION_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetMedicationFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // VetWeightForm
+        composable(
+            route = PawCareDestinations.VET_WEIGHT_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetWeightFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // VetAppointmentForm
+        composable(
+            route = PawCareDestinations.VET_APPOINTMENT_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetAppointmentFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // VetConditionForm
+        composable(
+            route = PawCareDestinations.VET_CONDITION_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetConditionFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // VetDewormingForm
+        composable(
+            route = PawCareDestinations.VET_DEWORMING_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetDewormingFormScreen(
+                petFirestoreId = firestoreId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         // VetHistorial
         composable(
             route = PawCareDestinations.VET_HISTORIAL,
@@ -347,7 +449,17 @@ fun PawCareNavGraph(
                 firestoreId = firestoreId,
                 tipo = tipo,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToForm = { /* lo conectamos después */ }
+                onNavigateToForm = {
+                    val route = when (tipo) {
+                        VetHistorialTipo.VACUNAS -> PawCareDestinations.vetVaccineForm(firestoreId)
+                        VetHistorialTipo.MEDICAMENTOS -> PawCareDestinations.vetMedicationForm(firestoreId)
+                        VetHistorialTipo.PESOS -> PawCareDestinations.vetWeightForm(firestoreId)
+                        VetHistorialTipo.TURNOS -> PawCareDestinations.vetAppointmentForm(firestoreId)
+                        VetHistorialTipo.CONDICIONES -> PawCareDestinations.vetConditionForm(firestoreId)
+                        VetHistorialTipo.DESPARASITACIONES -> PawCareDestinations.vetDewormingForm(firestoreId)
+                    }
+                    navController.navigate(route)
+                }
             )
         }
 
