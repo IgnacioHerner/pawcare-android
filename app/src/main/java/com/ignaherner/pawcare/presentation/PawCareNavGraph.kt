@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ignaherner.pawcare.domain.model.Rol
+import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.presentation.appointments.AppointmentDetailScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
@@ -45,6 +46,7 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
 import com.ignaherner.pawcare.presentation.vet.VetFormScreen
+import com.ignaherner.pawcare.presentation.vet.VetHistorialScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
@@ -111,8 +113,8 @@ object PawCareDestinations {
     // VETERINARIO
     const val VET_HOME = "vet_home"
     const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
-
     const val VET_FORM = "vet_form"
+    const val VET_HISTORIAL = "vet_historial/{firestoreId}/{tipo}"
 
     const val LOADING = "loading"
 
@@ -180,6 +182,8 @@ object PawCareDestinations {
     fun qrScreen(petId: Long) = "qr_screen/$petId"
 
     fun vetPetDetail(firestoreId: String) = "vet_pet_detail/$firestoreId"
+
+    fun vetHistorial(firestoreId: String, tipo: VetHistorialTipo) = "vet_historial/$firestoreId/${tipo.name}"
 
 }
 
@@ -309,10 +313,14 @@ fun PawCareNavGraph(
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
             VetPetDetailScreen(
                 firestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack()}
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToHistorial = { id, tipo ->
+                    navController.navigate(PawCareDestinations.vetHistorial(id, tipo))
+                }
             )
         }
 
+        // VetForm
         composable(PawCareDestinations.VET_FORM) {
             VetFormScreen(
                 onNavigateBack = {
@@ -323,6 +331,25 @@ fun PawCareNavGraph(
             )
         }
 
+        // VetHistorial
+        composable(
+            route = PawCareDestinations.VET_HISTORIAL,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType },
+                navArgument("tipo") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val tipo = VetHistorialTipo.valueOf(
+                backStackEntry.arguments?.getString("tipo") ?: return@composable
+            )
+            VetHistorialScreen(
+                firestoreId = firestoreId,
+                tipo = tipo,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToForm = { /* lo conectamos después */ }
+            )
+        }
 
         composable(PawCareDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }

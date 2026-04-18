@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.domain.model.VetPetSummary
 import com.ignaherner.pawcare.domain.model.calcularEdad
 import com.ignaherner.pawcare.domain.model.toFriendlyDate
@@ -73,6 +74,7 @@ import okhttp3.internal.wait
 fun VetPetDetailScreen(
     firestoreId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToHistorial: (String, VetHistorialTipo) -> Unit,
     viewModel: VetViewModel = hiltViewModel()
 ) {
     val summaryState by viewModel.summaryState.collectAsStateWithLifecycle()
@@ -117,6 +119,9 @@ fun VetPetDetailScreen(
                 is VetSummaryState.Success -> {
                     VetLibretaSanitaria(
                         summary = state.summary,
+                        onNavigateToHistorial = { tipo ->
+                            onNavigateToHistorial(firestoreId, tipo)
+                        },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -128,6 +133,7 @@ fun VetPetDetailScreen(
 @Composable
 private fun VetLibretaSanitaria(
     summary: VetPetSummary,
+    onNavigateToHistorial: (VetHistorialTipo) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -315,14 +321,17 @@ private fun VetLibretaSanitaria(
                         contenido = summary.ultimaVacuna?.nombre ?: "Sin registros",
                         subtitulo = summary.ultimaVacuna?.fecha?.toFriendlyDate(),
                         color = VaccineColor,
+                        onClick = { onNavigateToHistorial(VetHistorialTipo.VACUNAS) },
                         modifier = Modifier.weight(1f)
                     )
+                    // Medicamentos
                     DashboardCard(
                         icon = Icons.Default.LocalPharmacy,
                         titulo = "Medicamento activo",
                         contenido = summary.medicamentoActivo?.nombre ?: "Sin activos",
                         subtitulo = summary.medicamentoActivo?.dosis,
                         color = MedicationColor,
+                        onClick = { onNavigateToHistorial(VetHistorialTipo.MEDICAMENTOS) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -332,30 +341,35 @@ private fun VetLibretaSanitaria(
                         .height(110.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Peso
                     DashboardCard(
                         icon = Icons.Default.FitnessCenter,
                         titulo = "Último peso",
                         contenido = summary.ultimoPeso?.let { "${it.peso} kg" } ?: "Sin registros",
                         subtitulo = summary.ultimoPeso?.fecha?.toFriendlyDate(),
                         color = WeightColor,
+                        onClick = { onNavigateToHistorial(VetHistorialTipo.PESOS) },
                         modifier = Modifier.weight(1f)
                     )
+                    // Turnos
                     DashboardCard(
                         icon = Icons.Default.CalendarMonth,
                         titulo = "Último turno",
                         contenido = summary.ultimoTurno?.motivo ?: "Sin registros",
                         subtitulo = summary.ultimoTurno?.fecha?.toFriendlyDate(),
                         color = AppointmentColor,
+                        onClick = { onNavigateToHistorial(VetHistorialTipo.TURNOS) },
                         modifier = Modifier.weight(1f)
                     )
                 }
+                // Desparasitación
                 DashboardCard(
                     icon = Icons.Default.Vaccines,
                     titulo = "Última desparasitación",
-                    contenido = summary.ultimaDesparasitacion?.fecha?.toFriendlyDate()
-                        ?: "Sin registros",
+                    contenido = summary.ultimaDesparasitacion?.fecha?.toFriendlyDate() ?: "Sin registros",
                     subtitulo = summary.ultimaDesparasitacion?.producto,
                     color = MaterialTheme.colorScheme.tertiary,
+                    onClick = { onNavigateToHistorial(VetHistorialTipo.DESPARASITACIONES) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -436,9 +450,11 @@ private fun DashboardCard(
     contenido: String,
     subtitulo: String?,
     color: Color,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
