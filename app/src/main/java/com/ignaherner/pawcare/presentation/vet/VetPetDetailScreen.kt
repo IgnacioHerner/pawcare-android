@@ -7,23 +7,30 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalPharmacy
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Vaccines
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -45,12 +53,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.VetPetSummary
 import com.ignaherner.pawcare.domain.model.calcularEdad
+import com.ignaherner.pawcare.domain.model.toFriendlyDate
 import com.ignaherner.pawcare.ui.theme.AppointmentColor
 import com.ignaherner.pawcare.ui.theme.MedicationColor
 import com.ignaherner.pawcare.ui.theme.VaccineColor
@@ -64,16 +75,16 @@ fun VetPetDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: VetViewModel = hiltViewModel()
 ) {
-    val searchState by viewModel.searchState.collectAsStateWithLifecycle()
+    val summaryState by viewModel.summaryState.collectAsStateWithLifecycle()
 
     LaunchedEffect(firestoreId) {
-        viewModel.buscarMascota(firestoreId)
+        viewModel.cargarResumen(firestoreId)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Historial de la mascota") },
+                title = { Text("Libreta Sanitaria") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -84,37 +95,29 @@ fun VetPetDetailScreen(
     ) { paddingValues ->
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when(val state = searchState) {
-                is VetSearchState.Loading -> {
+            when (val state = summaryState) {
+                is VetSummaryState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-                is VetSearchState.Error -> {
+                is VetSummaryState.Error -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text("😔", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = state.mensaje,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Text(state.mensaje)
                     }
                 }
-                is VetSearchState.Success -> {
-                    VetPetDetailContent(
-                        pet = state.pet,
+                is VetSummaryState.Success -> {
+                    VetLibretaSanitaria(
+                        summary = state.summary,
                         modifier = Modifier.fillMaxSize()
-                    )
-                }
-                is VetSearchState.Idle -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -123,21 +126,21 @@ fun VetPetDetailScreen(
 }
 
 @Composable
-fun VetPetDetailContent(
-    pet: Pet,
-    modifier: Modifier
+private fun VetLibretaSanitaria(
+    summary: VetPetSummary,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         // Header
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Box(
                     modifier = Modifier
@@ -146,24 +149,27 @@ fun VetPetDetailContent(
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (pet.fotoUri != null) {
+                    if (summary.pet.fotoUri != null) {
                         AsyncImage(
-                            model = pet.fotoUri,
+                            model = summary.pet.fotoUri,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         Text(
-                            text = pet.nombre.first().uppercaseChar().toString(),
+                            text = summary.pet.nombre.first().uppercaseChar().toString(),
                             style = MaterialTheme.typography.headlineLarge,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(
-                        text = pet.nombre,
+                        text = summary.pet.nombre,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -171,23 +177,30 @@ fun VetPetDetailContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        AssistChip(onClick = {}, label = { Text(pet.especie.displayName)})
-                        pet.raza?.let {
-                            AssistChip(onClick = {}, label = {Text(it)})
+                        AssistChip(onClick = {}, label = { Text(summary.pet.especie.displayName) })
+                        summary.pet.raza?.let {
+                            AssistChip(onClick = {}, label = { Text(it) })
                         }
-                        pet.sexo?.let {
-                            AssistChip(onClick = {}, label = {Text(it.displayName)})
+                        summary.pet.sexo?.let {
+                            AssistChip(onClick = {}, label = { Text(it.displayName) })
                         }
                         AssistChip(
                             onClick = {},
                             label = {
-                                Text(calcularEdad(pet.fechaNacimiento, pet.fechaNacimientoTipo))
+                                Text(calcularEdad(summary.pet.fechaNacimiento, summary.pet.fechaNacimientoTipo))
                             }
                         )
-                        if (pet.castrado) {
+                        if (summary.pet.castrado) {
                             AssistChip(
                                 onClick = {},
-                                label = { Text("✂️ Castrado/a")}
+                                label = { Text("Castrado/a") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             )
                         }
                     }
@@ -195,162 +208,282 @@ fun VetPetDetailContent(
             }
         }
 
-        // ID para referencia
-        item {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "ID: ${pet.firestoreId}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Icon(
-                        imageVector = Icons.Default.QrCode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
-                    )
+        // Dueño
+        summary.owner?.let { owner ->
+            item {
+                SectionHeader(
+                    icon = Icons.Default.Person,
+                    titulo = "Dueño"
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(52.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (owner.fotoUri != null) {
+                                AsyncImage(
+                                    model = owner.fotoUri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Text(
+                                    text = owner.nombre.first().uppercaseChar().toString(),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = "${owner.nombre} ${owner.apellido}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Phone,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = owner.telefono,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            owner.ciudad?.let {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.LocationOn,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Secciones
+        // Resumen Clínico
         item {
-            Text(
-                text = "Historial Clínico 🏥",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+            SectionHeader(
+                icon = Icons.Default.MedicalServices,
+                titulo = "Resumen Clínico"
             )
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SeccionVetCard(
-                    titulo = "Vacunas",
-                    icono = Icons.Default.Favorite,
-                    color = VaccineColor,
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                )
-                SeccionVetCard(
-                    titulo = "Medicamentos",
-                    icono = Icons.Default.LocalPharmacy,
-                    color = MedicationColor,
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
+            Spacer(modifier = Modifier.height(12.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    DashboardCard(
+                        icon = Icons.Default.Favorite,
+                        titulo = "Última vacuna",
+                        contenido = summary.ultimaVacuna?.nombre ?: "Sin registros",
+                        subtitulo = summary.ultimaVacuna?.fecha?.toFriendlyDate(),
+                        color = VaccineColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                    DashboardCard(
+                        icon = Icons.Default.LocalPharmacy,
+                        titulo = "Medicamento activo",
+                        contenido = summary.medicamentoActivo?.nombre ?: "Sin activos",
+                        subtitulo = summary.medicamentoActivo?.dosis,
+                        color = MedicationColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    DashboardCard(
+                        icon = Icons.Default.FitnessCenter,
+                        titulo = "Último peso",
+                        contenido = summary.ultimoPeso?.let { "${it.peso} kg" } ?: "Sin registros",
+                        subtitulo = summary.ultimoPeso?.fecha?.toFriendlyDate(),
+                        color = WeightColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                    DashboardCard(
+                        icon = Icons.Default.CalendarMonth,
+                        titulo = "Último turno",
+                        contenido = summary.ultimoTurno?.motivo ?: "Sin registros",
+                        subtitulo = summary.ultimoTurno?.fecha?.toFriendlyDate(),
+                        color = AppointmentColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                DashboardCard(
+                    icon = Icons.Default.Vaccines,
+                    titulo = "Última desparasitación",
+                    contenido = summary.ultimaDesparasitacion?.fecha?.toFriendlyDate()
+                        ?: "Sin registros",
+                    subtitulo = summary.ultimaDesparasitacion?.producto,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
 
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SeccionVetCard(
-                    titulo = "Condiciones",
-                    icono = Icons.Default.MedicalServices,
-                    color = Color(0xFFE91E63),
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                )
-                SeccionVetCard(
-                    titulo = "Desparasitación",
-                    icono = Icons.Default.Vaccines,
-                    color = Color(0xFF795548),
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
+        // Condiciones
+        if (summary.condiciones.isNotEmpty()) {
+            item {
+                SectionHeader(
+                    icon = Icons.Default.Warning,
+                    titulo = "Condiciones"
                 )
             }
-        }
-
-        item {
-            Text(
-                text = "Seguimiento 📊",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SeccionVetCard(
-                    titulo = "Peso",
-                    icono = Icons.Default.FitnessCenter,
-                    color = WeightColor,
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                )
-                SeccionVetCard(
-                    titulo = "Visitas",
-                    icono = Icons.Default.CalendarMonth,
-                    color = AppointmentColor,
-                    onClick = { },
-                    modifier = Modifier.weight(1f)
-                )
+            items(summary.condiciones) { condition ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = condition.nombre,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        condition.fechaDiagnostico?.let {
+                            Text(
+                                text = "Diagnóstico: ${it.toFriendlyDate()}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        condition.notas?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SeccionVetCard(
+private fun SectionHeader(
+    icon: ImageVector,
+    titulo: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = titulo,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun DashboardCard(
+    icon: ImageVector,
     titulo: String,
-    icono: ImageVector,
+    contenido: String,
+    subtitulo: String?,
     color: Color,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.15f)
+            containerColor = color.copy(alpha = 0.12f)
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = icono,
-                contentDescription = titulo,
-                modifier = Modifier.size(40.dp),
-                tint = color
-            )
-            Text(
-                text = titulo,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = color
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = color,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = contenido,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                subtitulo?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.domain.model.Veterinario
 import kotlinx.coroutines.tasks.await
@@ -111,6 +112,30 @@ class UserRepository @Inject constructor() {
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerOwnerPorId(ownerId: String): Owner? {
+        return try {
+            val documento = firestore.collection("users")
+                .document(ownerId)
+                .get()
+                .await()
+
+            if (!documento.exists()) return null
+
+            Owner(
+                id = 0L,
+                nombre = documento.getString("nombre") ?: "",
+                apellido = documento.getString("apellido") ?: "",
+                telefono = documento.getString("telefono") ?: "",
+                email = documento.getString("email"),
+                ciudad = documento.getString("ciudad") ?: "",
+                direccion = documento.getString("direccion"),
+                fotoUri = documento.getString("fotoUri")
+            )
+        } catch (e: Exception) {
+            null
         }
     }
 
