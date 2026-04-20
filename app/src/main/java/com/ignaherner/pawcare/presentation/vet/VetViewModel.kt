@@ -15,6 +15,7 @@ import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VetHistorialTipo
@@ -48,6 +49,26 @@ class VetViewModel @Inject constructor(
 
     private val _historialState = MutableStateFlow<VetHistorialState>(VetHistorialState.Loading)
     val historialState: StateFlow<VetHistorialState> = _historialState.asStateFlow()
+
+    private val _ownerDetailState = MutableStateFlow<VetOwnerDetailState>(VetOwnerDetailState.Loading)
+    val ownerDetailState: StateFlow<VetOwnerDetailState> = _ownerDetailState.asStateFlow()
+
+    fun cargarOwnerDetail(ownerId: String) {
+        viewModelScope.launch {
+            _ownerDetailState.value = VetOwnerDetailState.Loading
+            try {
+                val owner = userRepository.obtenerOwnerPorId(ownerId)
+                val mascotas = vetRepository.buscarMascotasPorOwnerId(ownerId).getOrNull() ?: emptyList()
+                _ownerDetailState.value = VetOwnerDetailState.Success(
+                    owner = owner,
+                    mascotas = mascotas
+                )
+            } catch (e: Exception) {
+                _ownerDetailState.value = VetOwnerDetailState.Error(e.message ?: "Error")
+            }
+        }
+    }
+
 
     fun cargarHistorial(firestoreId: String, tipo: VetHistorialTipo) {
         viewModelScope.launch {
@@ -129,7 +150,6 @@ class VetViewModel @Inject constructor(
                 vaccineFirestoreRepository.guardarVacuna(vaccine, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.VACUNAS)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar vacuna")
             }
         }
@@ -141,7 +161,6 @@ class VetViewModel @Inject constructor(
                 medicationFirestoreRepository.guardarMedicamento(medication, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.MEDICAMENTOS)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar medicamento")
             }
         }
@@ -153,7 +172,6 @@ class VetViewModel @Inject constructor(
                 weightFirestoreRepository.guardarPeso(weight, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.PESOS)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar el peso")
             }
         }
@@ -165,7 +183,6 @@ class VetViewModel @Inject constructor(
                 appointmentFirestoreRepository.guardarTurno(appointment, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.TURNOS)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar el turno")
             }
         }
@@ -177,7 +194,6 @@ class VetViewModel @Inject constructor(
                 conditionFirestoreRepository.guardarCondicion(condition, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.CONDICIONES)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar la condicion")
             }
         }
@@ -189,7 +205,6 @@ class VetViewModel @Inject constructor(
                 dewormingFirestoreRepository.guardarDesparasitacion(deworming, petFirestoreId)
                 cargarHistorial(petFirestoreId, VetHistorialTipo.DESPARASITACIONES)
             }catch (e: Exception){
-                android.util.Log.e("VetDebug", "Error: ${e.message}")
                 _historialState.value = VetHistorialState.Error(e.message ?: "Error al guardar la desparasitacion")
             }
         }
@@ -271,4 +286,10 @@ sealed class VetHistorialState {
     data class Condiciones(val items: List<Condition>) : VetHistorialState()
     data class Desparasitaciones(val items: List<Deworming>) : VetHistorialState()
     data class Error(val mensaje: String) : VetHistorialState()
+}
+
+sealed class VetOwnerDetailState {
+    object Loading : VetOwnerDetailState()
+    data class Success(val owner: Owner?, val mascotas: List<Pet>) : VetOwnerDetailState()
+    data class Error(val mensaje: String) : VetOwnerDetailState()
 }

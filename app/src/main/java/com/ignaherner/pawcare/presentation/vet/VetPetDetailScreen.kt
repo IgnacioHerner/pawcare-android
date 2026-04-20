@@ -75,6 +75,7 @@ fun VetPetDetailScreen(
     firestoreId: String,
     onNavigateBack: () -> Unit,
     onNavigateToHistorial: (String, VetHistorialTipo) -> Unit,
+    onNavigateToOwnerDetail: (String) -> Unit,
     viewModel: VetViewModel = hiltViewModel()
 ) {
     val summaryState by viewModel.summaryState.collectAsStateWithLifecycle()
@@ -122,6 +123,7 @@ fun VetPetDetailScreen(
                         onNavigateToHistorial = { tipo ->
                             onNavigateToHistorial(firestoreId, tipo)
                         },
+                        onNavigateToOwnerDetail = onNavigateToOwnerDetail,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -134,6 +136,7 @@ fun VetPetDetailScreen(
 private fun VetLibretaSanitaria(
     summary: VetPetSummary,
     onNavigateToHistorial: (VetHistorialTipo) -> Unit,
+    onNavigateToOwnerDetail: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -222,7 +225,10 @@ private fun VetLibretaSanitaria(
                     titulo = "Dueño"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                OutlinedCard(
+                    onClick = { onNavigateToOwnerDetail(summary.pet.ownerId)},
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

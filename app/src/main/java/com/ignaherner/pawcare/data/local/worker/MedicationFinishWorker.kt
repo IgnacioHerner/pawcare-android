@@ -37,7 +37,11 @@ class MedicationFinishWorker @AssistedInject constructor(
             }
             Result.success()
         } catch (e: Exception) {
-            Result.failure()
+            if (runAttemptCount < 3) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
         }
     }
 }

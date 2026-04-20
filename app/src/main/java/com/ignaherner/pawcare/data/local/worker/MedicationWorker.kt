@@ -27,14 +27,21 @@ class MedicationWorker @AssistedInject constructor(
         val dosis = inputData.getString(KEY_DOSIS) ?: return Result.failure()
         val medicationId = inputData.getInt(KEY_MEDICATION_ID, -1)
 
-        notificationHelper.showMedicationNotification(
-            notificationId = medicationId,
-            petName = petName,
-            medicationName = medicationName,
-            dosis = dosis
-        )
-
-        return Result.success()
+        return try {
+            notificationHelper.showMedicationNotification(
+                notificationId = medicationId,
+                petName = petName,
+                medicationName = medicationName,
+                dosis = dosis
+            )
+            Result.success()
+        } catch (e: Exception) {
+            if (runAttemptCount < 3) {
+                Result.retry() // ← reintenta hasta 3 veces
+            } else {
+                Result.failure() // ← después de 3 intentos falla definitivamente
+            }
+        }
     }
 
 }

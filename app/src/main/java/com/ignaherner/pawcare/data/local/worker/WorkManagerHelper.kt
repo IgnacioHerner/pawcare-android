@@ -63,7 +63,6 @@ class WorkManagerHelper @Inject constructor(
     }
 
     fun cancelarRecordatorioMedicamento(medicationId: Long) {
-        Log.d("WorkManager", "Cancelando medication_$medicationId")
         workManager.cancelAllWorkByTag("medication_${medicationId}")
     }
 
@@ -105,7 +104,6 @@ class WorkManagerHelper @Inject constructor(
     }
 
     fun cancelarRecordatorioVacuna(vaccineId: Long) {
-        Log.d("WorkManager", "Cancelando vaccine_$vaccineId")
         workManager.cancelAllWorkByTag("vaccine_${vaccineId}")
     }
 

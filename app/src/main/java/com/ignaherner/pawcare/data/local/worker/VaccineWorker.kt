@@ -27,12 +27,20 @@ class VaccineWorker @AssistedInject constructor(
         val fecha = inputData.getString(KEY_FECHA) ?: return Result.failure()
         val vaccineId = inputData.getInt(KEY_VACCINE_ID, -1)
 
-        notificationHelper.showVaccineNotification(
-            notificationId = vaccineId,
-            petName = petName,
-            vaccineName = vaccineName,
-            fecha = fecha
-        )
-        return Result.success()
+        return try {
+            notificationHelper.showVaccineNotification(
+                notificationId = vaccineId,
+                petName = petName,
+                vaccineName = vaccineName,
+                fecha = fecha
+            )
+            Result.success()
+        } catch (e: Exception) {
+            if(runAttemptCount < 3) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
+        }
     }
 }

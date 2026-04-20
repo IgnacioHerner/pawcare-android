@@ -18,7 +18,6 @@ class UserRepository @Inject constructor() {
 
     suspend fun guardarUsuario(rol: Rol, uid: String): Result<Unit> {
         return try {
-            Log.d("AuthDebug", "Guardando rol: ${rol.name} para uid: $uid")
 
             val usuario = hashMapOf(
                 "uid" to uid,
@@ -32,10 +31,8 @@ class UserRepository @Inject constructor() {
                 .set(usuario)
                 .await()
 
-            Log.d("AuthDebug", "Guardado exitosamente")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("AuthDebug", "Error: ${e.message}")
             Result.failure(e)
         }
     }
@@ -45,20 +42,15 @@ class UserRepository @Inject constructor() {
             val uid = auth.currentUser?.uid ?: return Result.failure(
                 Exception("Usuario no autenticado")
             )
-            Log.d("RolDebug", "Buscando rol para uid: $uid")
             val documento = firestore.collection("users")
                 .document(uid)
                 .get()
                 .await()
-            Log.d("RolDebug", "Documento existe: ${documento.exists()}")
-            Log.d("RolDebug", "Datos: ${documento.data}")
             val rolString = documento.getString("rol") ?: return Result.failure(
                 Exception("Rol no encontrado")
             )
-            Log.d("RolDebug", "Rol encontrado: $rolString")
             Result.success(Rol.valueOf(rolString))
         } catch (e: Exception) {
-            Log.e("RolDebug", "Error: ${e.message}")
             Result.failure(e)
         }
     }
