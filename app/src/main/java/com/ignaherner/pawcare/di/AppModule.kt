@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.room.Room
 import androidx.work.Configuration
+import com.google.firebase.BuildConfig
 import com.ignaherner.pawcare.data.local.PawCareDatabase
 import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.local.dao.AppointmentDao
@@ -18,7 +19,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Module
@@ -34,9 +34,11 @@ abstract class AppModule {
             context,
             PawCareDatabase::class.java,
             "pawcare_database"
-        )
-            .fallbackToDestructiveMigration()
-            .build()
+        ).apply {
+            if (BuildConfig.DEBUG){
+                fallbackToDestructiveMigration()
+            }
+        }.build()
 
         @Provides
         @Singleton

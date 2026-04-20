@@ -187,7 +187,7 @@ object PawCareDestinations {
 
     fun dewormingForm(petId: Long, petName: String, dewormingId: Long? = null) =
         if (dewormingId != null)
-            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?deworming=$dewormingId"
+            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?dewormingId=$dewormingId"
         else
             "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
 

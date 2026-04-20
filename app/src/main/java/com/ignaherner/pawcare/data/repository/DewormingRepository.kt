@@ -7,7 +7,9 @@ import com.ignaherner.pawcare.domain.model.Deworming
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DewormingRepository @Inject constructor(
     private val dewormingDao: DewormingDao
 ) {

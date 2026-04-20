@@ -27,8 +27,7 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         ConditionEntity::class,
         DewormingEntity::class
         ],
-    version = 26
-    ,
+    version = 26,
     exportSchema = false
 )
 abstract class PawCareDatabase : RoomDatabase() {
@@ -37,10 +36,7 @@ abstract class PawCareDatabase : RoomDatabase() {
     abstract fun appointmentDao(): AppointmentDao
     abstract fun medicationDao(): MedicationDao
     abstract fun weightDao(): WeightDao
-
-
     abstract fun conditionDao() : ConditionDao
-
     abstract fun dewormingDao() : DewormingDao
 }
 
