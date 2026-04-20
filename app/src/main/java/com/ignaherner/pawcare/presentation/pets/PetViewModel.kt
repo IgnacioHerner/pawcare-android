@@ -6,6 +6,7 @@ import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
 import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ class PetViewModel @Inject constructor(
     private val repository: PetRepository,
     private val firestoreRepository: PetFirestoreRepository,
     private val workManagerHelper: WorkManagerHelper
-): ViewModel() {
+): BaseViewModel() {
 
     // Estado de la UI
     private val _uiState = MutableStateFlow<PetUiState>(PetUiState.Loading)
@@ -30,100 +31,56 @@ class PetViewModel @Inject constructor(
     private val _detailState = MutableStateFlow<PetDetailState>(PetDetailState.Loading)
     val detailState: StateFlow<PetDetailState> = _detailState.asStateFlow()
 
-    private val _snackbarMessage = MutableStateFlow<String?>(null)
-    val snackbarMessage = _snackbarMessage.asStateFlow()
 
-    fun clearSnackbar() {
-        _snackbarMessage.value = null
-    }
-
-    init {
-        loadPets()
-    }
+    init { loadPets() }
 
     private fun loadPets() {
         viewModelScope.launch {
-            try {
-                repository.getAllPets()
-                    .collect { pets ->
-                        _uiState.value = if ( pets.isEmpty()) {
-                            PetUiState.Empty
-                        } else {
-                            PetUiState.Success(pets)
-                        }
-                    }
-            } catch (e: Exception) {
-                _uiState.value = PetUiState.Error(e.message ?: "Error desconocido")
+            repository.getAllPets().collect { pets ->
+                _uiState.value = if (pets.isEmpty()) PetUiState.Empty
+                else PetUiState.Success(pets)
             }
         }
     }
 
     fun loadPetById(id: Long) {
         viewModelScope.launch {
-            try {
-                repository.getPetById(id)
-                    .collect { pet ->
-                        _detailState.value = if (pet != null) {
-                            PetDetailState.Success(pet)
-                        } else {
-                            PetDetailState.Error("Mascota no encontrada")
-                        }
-                    }
-            } catch (e: Exception) {
-                _detailState.value = PetDetailState.Error(e.message ?: "Error")
+            repository.getPetById(id).collect { pet ->
+                _detailState.value = if (pet != null) PetDetailState.Success(pet)
+                else PetDetailState.Error("Mascota no encontrada")
             }
         }
     }
 
     fun insertPet(pet: Pet) {
-        viewModelScope.launch {
-            try {
-                withContext(NonCancellable) {
-                    val firestoreResult = firestoreRepository.guardarPet(pet)
-
-                    if (firestoreResult.isSuccess) {
-                        val firestoreId = firestoreResult.getOrNull() ?: ""
-                        val petConId = pet.copy(firestoreId = firestoreId)
-                        repository.insertPet(petConId)
-                    } else {
-                        repository.insertPet(pet)
-                    }
-                }
-            } catch (e: Exception) {
-                _snackbarMessage.value = "Error al guardar"
+        safeLaunch(onError = "Error al guardar") {
+            val firestoreResult = firestoreRepository.guardarPet(pet)
+            if (firestoreResult.isSuccess) {
+                val firestoreId = firestoreResult.getOrNull() ?: ""
+                repository.insertPet(pet.copy(firestoreId = firestoreId))
+            } else {
+                repository.insertPet(pet)
             }
         }
     }
 
     fun updatePet(pet: Pet) {
-        viewModelScope.launch {
-            try {
-                // Actualizar en Room
-                repository.updatePet(pet)
-                // Sincronizar con Firestore
-                if (pet.firestoreId.isNotBlank()) {
-                    firestoreRepository.actualizarPet(pet)
-                }
-            } catch (e: Exception) {
-                _uiState.value = PetUiState.Error(e.message ?: "Error al actualizar")
+        safeLaunch(onError = "Error al actualizar") {
+            repository.updatePet(pet)
+            if (pet.firestoreId.isNotBlank()) {
+                firestoreRepository.actualizarPet(pet)
             }
         }
     }
 
     fun deletePet(pet: Pet) {
-        viewModelScope.launch {
-            try {
-                workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
-                // Eliminar de Room
-                repository.deletePet(pet)
-                // Eliminar de Firestore
-                if(pet.firestoreId.isNotBlank()) {
-                    firestoreRepository.eliminarPet(pet.firestoreId)
-                }
-                _snackbarMessage.value = "${pet.nombre} eliminado"
-            } catch (e: Exception) {
-                _snackbarMessage.value = "Error al eliminar"
+        safeLaunch(onError = "Error al eliminar") {
+            workManagerHelper.cancelarTodosLosRecordatoriosDeMascota(pet.id)
+            repository.deletePet(pet)
+            if (pet.firestoreId.isNotBlank()) {
+                firestoreRepository.eliminarPet(pet.firestoreId)
             }
+            showSnackbar("${pet.nombre} eliminado")
         }
     }
 }

@@ -8,6 +8,7 @@ import com.ignaherner.pawcare.data.repository.MedicationRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,139 +25,88 @@ class MedicationViewModel @Inject constructor(
     private val firestoreRepository: MedicationFirestoreRepository,
     private val petRepository: PetRepository,
     private val workManagerHelper: WorkManagerHelper
-) : ViewModel() {
+) : BaseViewModel() {
     private val _uiState = MutableStateFlow<MedicationUiState>(MedicationUiState.Loading)
     val uiState: StateFlow<MedicationUiState> = _uiState.asStateFlow()
 
     private val _medicationDetailState = MutableStateFlow<MedicationDetailState>(MedicationDetailState.Loading)
     val medicationDetailState: StateFlow<MedicationDetailState> = _medicationDetailState
 
-    private val _snackbarMessage = MutableStateFlow<String?>(null)
-    val snackbarMessage = _snackbarMessage.asStateFlow()
-
-    fun clearSnackbar() {
-        _snackbarMessage.value = null
-    }
-
     fun loadMedications(petId: Long) {
         viewModelScope.launch {
-            try {
-                repository.getMedicationByPetId(petId)
-                    .collect { medications ->
-                        _uiState.value = if (medications.isEmpty()) {
-                            MedicationUiState.Empty
-                        } else {
-                            MedicationUiState.Success(medications)
-                        }
-                    }
-            } catch (e: Exception) {
-                _uiState.value = MedicationUiState.Error(e.message ?: "Error desconocido")
+            repository.getMedicationByPetId(petId).collect { medications ->
+                _uiState.value = if (medications.isEmpty()) MedicationUiState.Empty
+                else MedicationUiState.Success(medications)
             }
         }
     }
 
     fun loadMedicationById(id: Long) {
         viewModelScope.launch {
-            try {
-                val medication = repository.getMedicationById(id)
-                _medicationDetailState.value = if (medication != null) {
-                    MedicationDetailState.Success(medication)
-                } else {
-                    MedicationDetailState.Error("Medicamento no encontrado")
-                }
-            } catch (e: Exception) {
-                _medicationDetailState.value = MedicationDetailState.Error(e.message ?: "Error")
-            }
+            val medication = repository.getMedicationById(id)
+            _medicationDetailState.value = if (medication != null)
+                MedicationDetailState.Success(medication)
+            else
+                MedicationDetailState.Error("Medicamento no encontrado")
         }
     }
 
     fun insertMedication(medication: Medication, petName: String) {
-        viewModelScope.launch {
-            try {
-                val id = repository.insertMedication(medication)
-                val medicationConId = medication.copy(id = id)
-
-                // Sincronizar con Firestore
-                withContext(NonCancellable){
-                    val pet = petRepository.getPetById(medicationConId.petId).firstOrNull()
-                    val petFirestoreId = pet?.firestoreId ?: ""
-                    if (petFirestoreId.isNotBlank()){
-                        val firestoreResult = firestoreRepository.guardarMedicamento(
-                            medicationConId, petFirestoreId
-                        )
-                        if (firestoreResult.isSuccess) {
-                            val firestoreId = firestoreResult.getOrNull() ?: ""
-                            repository.updateMedication(medicationConId.copy(firestoreId = firestoreId))
-                        }
-                    }
+        safeLaunch(onError = "Error al guardar") {
+            val id = repository.insertMedication(medication)
+            val medicationConId = medication.copy(id = id)
+            val pet = petRepository.getPetById(medicationConId.petId).firstOrNull()
+            val petFirestoreId = pet?.firestoreId ?: ""
+            if (petFirestoreId.isNotBlank()) {
+                val result = firestoreRepository.guardarMedicamento(medicationConId, petFirestoreId)
+                if (result.isSuccess) {
+                    val firestoreId = result.getOrNull() ?: ""
+                    repository.updateMedication(medicationConId.copy(firestoreId = firestoreId))
                 }
-
-                if (medication.status == MedicationStatus.ACTIVO) {
-                    if (!medicationConId.esUnicaDosis) {
-                        // Recordatorio periodico
-                        workManagerHelper.programarRecordatorioMedicamento(
-                            medicationConId, petName
-                        )
-                        // Finalizar automaticamente al terminar
-                        workManagerHelper.programarFinMedicamento(medicationConId)
-                        _snackbarMessage.value =
-                            "Recordatorio cada ${medicationConId.intervaloHoras}h programado \uD83D\uDC8A"
-                    } else {
-                        // Unica dosis - finalizar inmediatamente despues
-                        _snackbarMessage.value = "Medicamento de única dosis registrado \uD83D\uDC8A"
-                        // Cambiar a FINALIZADO directamente
-                        val medicationFinalizada = medicationConId.copy(
-                            status = MedicationStatus.FINALIZADO
-                        )
-                        repository.updateMedication(medicationFinalizada)
-                    }
+            }
+            if (medicationConId.status == MedicationStatus.ACTIVO) {
+                if (!medicationConId.esUnicaDosis) {
+                    workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
+                    workManagerHelper.programarFinMedicamento(medicationConId)
+                    showSnackbar("Recordatorio cada ${medicationConId.intervaloHoras}h programado 💊")
+                } else {
+                    repository.updateMedication(medicationConId.copy(status = MedicationStatus.FINALIZADO))
+                    showSnackbar("Medicamento de única dosis registrado 💊")
                 }
-            }catch (e: Exception) {
-                _snackbarMessage.value = "Error al guardar"
             }
         }
     }
 
     fun updateMedication(medication: Medication, petName: String) {
-        viewModelScope.launch {
-            try {
-                repository.updateMedication(medication)
-                if(medication.firestoreId.isNotBlank()){
-                    // Obtener petFirestoreId desde Room
-                    val pet = petRepository.getPetById(medication.petId).firstOrNull()
-                    val petFirestoreId = pet?.firestoreId ?: ""
-                    if (petFirestoreId.isNotBlank()){
-                        firestoreRepository.actualizarMedicamento(medication, petFirestoreId)
-                    }
-                }
-                if (medication.status == MedicationStatus.ACTIVO) {
-                    workManagerHelper.programarRecordatorioMedicamento(medication, petName)
-                } else {
-                    workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
-                }
-            }catch (e: Exception) {
-                _uiState.value = MedicationUiState.Error(e.message ?: "Error al actualizar")
+        safeLaunch(onError = "Error al actualizar") {
+            repository.updateMedication(medication)
+            val pet = petRepository.getPetById(medication.petId).firstOrNull()
+            val petFirestoreId = pet?.firestoreId ?: ""
+            if (medication.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
+                firestoreRepository.actualizarMedicamento(medication, petFirestoreId)
+            }
+            if (medication.status == MedicationStatus.ACTIVO) {
+                workManagerHelper.programarRecordatorioMedicamento(medication, petName)
+            } else {
+                workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
             }
         }
     }
 
     fun deleteMedication(medication: Medication) {
-        viewModelScope.launch {
-            try {
-                workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
-                workManagerHelper.cancelarFinMedicamento(medication.id)
-                repository.deleteMedication(medication)
-                val pet = petRepository.getPetById(medication.petId).firstOrNull()
-                val petFirestoreId = pet?.firestoreId ?: ""
-                if (medication.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
-                    firestoreRepository.eliminarMedicamento(medication.firestoreId, petFirestoreId)
-                }
-                _snackbarMessage.value = "${medication.nombre} eliminada"
-            }catch (e: Exception) {
-                _snackbarMessage.value = "Error al eliminar"
+        safeLaunch(onError = "Error al eliminar") {
+            workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
+            workManagerHelper.cancelarFinMedicamento(medication.id)
+            repository.deleteMedication(medication)
+            val pet = petRepository.getPetById(medication.petId).firstOrNull()
+            val petFirestoreId = pet?.firestoreId ?: ""
+            if (medication.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
+                firestoreRepository.eliminarMedicamento(medication.firestoreId, petFirestoreId)
             }
+            showSnackbar("${medication.nombre} eliminado")
         }
     }
+
 
 }
 
