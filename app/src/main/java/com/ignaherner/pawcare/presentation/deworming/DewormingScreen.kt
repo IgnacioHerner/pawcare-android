@@ -163,7 +163,7 @@ fun DewormingScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(
-                            items = state.deworming,
+                            items = state.dewormings,
                             key = {it.id}
                         ) { deworming ->
                             SwipeRevealCard(

@@ -1,6 +1,5 @@
 package com.ignaherner.pawcare.presentation.deworming
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.remote.firestore.DewormingFirestoreRepository
 import com.ignaherner.pawcare.data.repository.DewormingRepository
@@ -8,13 +7,11 @@ import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,7 +88,7 @@ class DewormingViewModel @Inject constructor(
 sealed class DewormingUiState {
     object Loading: DewormingUiState()
     object Empty: DewormingUiState()
-    data class Success(val deworming: List<Deworming>) : DewormingUiState()
+    data class Success(val dewormings: List<Deworming>) : DewormingUiState()
     data class Error(val mensaje: String) : DewormingUiState()
 }
 
