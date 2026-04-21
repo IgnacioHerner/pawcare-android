@@ -58,6 +58,7 @@ fun MedicationScreen(
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    isVeterinario: Boolean = false,
     viewModel: MedicationViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ) {
@@ -132,8 +133,10 @@ fun MedicationScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar medicamento")
+            if(isVeterinario){
+                FloatingActionButton(onClick = onNavigateToForm) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar medicamento")
+                }
             }
         }
     ) { paddingValues ->
@@ -229,16 +232,25 @@ fun MedicationScreen(
                                 items = medicationsFiltradas,
                                 key = {it.id}
                             ) { medication ->
-                                SwipeRevealCard(
-                                    onDelete = { medicationToDelete = medication},
-                                    onEdit = { onNavigateToEdit(medication.id)}
-                                ) {
+                                if (isVeterinario){
+                                    SwipeRevealCard(
+                                        onDelete = { medicationToDelete = medication},
+                                        onEdit = { onNavigateToEdit(medication.id)}
+                                    ) {
+                                        MedicationCard(
+                                            medication = medication,
+                                            onClick = { onNavigateToDetail(medication.id)},
+                                            onDeleteClick = { viewModel.deleteMedication(medication)}
+                                        )
+                                    }
+                                } else {
                                     MedicationCard(
                                         medication = medication,
                                         onClick = { onNavigateToDetail(medication.id)},
-                                        onDeleteClick = { medicationToDelete = medication}
+                                        onDeleteClick = {}
                                     )
                                 }
+
                             }
                         }
                     }

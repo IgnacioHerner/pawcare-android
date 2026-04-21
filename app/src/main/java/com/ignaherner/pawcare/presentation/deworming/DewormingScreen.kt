@@ -53,6 +53,7 @@ fun DewormingScreen(
     onNavigateBack: () -> Unit,
     onNavigateToForm: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
+    isVeterinario: Boolean = false,
     viewModel: DewormingViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ){
@@ -118,8 +119,10 @@ fun DewormingScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar desparasitacion")
+            if(isVeterinario) {
+                FloatingActionButton(onClick = onNavigateToForm) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar desparasitacion")
+                }
             }
         }
     ) { paddingValues ->
@@ -166,12 +169,17 @@ fun DewormingScreen(
                             items = state.deworming,
                             key = {it.id}
                         ) { deworming ->
-                            SwipeRevealCard(
-                                onDelete = { dewormingToDelete = deworming},
-                                onEdit = {onNavigateToEdit(deworming.id)}
-                            ) {
+                            if (isVeterinario){
+                                SwipeRevealCard(
+                                    onDelete = { dewormingToDelete = deworming},
+                                    onEdit = {onNavigateToEdit(deworming.id)}
+                                ) {
+                                    DewormingCard(deworming = deworming)
+                                }
+                            } else {
                                 DewormingCard(deworming = deworming)
                             }
+
                         }
                     }
                 }

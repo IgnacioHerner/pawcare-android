@@ -3,6 +3,7 @@ package com.ignaherner.pawcare.data.local
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -22,6 +23,20 @@ class SettingsDataStore @Inject constructor(
 
     companion object {
         val NOMBRE_VETERINARIO = stringPreferencesKey("nombre_veterinario")
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+
+    }
+
+    val notificationsEnabled: Flow<Boolean> = context.dataStore.data // ← context.dataStore
+        .map { preferences ->
+            preferences[NOTIFICATIONS_ENABLED] ?: true
+        }
+
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATIONS_ENABLED] = enabled
+        }
     }
 
     // Leer nombre veterinario

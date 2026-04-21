@@ -60,7 +60,8 @@ fun VaccineScreen(
     onNavigateToForm: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     viewModel: VaccineViewModel = hiltViewModel(),
-    petViewModel: PetViewModel = hiltViewModel()
+    petViewModel: PetViewModel = hiltViewModel(),
+    isVeterinario: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
@@ -134,8 +135,10 @@ fun VaccineScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar vacuna")
+            if(isVeterinario) {
+                FloatingActionButton(onClick = onNavigateToForm) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar vacuna")
+                }
             }
         }
 
@@ -255,16 +258,25 @@ fun VaccineScreen(
                                 items = vaccinesOrdenadas,
                                 key = { it.id }
                             ) { vaccine ->
-                                SwipeRevealCard(
-                                    onDelete = { vaccineToDelete = vaccine},
-                                    onEdit = { onNavigateToEdit(vaccine.id)}
-                                ) {
+                                if (isVeterinario){
+                                    SwipeRevealCard(
+                                        onDelete = { vaccineToDelete = vaccine},
+                                        onEdit = { onNavigateToEdit(vaccine.id)}
+                                    ) {
+                                        VaccineCard(
+                                            vaccine = vaccine,
+                                            onClick = { onNavigateToDetail(vaccine.id)},
+                                            onDeleteClick = { viewModel.deleteVaccine(vaccine) }
+                                        )
+                                    }
+                                } else {
                                     VaccineCard(
                                         vaccine = vaccine,
                                         onClick = { onNavigateToDetail(vaccine.id)},
-                                        onDeleteClick = { viewModel.deleteVaccine(vaccine) }
+                                        onDeleteClick = {}
                                     )
                                 }
+
                             }
                         }
                     }

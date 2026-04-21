@@ -1,6 +1,7 @@
 package com.ignaherner.pawcare.presentation
 
 import android.R.attr.type
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -175,7 +176,6 @@ object PawCareDestinations {
     fun weightList(petId: Long) = "weight_list/$petId"
     fun weightForm(petId: Long, weightId: Long? = null) =
         if(weightId != null) "weight_form/$petId?weightId=$weightId" else "weight_form/$petId"
-
     // Funciones para conditions
     fun conditionList(petId: Long, petName: String) =
         "condition_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
@@ -218,7 +218,7 @@ fun PawCareNavGraph(
     val authViewModel: AuthViewModel = hiltViewModel()
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
-        android.util.Log.d("NavDebug", "Navegando a: ${destination.route}")
+        Log.d("NavDebug", "Navegando a: ${destination.route}")
     }
 
     NavHost(
@@ -823,6 +823,7 @@ fun PawCareNavGraph(
                 viewModel = viewModel,
                 petId = petId,
                 petName = petName,
+                isVeterinario = false,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { medicationId ->
                     navController.navigate(
@@ -913,8 +914,14 @@ fun PawCareNavGraph(
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             WeightScreen(
                 petId = petId,
-                onNavigateBack = {navController.popBackStack()},
-                onNavigateToForm = {navController.navigate(PawCareDestinations.weightForm(petId))}
+                isVeterinario = false,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToForm = { navController.navigate(PawCareDestinations.weightForm(petId)) },
+                onNavigateToEdit = { weightId ->
+                    navController.navigate(
+                        PawCareDestinations.weightForm(petId, weightId)
+                    )
+                }
             )
         }
 
@@ -955,6 +962,7 @@ fun PawCareNavGraph(
             ConditionScreen(
                 petId = petId,
                 petName = petName,
+                isVeterinario = false,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.conditionForm(petId, petName))
@@ -1015,6 +1023,7 @@ fun PawCareNavGraph(
             DewormingScreen(
                 petId = petId,
                 petName = petName,
+                isVeterinario = false,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.dewormingForm(petId, petName))

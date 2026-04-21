@@ -52,6 +52,7 @@ fun ConditionScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
+    isVeterinario: Boolean = false,
     viewModel: ConditionViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ) {
@@ -118,8 +119,10 @@ fun ConditionScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar condición")
+            if (isVeterinario){
+                FloatingActionButton(onClick = onNavigateToForm) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar condición")
+                }
             }
         }
     ) { paddingValues ->
@@ -166,12 +169,17 @@ fun ConditionScreen(
                             items = state.conditions,
                             key = {it.id}
                         ) { condition ->
-                            SwipeRevealCard(
-                                onDelete = { conditionToDelete = condition},
-                                onEdit = { onNavigateToEdit(condition.id) }
-                            ) {
+                            if (isVeterinario){
+                                SwipeRevealCard(
+                                    onDelete = { conditionToDelete = condition},
+                                    onEdit = { onNavigateToEdit(condition.id) }
+                                ) {
+                                    ConditionCard(condition = condition)
+                                }
+                            } else {
                                 ConditionCard(condition = condition)
                             }
+
                         }
                     }
                 }

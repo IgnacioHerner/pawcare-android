@@ -30,7 +30,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +43,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.domain.model.WeightMetrics
 import com.ignaherner.pawcare.domain.model.calcularMetricas
+import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.components.WeightCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
@@ -58,6 +62,8 @@ fun WeightScreen(
     petId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
+    isVeterinario: Boolean = false,
     viewModel: WeightViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
 ){
@@ -67,6 +73,20 @@ fun WeightScreen(
     LaunchedEffect(petId) {
         viewModel.loadWeights(petId)
         petViewModel.loadPetById(petId)
+    }
+
+    var weightToDelete by remember { mutableStateOf<Weight?>(null) }
+
+    weightToDelete?.let { weight ->
+        ConfirmDeleteDialog(
+            titulo = "Eliminar a ${weight.fecha}?",
+            mensaje = "Esta accion no se puede deshacer",
+            onConfirm = {
+                viewModel.deleteWeight(weight)
+                weightToDelete = null
+            },
+            onDismiss = { weightToDelete = null}
+        )
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -113,8 +133,10 @@ fun WeightScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar pesos")
+            if(isVeterinario){
+                FloatingActionButton(onClick = onNavigateToForm) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar pesos")
+                }
             }
         }
     ) { paddingValues ->
@@ -151,7 +173,9 @@ fun WeightScreen(
                 is WeightUiState.Success -> {
                     WeightContent(
                         weights = state.weights,
-                        onDeleteWeight = { viewModel.deleteWeight(it) },
+                        onDeleteWeight = { weightToDelete = it },
+                        onEditWeight = { onNavigateToEdit(it.id) },
+                        isVeterinario = isVeterinario,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -170,6 +194,8 @@ fun WeightScreen(
 private fun WeightContent(
     weights: List<Weight>,
     onDeleteWeight: (Weight) -> Unit,
+    onEditWeight: (Weight) -> Unit,
+    isVeterinario: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val metricas = calcularMetricas(weights)
@@ -178,22 +204,16 @@ private fun WeightContent(
         modifier = modifier,
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
-        // 1. Métricas arriba
         metricas?.let { m ->
-            item {
-                MetricsCard(metricas = m)
-            }
+            item { MetricsCard(metricas = m) }
         }
 
-        // 2. Gráfica solo si hay 2+ registros
         if (weights.size >= 2) {
-            item {
-                WeightChart(weights = weights)
-            }
+            item { WeightChart(weights = weights) }
         } else {
             item {
                 Text(
-                    text = "Agregá más registros par ver la evolucion \uD83D\uDCC8",
+                    text = "Agregá más registros para ver la evolución 📈",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp)
@@ -201,17 +221,29 @@ private fun WeightContent(
             }
         }
 
-        // 3. Lista de registros con índice
         itemsIndexed(weights) { index, weight ->
-            WeightCard(
-                weight = weight,
-                pesoAnterior = weights.getOrNull(index + 1)?.peso,
-                onClick = {},
-                onDeleteClick = {onDeleteWeight(weight)}
-            )
+            if (isVeterinario) {
+                SwipeRevealCard(
+                    onDelete = { onDeleteWeight(weight) },
+                    onEdit = { onEditWeight(weight) }
+                ) {
+                    WeightCard(
+                        weight = weight,
+                        pesoAnterior = weights.getOrNull(index + 1)?.peso,
+                        onClick = {},
+                        onDeleteClick = { onDeleteWeight(weight) }
+                    )
+                }
+            } else {
+                WeightCard(
+                    weight = weight,
+                    pesoAnterior = weights.getOrNull(index + 1)?.peso,
+                    onClick = {},
+                    onDeleteClick = {}
+                )
+            }
         }
     }
-
 }
 
 @Composable
