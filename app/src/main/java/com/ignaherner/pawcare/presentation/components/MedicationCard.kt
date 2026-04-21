@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocalPharmacy
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
@@ -19,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,17 +46,22 @@ fun MedicationCard(
     medication: Medication,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
-){
+) {
     val isActivo = medication.status == MedicationStatus.ACTIVO
+    val statusColor = if (isActivo)
+        MaterialTheme.colorScheme.primary
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isActivo)
-                Color(0xFF4CAF50).copy(alpha = 0.05f)
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
             else
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
@@ -62,7 +72,7 @@ fun MedicationCard(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Header - nombre + status chip
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -70,54 +80,59 @@ fun MedicationCard(
             ) {
                 Text(
                     text = medication.nombre,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
-                AssistChip(
-                    onClick = {},
-                    label = {
-                        Text(
-                            text = if (isActivo) "En curso" else "Finalizado",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = if (isActivo)
-                            Color(0xFF4CAFF50).copy(alpha = 0.15f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                        labelColor = if (isActivo)
-                            Color(0xFF4CAF50)
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = statusColor.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = if (isActivo) "En curso" else "Finalizado",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = statusColor,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                )
+                }
             }
 
             // Dosis e intervalo
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("\uD83D\uDC8A", style = MaterialTheme.typography.bodyMedium)
+                    Icon(
+                        Icons.Default.LocalPharmacy,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(
-                        text = "Dosis: ${medication.dosis}",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "${medication.dosis}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("⏱", style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        text = "Cada ${medication.intervaloHoras} hs",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                if (!medication.esUnicaDosis) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Cada ${medication.intervaloHoras}h",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -127,25 +142,28 @@ fun MedicationCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.CalendarMonth,
+                    Icons.Default.CalendarMonth,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "${medication.fechaInicio.toFriendlyDate()} → " +
-                            "Fin: ${calcularFechaFin(medication.fechaInicio, medication.duracionDias).toFriendlyDate()}",
+                            "Fin: ${calcularFechaFin(
+                                medication.fechaInicio,
+                                medication.duracionDias
+                            ).toFriendlyDate()}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            // Progreso - solo si está activo
+            // Progreso
             if (isActivo) {
                 Text(
                     text = calcularDiaActual(medication.fechaInicio, medication.duracionDias),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF4CAF50),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -153,10 +171,15 @@ fun MedicationCard(
             // Recetado por
             medication.recetadoPor?.let {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("👨‍⚕️", style = MaterialTheme.typography.bodySmall)
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
@@ -165,7 +188,7 @@ fun MedicationCard(
                 }
             }
 
-            // notas
+            // Notas
             medication.notas?.let {
                 Text(
                     text = it,
@@ -173,27 +196,6 @@ fun MedicationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontStyle = FontStyle.Italic
                 )
-            }
-
-            // Boton eliminar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(
-                    onClick = onDeleteClick,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Eliminar")
-                }
             }
         }
     }

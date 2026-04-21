@@ -8,17 +8,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,18 +46,29 @@ fun VaccineCard(
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val statusColor = when (vaccine.status) {
+        is VaccineStatus.Aplicada -> MaterialTheme.colorScheme.primary
+        is VaccineStatus.Programada -> MaterialTheme.colorScheme.tertiary
+        is VaccineStatus.Pendiente -> MaterialTheme.colorScheme.error
+    }
+
     Card(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = statusColor.copy(alpha = 0.06f)
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Header - nombre + status chip
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -60,49 +76,39 @@ fun VaccineCard(
             ) {
                 Text(
                     text = vaccine.nombre,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
-                AssistChip(
-                    onClick = {},
-                    label = {
-                        Text(
-                            text = vaccine.status.displayName(),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = when (vaccine.status) {
-                            is VaccineStatus.Aplicada -> Color(0xFF4CAF50).copy(alpha = 0.15f)
-                            is VaccineStatus.Programada -> Color(0xFFFFEB3B).copy(alpha = 0.15f)
-                            is VaccineStatus.Pendiente -> Color(0xFFF44336).copy(alpha = 0.15f)
-
-                        },
-                        labelColor = when (vaccine.status) {
-                            is VaccineStatus.Aplicada -> Color(0xFF4CAF50)
-                            is VaccineStatus.Programada -> Color(0xFFF57F17)
-                            is VaccineStatus.Pendiente  -> Color(0xFFF44336)
-                        }
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = statusColor.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = vaccine.status.displayName(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = statusColor,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                )
+                }
             }
 
-            // Fecha aplicacion
+            // Fecha
             vaccine.fecha?.let {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CalendarMonth,
+                        Icons.Default.CalendarMonth,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = it.toFriendlyDate(),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -115,13 +121,16 @@ fun VaccineCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.SkipNext,
+                        Icons.Default.Notifications,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Próxima: ${it.toFriendlyDate()}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -132,9 +141,11 @@ fun VaccineCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "\uD83D\uDC68\u200D⚕\uFE0F",
-                        style = MaterialTheme.typography.bodyMedium
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = it,
@@ -143,33 +154,9 @@ fun VaccineCard(
                     )
                 }
             }
-
-
-
-            // Boton eliminar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(
-                    onClick = onDeleteClick,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Eliminar")
-                }
-            }
         }
     }
 }
-
 
 @PreviewLightDark
 @Composable
