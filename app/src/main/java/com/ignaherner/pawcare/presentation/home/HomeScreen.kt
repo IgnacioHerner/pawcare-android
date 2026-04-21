@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +50,7 @@ fun HomeScreen(
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
+    bottomPadding: Dp = 0.dp,
     viewModel: HomeViewModel = hiltViewModel(),
     ownerViewModel: OwnerViewModel = hiltViewModel()
 ) {
@@ -108,17 +110,12 @@ fun HomeScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAddPet) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar mascota")
-            }
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(innerPadding)
                 .padding(top = 8.dp)
         ) {
             // Saludo
@@ -166,7 +163,7 @@ fun HomeScreen(
                     }
                     is HomeUiState.Success -> {
                         LazyColumn(
-                            contentPadding = PaddingValues(bottom = 80.dp)
+                            contentPadding = PaddingValues(bottom = bottomPadding + 96.dp)
                         ) {
                             items(
                                 items = state.summaries,

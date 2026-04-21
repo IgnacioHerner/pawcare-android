@@ -36,6 +36,7 @@ import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToOwnerDetail : () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     authViewModel: AuthViewModel
 ){

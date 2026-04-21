@@ -488,44 +488,34 @@ fun PawCareNavGraph(
         composable(PawCareDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }
 
-            HomeScreen(
+            MainScreen(
+                navController = navController,
                 onNavigateToPetDetail = { petId ->
-                    if (!isNavigating) {
-                        isNavigating = true
-                        navController.navigate(PawCareDestinations.petDetail(petId)) {
-                            launchSingleTop = true
-                        }
-                    }
-                },
-                onNavigateToSettings = {
-                    if (!isNavigating) {
-                        isNavigating = true
-                        navController.navigate(PawCareDestinations.SETTINGS) {
-                            launchSingleTop = true
-                        }
-                    }
-                },
-                onNavigateToOwnerDetail = {
-                    if (!isNavigating) {
-                        isNavigating = true
-                        navController.navigate(PawCareDestinations.OWNER_DETAIL) {
-                            launchSingleTop = true
-                        }
+                    navController.navigate(PawCareDestinations.petDetail(petId)) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToAddPet = {
-                    if (!isNavigating) {
-                        isNavigating = true
-                        navController.navigate(PawCareDestinations.petForm()) {
-                            launchSingleTop = true
-                        }
+                    navController.navigate(PawCareDestinations.petForm()) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToEdit = { petId ->
                     navController.navigate(PawCareDestinations.petForm(petId)) {
                         launchSingleTop = true
                     }
-                }
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS) {
+                        launchSingleTop = true
+                    }
+                },
+                authViewModel = authViewModel
             )
 
             // Resetear cuando volvemos a HOME
@@ -575,7 +565,11 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                },
+
             )
         }
 
