@@ -20,6 +20,15 @@ class SettingsViewModel @Inject constructor(
     private val database: PawCareDatabase,
 ) : ViewModel() {
 
+    val notificationsEnabled: StateFlow<Boolean> = settingsDataStore.notificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setNotificationsEnabled(enabled)
+        }
+    }
+
     val nombreVeterinario: StateFlow<String> = settingsDataStore.nombreVeterinario
         .stateIn(
             scope = viewModelScope,

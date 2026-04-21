@@ -575,6 +575,9 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
                 }
             )
         }
