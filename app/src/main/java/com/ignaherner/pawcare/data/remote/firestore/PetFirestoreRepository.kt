@@ -115,10 +115,25 @@ class PetFirestoreRepository @Inject constructor(){
 
     suspend fun eliminarPet(firestoreId: String): Result<Unit> {
         return try {
-            firestore.collection("pets")
-                .document(firestoreId)
-                .delete()
-                .await()
+            val petRef = firestore.collection("pets").document(firestoreId)
+
+            // 1. Borrar todas las subcolecciones primero
+            val subcolecciones = listOf(
+                "vaccines", "medications", "weights",
+                "appointments", "conditions", "dewormings"
+            )
+
+            subcolecciones.forEach { subcoleccion ->
+                val docs = petRef.collection(subcoleccion).get().await()
+                docs.forEach {
+                    it.reference.delete().await()
+                }
+            }
+
+            // 2. Borrar el documento de la mascota
+            petRef.delete().await()
+
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.data.repository
 
+import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
 import com.ignaherner.pawcare.data.remote.firestore.AppointmentFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.ConditionFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.DewormingFirestoreRepository
@@ -7,7 +8,9 @@ import com.ignaherner.pawcare.data.remote.firestore.MedicationFirestoreRepositor
 import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.VaccineFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.WeightFirestoreRepository
+import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.VaccineStatus
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -29,7 +32,8 @@ class SyncRepository @Inject constructor(
     private val conditionRepository: ConditionRepository,
     private val conditionFirestoreRepository: ConditionFirestoreRepository,
     private val dewormingRepository: DewormingRepository,
-    private val dewormingFirestoreRepository: DewormingFirestoreRepository
+    private val dewormingFirestoreRepository: DewormingFirestoreRepository,
+    private val workManagerHelper: WorkManagerHelper
 ) {
 
     private val syncMutex = Mutex()
@@ -41,7 +45,6 @@ class SyncRepository @Inject constructor(
                 result.getOrNull()?.forEach { petFirestore ->
                     // Validar que tiene firestoreId
                     if (petFirestore.firestoreId.isBlank()) {
-                        android.util.Log.e("SyncRepository", "Pet sin firestoreId, ignorando")
                         return@forEach
                     }
 
@@ -82,8 +85,15 @@ class SyncRepository @Inject constructor(
                     val local = vaccineRepository.getVaccinesByPetId(pet.id)
                         .firstOrNull()
                         ?.find { it.firestoreId == vaccineFirestore.firestoreId }
+
                     if (local == null) {
-                        vaccineRepository.insertVaccine(vaccineConPetId)
+                        val id = vaccineRepository.insertVaccine(vaccineConPetId)
+                        val vaccineConId = vaccineConPetId.copy(id = id)
+
+                        // Programar Worker si tiene próxima dosis
+                        if (vaccineConId.status is VaccineStatus.Aplicada && vaccineConId.proximaDosis != null) {
+                            workManagerHelper.programarRecordatorioVacuna(vaccineConId, pet.nombre)
+                        }
                     } else {
                         vaccineRepository.updateVaccine(vaccineConPetId.copy(id = local.id))
                     }
@@ -103,7 +113,14 @@ class SyncRepository @Inject constructor(
                         .firstOrNull()
                         ?.find { it.firestoreId == medicationFirestore.firestoreId }
                     if (local == null) {
-                        medicationRepository.insertMedication(medicationConPetId)
+                        val id = medicationRepository.insertMedication(medicationConPetId)
+                        val medicacionConId = medicationConPetId.copy(id = id)
+
+                        if(medicacionConId.status == MedicationStatus.ACTIVO && !medicacionConId.esUnicaDosis){
+                            workManagerHelper.programarRecordatorioMedicamento(medicacionConId, pet.nombre)
+                            workManagerHelper.programarFinMedicamento(medicacionConId)
+                        }
+
                     } else {
                         medicationRepository.updateMedication(medicationConPetId.copy(id = local.id))
                     }
