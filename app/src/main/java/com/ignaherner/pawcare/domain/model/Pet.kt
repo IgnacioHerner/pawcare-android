@@ -3,6 +3,7 @@ package com.ignaherner.pawcare.domain.model
 data class Pet(
     val id: Long = 0,
     val firestoreId: String = "",
+    val codigo: String = "",
     val ownerId: String = "",
     val nombre: String,
     val especie: Especie,

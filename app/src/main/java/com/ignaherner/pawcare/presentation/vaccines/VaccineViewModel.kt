@@ -7,7 +7,7 @@ import com.ignaherner.pawcare.data.remote.firestore.VaccineFirestoreRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

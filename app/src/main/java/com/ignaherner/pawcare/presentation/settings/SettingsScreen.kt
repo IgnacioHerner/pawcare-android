@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
+import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 
@@ -107,29 +108,11 @@ fun SettingsScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(56.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primaryContainer),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (state.owner.fotoUri != null) {
-                                        AsyncImage(
-                                            model = state.owner.fotoUri,
-                                            contentDescription = null,
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Text(
-                                            text = state.owner.nombre.first()
-                                                .uppercaseChar().toString(),
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                }
+                                PawCareAvatar(
+                                    fotoUri = state.owner.fotoUri,
+                                    nombre = state.owner.nombre,
+                                    modifier = Modifier.size(80.dp)
+                                )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "${state.owner.nombre} ${state.owner.apellido}",

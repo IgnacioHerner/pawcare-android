@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard

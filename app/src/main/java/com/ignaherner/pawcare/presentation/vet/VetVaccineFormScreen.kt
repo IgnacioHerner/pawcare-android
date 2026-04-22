@@ -38,9 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
-import com.ignaherner.pawcare.domain.model.calcularProximaDosis
-import com.ignaherner.pawcare.domain.model.fechaHoy
-import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.utils.calcularProximaDosis
+import com.ignaherner.pawcare.utils.fechaHoy
+import com.ignaherner.pawcare.utils.toFormattedString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -28,6 +28,7 @@ class VetRepository @Inject constructor() {
             val pet = Pet(
                 id = 0L,
                 firestoreId = documento.id,
+                codigo = documento.getString("codigo") ?: "",
                 nombre = documento.getString("nombre") ?: "",
                 especie = Especie.valueOf(documento.getString("especie") ?: "PERRO"),
                 raza = documento.getString("raza"),
@@ -39,7 +40,42 @@ class VetRepository @Inject constructor() {
                 castrado = documento.getBoolean("castrado") ?: false,
                 fechaCastracion = documento.getString("fechaCastracion"),
                 fotoUri = documento.getString("fotoUri"),
-                ownerId = documento.getString("ownerId") ?: ""
+                ownerId = documento.getString("ownerId") ?: "",
+            )
+            Result.success(pet)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun buscarMascotaPorCodigo(codigo: String): Result<Pet> {
+        return try {
+            val documentos = firestore.collection("pets")
+                .whereEqualTo("codigo", codigo.uppercase())
+                .get()
+                .await()
+
+            if (documentos.isEmpty) return Result.failure(
+                Exception("Mascota no encontrada")
+            )
+
+            val doc = documentos.first()
+            val pet = Pet(
+                id = 0L,
+                firestoreId = doc.id,
+                codigo = doc.getString("codigo") ?: "",
+                nombre = doc.getString("nombre") ?: "",
+                especie = Especie.valueOf(doc.getString("especie") ?: "PERRO"),
+                raza = doc.getString("raza"),
+                sexo = doc.getString("sexo")?.let { Sex.valueOf(it) },
+                fechaNacimiento = doc.getString("fechaNacimiento"),
+                fechaNacimientoTipo = FechaNacimientoTipo.valueOf(
+                    doc.getString("fechaNacimientoTipo") ?: "DESCONOCIDA"
+                ),
+                castrado = doc.getBoolean("castrado") ?: false,
+                fechaCastracion = doc.getString("fechaCastracion"),
+                fotoUri = doc.getString("fotoUri"),
+                ownerId = doc.getString("ownerId") ?: ""
             )
             Result.success(pet)
         } catch (e: Exception) {

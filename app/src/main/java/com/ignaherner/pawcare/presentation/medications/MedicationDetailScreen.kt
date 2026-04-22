@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -37,9 +36,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
-import com.ignaherner.pawcare.domain.model.calcularDiaNumero
-import com.ignaherner.pawcare.domain.model.calcularFechaFin
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.utils.calcularDiaNumero
+import com.ignaherner.pawcare.utils.calcularFechaFin
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.InfoRow
 
 @OptIn(ExperimentalMaterial3Api::class)

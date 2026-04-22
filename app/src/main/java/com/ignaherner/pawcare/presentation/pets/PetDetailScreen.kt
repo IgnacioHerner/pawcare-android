@@ -59,7 +59,8 @@ import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Weight
-import com.ignaherner.pawcare.domain.model.calcularEdad
+import com.ignaherner.pawcare.presentation.components.PawCareAvatar
+import com.ignaherner.pawcare.utils.calcularEdad
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
 import com.ignaherner.pawcare.presentation.weight.WeightUiState
@@ -332,28 +333,11 @@ private fun PetHeaderSection(
         verticalAlignment = Alignment.Top
     ) {
         // Foto circular
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-        ) {
-            if (pet.fotoUri != null) {
-                AsyncImage(
-                    model = pet.fotoUri,
-                    contentDescription = "Foto de ${pet.nombre}",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Text(
-                    text = pet.nombre.first().uppercaseChar().toString(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
+        PawCareAvatar(
+            fotoUri = pet.fotoUri,
+            nombre = pet.nombre,
+            modifier = Modifier.size(80.dp)
+        )
 
         // Chips con FlowRow
         FlowRow(
@@ -423,28 +407,11 @@ private fun OwnerContactCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                if (owner.fotoUri != null) {
-                    AsyncImage(
-                        model = owner.fotoUri,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text(
-                        text = owner.nombre.first().uppercaseChar().toString(),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
+            PawCareAvatar(
+                fotoUri = owner.fotoUri,
+                nombre = owner.nombre,
+                modifier = Modifier.size(80.dp)
+            )
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

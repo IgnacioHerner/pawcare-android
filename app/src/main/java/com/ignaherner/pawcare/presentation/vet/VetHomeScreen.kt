@@ -32,8 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,6 +74,15 @@ fun VetHomeScreen(
     val nombreVet = when (val state = ownerState) {
         is OwnerState.Success -> state.owner.nombre
         else -> "Veterinario"
+    }
+
+    // Estado sin formato — solo letras y números
+    var searchRaw by remember { mutableStateOf("") }
+
+    // Lo que se muestra con el guion
+    val searchDisplay = when {
+        searchRaw.length <= 3 -> searchRaw
+        else -> "${searchRaw.take(3)}-${searchRaw.drop(3).take(4)}"
     }
 
     Scaffold(
@@ -105,22 +120,50 @@ fun VetHomeScreen(
 
             // Buscar por ID
             OutlinedTextField(
-                value = searchId,
-                onValueChange = { searchId = it},
-                label = { Text("ID de la mascota")},
-                placeholder = { Text("Pega el ID del QR aca")},
-                trailingIcon = {
-                    if (searchId.isNotBlank()){
-                        IconButton(onClick = { searchId = ""}) {
-                            Icon(Icons.Default.Clear, contentDescription = "Limpiar")
-                        }
-                    }
+                value = searchRaw,
+                onValueChange = { input ->
+                    val limpio = input
+                        .filter { it.isLetterOrDigit() }
+                        .uppercase()
+                        .take(7) // máximo 3 letras + 4 números
+                    searchRaw = limpio
                 },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                label = { Text("Código de la mascota") },
+                placeholder = { Text("Ej: MIL-4829") },
+                visualTransformation = VisualTransformation { text ->
+                    val original = text.text
+                    val formatted = when {
+                        original.length <= 3 -> original
+                        else -> "${original.take(3)}-${original.drop(3)}"
+                    }
+                    TransformedText(
+                        AnnotatedString(formatted),
+                        object : OffsetMapping {
+                            override fun originalToTransformed(offset: Int): Int {
+                                return if (offset <= 3) offset else offset + 1
+                            }
+
+                            override fun transformedToOriginal(offset: Int): Int {
+                                return if (offset <= 3) offset else offset - 1
+                            }
+                        }
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = if (searchRaw.length < 3)
+                        KeyboardType.Text
+                    else
+                        KeyboardType.Number,
+                    capitalization = if (searchRaw.length < 3)
+                        KeyboardCapitalization.Characters
+                    else
+                        KeyboardCapitalization.None,
+                    imeAction = ImeAction.Search
+                ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        if(searchId.isNotBlank()) {
-                            viewModel.buscarMascota(searchId.trim())
+                        if (searchRaw.length == 7) {
+                            viewModel.buscarMascota("${searchRaw.take(3)}-${searchRaw.drop(3)}")
                         }
                     }
                 ),
@@ -130,8 +173,11 @@ fun VetHomeScreen(
 
             // Boton buscar
             Button(
-                onClick = { viewModel.buscarMascota(searchId.trim())},
-                enabled = searchId.isNotBlank() && searchState !is VetSearchState.Loading,
+                onClick = {
+                    val codigoFormateado = "${searchRaw.take(3)}-${searchRaw.drop(3)}"
+                    viewModel.buscarMascota(codigoFormateado)
+                },
+                enabled = searchRaw.length == 7 && searchState !is VetSearchState.Loading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (searchState is VetSearchState.Loading){

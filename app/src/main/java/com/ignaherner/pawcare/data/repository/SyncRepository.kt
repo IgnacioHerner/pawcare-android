@@ -9,6 +9,8 @@ import com.ignaherner.pawcare.data.remote.firestore.VaccineFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.WeightFirestoreRepository
 import com.ignaherner.pawcare.domain.model.Pet
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,23 +31,30 @@ class SyncRepository @Inject constructor(
     private val dewormingRepository: DewormingRepository,
     private val dewormingFirestoreRepository: DewormingFirestoreRepository
 ) {
-    suspend fun sincronizarTodo(){
+
+    private val syncMutex = Mutex()
+
+    suspend fun sincronizarTodo() = syncMutex.withLock { // ← solo un sync a la vez
         try {
             val result = petFirestoreRepository.obtenerMascotasDueno()
-            if (result.isSuccess){
+            if (result.isSuccess) {
                 result.getOrNull()?.forEach { petFirestore ->
+                    // Validar que tiene firestoreId
+                    if (petFirestore.firestoreId.isBlank()) {
+                        android.util.Log.e("SyncRepository", "Pet sin firestoreId, ignorando")
+                        return@forEach
+                    }
+
                     val petLocal = petRepository.getPetByFirestoreId(petFirestore.firestoreId)
 
-                    val petId = if (petLocal == null){
-                        val id = petRepository.insertPet(petFirestore)
-                        id
+                    if (petLocal == null) {
+                        petRepository.insertPet(petFirestore)
                     } else {
                         val petActualizado = petFirestore.copy(
                             id = petLocal.id,
                             fotoUri = petLocal.fotoUri ?: petFirestore.fotoUri
                         )
                         petRepository.updatePet(petActualizado)
-                        petLocal.id
                     }
 
                     val pet = petRepository.getPetByFirestoreId(petFirestore.firestoreId)
@@ -56,11 +65,10 @@ class SyncRepository @Inject constructor(
                         sincronizarTurnos(it, petFirestore.firestoreId)
                         sincronizarCondiciones(it, petFirestore.firestoreId)
                         sincronizarDesparasitaciones(it, petFirestore.firestoreId)
-
                     }
                 }
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             android.util.Log.e("SyncRepository", "Error: ${e.message}")
         }
     }

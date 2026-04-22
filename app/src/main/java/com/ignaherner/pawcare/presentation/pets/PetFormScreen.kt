@@ -16,10 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -56,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,7 +63,7 @@ import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
-import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.utils.toFormattedString
 import java.io.File
 import java.time.LocalDate
 

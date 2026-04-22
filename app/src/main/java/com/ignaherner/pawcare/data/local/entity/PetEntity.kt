@@ -8,6 +8,7 @@ data class PetEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val firestoreId: String = "",
+    val codigo: String = "",
     val ownerId: String = "",
     val nombre: String,
     val especie: String,

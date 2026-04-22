@@ -14,19 +14,19 @@ class QRGenerator @Inject constructor() {
 
     fun generarQR(
         nombreMascota: String,
-        firestoreId: String,
+        codigo: String,  // ← codigo en vez de firestoreId
         nombreDueno: String,
         telefono: String,
         medicamentosActivos: List<String> = emptyList()
     ): Bitmap {
         val contenido = buildString {
-            appendLine("🐾 PawCare")
+            appendLine("PawCare")
             appendLine("Mascota: $nombreMascota")
-            appendLine("ID: $firestoreId")
-            appendLine("Dueño: $nombreDueno")
+            appendLine("Codigo: $codigo")  // ← codigo
+            appendLine("Dueno: $nombreDueno")
             appendLine("Tel: $telefono")
             if (medicamentosActivos.isNotEmpty()) {
-                appendLine("Medicamentos: ${medicamentosActivos.joinToString { ", " }}")
+                appendLine("Medicamentos: ${medicamentosActivos.joinToString(", ")}")
             }
         }
 
@@ -49,7 +49,8 @@ class QRGenerator @Inject constructor() {
             for (y in 0 until 512) {
                 bitmap.setPixel(
                     x, y,
-                    if (bitMatrix[x, y]) Color.BLACK else Color.WHITE
+                    if (bitMatrix[x, y]) android.graphics.Color.BLACK
+                    else android.graphics.Color.WHITE
                 )
             }
         }

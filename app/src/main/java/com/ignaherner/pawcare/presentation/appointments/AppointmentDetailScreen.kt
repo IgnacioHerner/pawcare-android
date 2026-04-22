@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,7 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.InfoRow
 
 @OptIn(ExperimentalMaterial3Api::class)

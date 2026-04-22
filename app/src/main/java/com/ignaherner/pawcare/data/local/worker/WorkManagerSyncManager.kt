@@ -5,8 +5,8 @@ import com.ignaherner.pawcare.data.repository.MedicationRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
 import com.ignaherner.pawcare.data.repository.VaccineRepository
 import com.ignaherner.pawcare.domain.model.MedicationStatus
-import com.ignaherner.pawcare.domain.model.calcularFechaFin
-import com.ignaherner.pawcare.domain.model.diasHastaFecha
+import com.ignaherner.pawcare.utils.calcularFechaFin
+import com.ignaherner.pawcare.utils.diasHastaFecha
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton

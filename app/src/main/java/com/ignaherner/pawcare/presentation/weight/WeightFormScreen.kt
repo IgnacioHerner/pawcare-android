@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
-import com.ignaherner.pawcare.domain.model.fechaHoy
-import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.utils.fechaHoy
+import com.ignaherner.pawcare.utils.toFormattedString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

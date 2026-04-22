@@ -1,8 +1,11 @@
-package com.ignaherner.pawcare.domain.model
+package com.ignaherner.pawcare.utils
 
+import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
+import com.ignaherner.pawcare.domain.model.Weight
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 private val dateFormatterAlt: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
@@ -31,7 +34,7 @@ fun String.toFriendlyDate(): String {
         val date = this.toLocalDate()
         val formatter = DateTimeFormatter.ofPattern(
             "dd MMM yyyy",
-            java.util.Locale("es", "AR")
+            Locale("es", "AR")
         )
         date.format(formatter)
     } catch (e: Exception) {

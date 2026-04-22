@@ -1,7 +1,6 @@
 package com.ignaherner.pawcare.data.local.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -10,8 +9,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.Vaccine
-import com.ignaherner.pawcare.domain.model.calcularFechaFin
-import com.ignaherner.pawcare.domain.model.diasHastaFecha
+import com.ignaherner.pawcare.utils.calcularFechaFin
+import com.ignaherner.pawcare.utils.diasHastaFecha
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.domain.model.AppointmentStatus
-import com.ignaherner.pawcare.domain.model.fechaHoy
-import com.ignaherner.pawcare.domain.model.toFormattedString
+import com.ignaherner.pawcare.utils.fechaHoy
+import com.ignaherner.pawcare.utils.toFormattedString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,7 +1,5 @@
 package com.ignaherner.pawcare.presentation.medications
 
-import android.widget.Button
-import android.widget.DatePicker
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,10 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
-import com.ignaherner.pawcare.domain.model.fechaHoy
-import com.ignaherner.pawcare.domain.model.toFormattedString
-import com.ignaherner.pawcare.presentation.pets.PetDetailState
-import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.utils.fechaHoy
+import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

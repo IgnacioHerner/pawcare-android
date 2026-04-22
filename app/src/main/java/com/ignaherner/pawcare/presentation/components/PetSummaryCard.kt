@@ -22,13 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.room.util.splitToIntList
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.PetSummary
-import com.ignaherner.pawcare.domain.model.calcularDiaActual
-import com.ignaherner.pawcare.domain.model.calcularDiaNumero
-import com.ignaherner.pawcare.domain.model.calcularEdad
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.utils.calcularDiaActual
+import com.ignaherner.pawcare.utils.calcularDiaNumero
+import com.ignaherner.pawcare.utils.calcularEdad
+import com.ignaherner.pawcare.utils.toFriendlyDate
 
 @Composable
 fun PetSummaryCard(
@@ -53,28 +52,11 @@ fun PetSummaryCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Foto circular
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    if(summary.pet.fotoUri != null) {
-                        AsyncImage(
-                            model = summary.pet.fotoUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }else {
-                        Text(
-                            text = summary.pet.nombre.first().uppercaseChar().toString(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
+                PawCareAvatar(
+                    fotoUri = summary.pet.fotoUri,
+                    nombre = summary.pet.nombre,
+                    modifier = Modifier.size(80.dp)
+                )
 
                 Column {
                     Text(

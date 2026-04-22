@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Owner
+import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,28 +116,11 @@ fun OwnerDetailContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            if (owner.fotoUri != null) {
-                AsyncImage(
-                    model = owner.fotoUri,
-                    contentDescription = "Foto de ${owner.nombre}",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Text(
-                    text = owner.nombre.first().uppercaseChar().toString(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
+        PawCareAvatar(
+            fotoUri = owner.fotoUri,
+            nombre = owner.nombre,
+            modifier = Modifier.size(80.dp)
+        )
 
         // Header
         Text(

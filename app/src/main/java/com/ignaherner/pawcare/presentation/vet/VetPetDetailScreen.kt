@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
@@ -58,16 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.domain.model.VetPetSummary
-import com.ignaherner.pawcare.domain.model.calcularEdad
-import com.ignaherner.pawcare.domain.model.toFriendlyDate
+import com.ignaherner.pawcare.presentation.components.PawCareAvatar
+import com.ignaherner.pawcare.utils.calcularEdad
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.ui.theme.AppointmentColor
 import com.ignaherner.pawcare.ui.theme.MedicationColor
 import com.ignaherner.pawcare.ui.theme.VaccineColor
 import com.ignaherner.pawcare.ui.theme.WeightColor
-import okhttp3.internal.wait
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,28 +149,11 @@ private fun VetLibretaSanitaria(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (summary.pet.fotoUri != null) {
-                        AsyncImage(
-                            model = summary.pet.fotoUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            text = summary.pet.nombre.first().uppercaseChar().toString(),
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+                PawCareAvatar(
+                    fotoUri = summary.pet.fotoUri,
+                    nombre = summary.pet.nombre,
+                    modifier = Modifier.size(80.dp)
+                )
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -236,28 +217,11 @@ private fun VetLibretaSanitaria(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (owner.fotoUri != null) {
-                                AsyncImage(
-                                    model = owner.fotoUri,
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Text(
-                                    text = owner.nombre.first().uppercaseChar().toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
+                        PawCareAvatar(
+                            fotoUri = owner.fotoUri,
+                            nombre = owner.nombre,
+                            modifier = Modifier.size(80.dp)
+                        )
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(2.dp)

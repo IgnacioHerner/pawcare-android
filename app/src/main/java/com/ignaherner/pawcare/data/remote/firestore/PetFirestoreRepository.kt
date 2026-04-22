@@ -7,6 +7,7 @@ import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
+import com.ignaherner.pawcare.utils.CodigoGenerator
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,11 +18,12 @@ class PetFirestoreRepository @Inject constructor(){
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun guardarPet(pet: Pet): Result<String> {
+    suspend fun guardarPet(pet: Pet): Result<Pair<String, String>> {
         return try {
             val uid = auth.currentUser?.uid ?: return Result.failure(
                 Exception("Usuario no autenticado")
             )
+            val codigo = CodigoGenerator.generarCodigo(pet.nombre)
 
             val petData = hashMapOf(
                 "nombre" to pet.nombre,
@@ -33,14 +35,15 @@ class PetFirestoreRepository @Inject constructor(){
                 "castrado" to pet.castrado,
                 "fechaCastracion" to pet.fechaCastracion,
                 "fotoUri" to pet.fotoUri,
-                "ownerId" to uid
+                "ownerId" to uid,
+                "codigo" to codigo
             )
 
             // Firestore genera el ID Automaticamente
             val docRef = firestore.collection("pets")
                 .add(petData)
                 .await()
-            Result.success(docRef.id)
+            Result.success(Pair(docRef.id, codigo))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -100,7 +103,8 @@ class PetFirestoreRepository @Inject constructor(){
                     castrado = doc.getBoolean("castrado") ?: false,
                     fechaCastracion = doc.getString("fechaCastracion"),
                     fotoUri = doc.getString("fotoUri"),
-                    ownerId = uid
+                    ownerId = uid,
+                    codigo = doc.getString("codigo") ?: ""
                 )
             }
             Result.success(mascotas)

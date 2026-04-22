@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,29 +97,12 @@ fun VetOwnerDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(80.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primaryContainer),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (state.owner?.fotoUri != null) {
-                                        AsyncImage(
-                                            model = state.owner.fotoUri,
-                                            contentDescription = null,
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Text(
-                                            text = state.owner?.nombre?.first()
-                                                ?.uppercaseChar()?.toString() ?: "?",
-                                            style = MaterialTheme.typography.headlineMedium,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                }
+                                PawCareAvatar(
+                                    fotoUri = state.owner?.fotoUri,
+                                    nombre = state.owner?.nombre?.first()
+                                        ?.uppercaseChar()?.toString() ?: "?",
+                                    modifier = Modifier.size(80.dp)
+                                )
                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(
                                         text = "${state.owner?.nombre} ${state.owner?.apellido}",
@@ -223,29 +207,11 @@ fun VetOwnerDetailScreen(
                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(56.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.primaryContainer),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            if (mascota.fotoUri != null) {
-                                                AsyncImage(
-                                                    model = mascota.fotoUri,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentScale = ContentScale.Crop
-                                                )
-                                            } else {
-                                                Text(
-                                                    text = mascota.nombre.first()
-                                                        .uppercaseChar().toString(),
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                                )
-                                            }
-                                        }
+                                        PawCareAvatar(
+                                            fotoUri = mascota.fotoUri,
+                                            nombre = mascota.nombre,
+                                            modifier = Modifier.size(80.dp)
+                                        )
                                         Column(
                                             modifier = Modifier.weight(1f),
                                             verticalArrangement = Arrangement.spacedBy(4.dp)

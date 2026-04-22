@@ -132,10 +132,10 @@ class VetViewModel @Inject constructor(
 
 
 
-    fun buscarMascota(firestoreId: String) {
+    fun buscarMascota(codigo: String) {
         viewModelScope.launch {
             _searchState.value = VetSearchState.Loading
-            val result = vetRepository.buscarMascotaPorId(firestoreId)
+            val result = vetRepository.buscarMascotaPorCodigo(codigo.uppercase())
             _searchState.value = if (result.isSuccess) {
                 VetSearchState.Success(result.getOrNull()!!)
             } else {

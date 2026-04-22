@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
-import com.ignaherner.pawcare.domain.model.WeightMetrics
-import com.ignaherner.pawcare.domain.model.calcularMetricas
+import com.ignaherner.pawcare.utils.WeightMetrics
+import com.ignaherner.pawcare.utils.calcularMetricas
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.components.WeightCard
