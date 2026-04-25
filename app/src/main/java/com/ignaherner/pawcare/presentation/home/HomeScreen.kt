@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
 import com.ignaherner.pawcare.presentation.components.PetSummaryCard
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
@@ -144,22 +146,11 @@ fun HomeScreen(
                         )
                     }
                     is HomeUiState.Empty -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text("🐾", style = MaterialTheme.typography.displayLarge)
-                            Text(
-                                text = "Todavia no tenés mascotas",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Toca el + para agregar la primera",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        EmptyState(
+                            icon = Icons.Outlined.Pets,
+                            title = "Sin mascotas todavía",
+                            body = "Agregá tu primera mascota para empezar a llevar su salud al día"
+                        )
                     }
                     is HomeUiState.Success -> {
                         LazyColumn(

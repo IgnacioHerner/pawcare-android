@@ -1,0 +1,125 @@
+package com.ignaherner.pawcare.presentation.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.ignaherner.pawcare.ui.theme.*
+
+
+// ═══════════════════════════════════════════════════════════
+// CATEGORY ROW
+// Fila de categoría con ícono tonal + título + count + hint
+// Reemplaza los SeccionCard del PetDetailScreen
+// ═══════════════════════════════════════════════════════════
+
+enum class Tone { OK, INFO, WARN, MUTED }
+
+@Composable
+fun CategoryRow(
+    icon: ImageVector,
+    title: String,
+    count: Int,
+    hint: String,
+    tone: Tone,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val (toneBg, toneFg) = when (tone) {
+        Tone.OK -> SuccessSoft to Success
+        Tone.INFO -> InfoSoft to Info
+        Tone.WARN -> WarnSoft to Warn
+        Tone.MUTED -> SurfaceSunk to InkMuted
+    }
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(PawRadii.md),
+        tonalElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PawSpace.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
+        ) {
+            // Tile del ícono
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .background(toneBg),
+                contentAlignment = Alignment.Center
+            ) {
+                PawCareIcon(
+                    icon = icon,
+                    contentDescription = title,
+                    size = PawIconSize.medium,
+                    tint = toneFg
+                )
+            }
+
+            // Título + hint
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    // Badge count
+                    if (count > 0) {
+                        Surface(
+                            shape = RoundedCornerShape(PawRadii.xs),
+                            color = toneBg
+                        ) {
+                            Text(
+                                text = count.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = toneFg,
+                                modifier = Modifier.padding(
+                                    horizontal = 6.dp,
+                                    vertical = 2.dp
+                                )
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Chevron
+            PawCareIcon(
+                icon = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                size = PawIconSize.medium,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}

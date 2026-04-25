@@ -62,10 +62,7 @@ import com.ignaherner.pawcare.domain.model.VetPetSummary
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 import com.ignaherner.pawcare.utils.calcularEdad
 import com.ignaherner.pawcare.utils.toFriendlyDate
-import com.ignaherner.pawcare.ui.theme.AppointmentColor
-import com.ignaherner.pawcare.ui.theme.MedicationColor
-import com.ignaherner.pawcare.ui.theme.VaccineColor
-import com.ignaherner.pawcare.ui.theme.WeightColor
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -290,7 +287,7 @@ private fun VetLibretaSanitaria(
                         titulo = "Última vacuna",
                         contenido = summary.ultimaVacuna?.nombre ?: "Sin registros",
                         subtitulo = summary.ultimaVacuna?.fecha?.toFriendlyDate(),
-                        color = VaccineColor,
+                        color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.VACUNAS) },
                         modifier = Modifier.weight(1f)
                     )
@@ -300,7 +297,7 @@ private fun VetLibretaSanitaria(
                         titulo = "Medicamento activo",
                         contenido = summary.medicamentoActivo?.nombre ?: "Sin activos",
                         subtitulo = summary.medicamentoActivo?.dosis,
-                        color = MedicationColor,
+                        color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.MEDICAMENTOS) },
                         modifier = Modifier.weight(1f)
                     )
@@ -317,7 +314,7 @@ private fun VetLibretaSanitaria(
                         titulo = "Último peso",
                         contenido = summary.ultimoPeso?.let { "${it.peso} kg" } ?: "Sin registros",
                         subtitulo = summary.ultimoPeso?.fecha?.toFriendlyDate(),
-                        color = WeightColor,
+                        color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.PESOS) },
                         modifier = Modifier.weight(1f)
                     )
@@ -327,7 +324,7 @@ private fun VetLibretaSanitaria(
                         titulo = "Último turno",
                         contenido = summary.ultimoTurno?.motivo ?: "Sin registros",
                         subtitulo = summary.ultimoTurno?.fecha?.toFriendlyDate(),
-                        color = AppointmentColor,
+                        color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.TURNOS) },
                         modifier = Modifier.weight(1f)
                     )

@@ -1,29 +1,49 @@
 package com.ignaherner.pawcare.ui.theme
 
 import androidx.compose.ui.graphics.Color
-// Paleta principal — Verde PawCare
-val Green10 = Color(0xFF002204)
-val Green20 = Color(0xFF004408)
-val Green30 = Color(0xFF00660D)
-val Green40 = Color(0xFF008811)
-val Green80 = Color(0xFF8FD98F)
-val Green90 = Color(0xFFAAF0AA)
 
-// Secundario — Verde suave
-val LightGreen10 = Color(0xFF002204)
-val LightGreen20 = Color(0xFF1B5E20)
-val LightGreen80 = Color(0xFFA5D6A7)
-val LightGreen90 = Color(0xFFC8E6C9)
+// ═══════════════════════════════════════════════════════════
+// NEUTROS CÁLIDOS — base de la app
+// ═══════════════════════════════════════════════════════════
+val BgCream = Color(0xFFFAF7F0)
+val Surface = Color(0xFFFFFFFF)
+val SurfaceAlt = Color(0xFFF4F0E6)
+val SurfaceSunk = Color(0xFFECE6D8)
+val Line = Color(0xFFE6E0D4)
+val LineStrong = Color(0xFFCFC7B6)
 
-// Neutros
-val White = Color(0xFFFFFFFF)
-val Gray10 = Color(0xFF1A1A1A)
-val Gray20 = Color(0xFF303030)
-val Gray90 = Color(0xFFE5E5E5)
-val Gray99 = Color(0xFFFCFCFC)
+// ═══════════════════════════════════════════════════════════
+// TEXTO
+// ═══════════════════════════════════════════════════════════
+val InkPrimary = Color(0xFF2A2824)
+val InkMuted = Color(0xFF6B6762)
+val InkSubtle = Color(0xFF928D85)
 
-// Colores de estado — para cards de secciones
-val VaccineColor = Color(0xFF2196F3)      // azul
-val MedicationColor = Color(0xFFFF9800)   // naranja
-val AppointmentColor = Color(0xFF9C27B0)  // morado
-val WeightColor = Color(0xFF4CAF50)       // verde
+// ═══════════════════════════════════════════════════════════
+// PRIMARIO DUEÑO — verde oliva natural
+// ═══════════════════════════════════════════════════════════
+val OwnerPrimary = Color(0xFF5A7A3E)
+val OwnerPrimaryHi = Color(0xFF6B8C4C)
+val OwnerPrimarySoft = Color(0xFFE8F0DC)
+val OwnerPrimaryInk = Color(0xFF2F4220)
+val OnPrimary = Color(0xFFFAF7F0)
+
+// ═══════════════════════════════════════════════════════════
+// PRIMARIO VETERINARIO — azul petróleo
+// ═══════════════════════════════════════════════════════════
+val VetPrimary = Color(0xFF3A5F7A)
+val VetPrimaryHi = Color(0xFF476F8C)
+val VetPrimarySoft = Color(0xFFDCE7F0)
+val VetPrimaryInk = Color(0xFF233E52)
+
+// ═══════════════════════════════════════════════════════════
+// SEMÁNTICOS — para estados (Success/Warn/Danger/Info)
+// ═══════════════════════════════════════════════════════════
+val Success = Color(0xFF4A8A3D)
+val SuccessSoft = Color(0xFFE0EEDC)
+val Warn = Color(0xFFB88421)
+val WarnSoft = Color(0xFFF5ECD6)
+val Danger = Color(0xFFB8422E)
+val DangerSoft = Color(0xFFF2DED8)
+val Info = Color(0xFF3A6A9E)
+val InfoSoft = Color(0xFFDCE5F0)

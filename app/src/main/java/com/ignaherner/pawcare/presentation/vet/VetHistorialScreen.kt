@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,7 +48,6 @@ import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.utils.toFriendlyDate
-import com.ignaherner.pawcare.ui.theme.WeightColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -296,7 +296,7 @@ private fun VetPesosList(items: List<Weight>) {
                         text = "${weight.peso} kg",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = WeightColor
+                        color = Color(0xFFE91E63)
                     )
                     Text(
                         text = weight.fecha.toFriendlyDate(),

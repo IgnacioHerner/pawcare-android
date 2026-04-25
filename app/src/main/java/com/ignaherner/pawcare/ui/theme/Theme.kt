@@ -15,57 +15,58 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Green40,
-    onPrimary = White,
-    primaryContainer = Green90,
-    onPrimaryContainer = Green10,
-    secondary = LightGreen20,
-    onSecondary = White,
-    secondaryContainer = LightGreen90,
-    onSecondaryContainer = LightGreen10,
-    background = Gray99,
-    onBackground = Gray10,
-    surface = White,
-    onSurface = Gray10,
+// ═══════════════════════════════════════════════════════════
+// ROL DEL USUARIO — define qué paleta usar
+// ═══════════════════════════════════════════════════════════
+enum class UserRole { OWNER, VET }
+
+// ═══════════════════════════════════════════════════════════
+// COLOR SCHEME DUEÑO — verde oliva
+// ═══════════════════════════════════════════════════════════
+private val OwnerLight = lightColorScheme(
+    primary = OwnerPrimary,
+    onPrimary = OnPrimary,
+    primaryContainer = OwnerPrimarySoft,
+    onPrimaryContainer = OwnerPrimaryInk,
+    background = BgCream,
+    onBackground = InkPrimary,
+    surface = Surface,
+    onSurface = InkPrimary,
+    surfaceVariant = SurfaceAlt,
+    onSurfaceVariant = InkMuted,
+    outline = LineStrong,
+    outlineVariant = Line,
+    error = Danger,
+    errorContainer = DangerSoft,
+    onErrorContainer = InkPrimary,
+    tertiary = Info,
+    tertiaryContainer = InfoSoft,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Green80,
-    onPrimary = Green20,
-    primaryContainer = Green30,
-    onPrimaryContainer = Green90,
-    secondary = LightGreen80,
-    onSecondary = LightGreen20,
-    secondaryContainer = LightGreen20,
-    onSecondaryContainer = LightGreen90,
-    background = Gray99,
-    onBackground = Gray10,
-    surface = White,
-    onSurface = Gray10,
-    surfaceVariant = Gray90,
-    onSurfaceVariant = Gray20
+// ═══════════════════════════════════════════════════════════
+// COLOR SCHEME VETERINARIO — azul petróleo
+// Comparte todo con OwnerLight, solo cambia el primario
+// ═══════════════════════════════════════════════════════════
+private val VetLight = OwnerLight.copy(
+    primary = VetPrimary,
+    onPrimary = OnPrimary,
+    primaryContainer = VetPrimarySoft,
+    onPrimaryContainer = VetPrimaryInk,
 )
 
+// ═══════════════════════════════════════════════════════════
+// THEME COMPOSABLE
+// Usar: PawCareTheme(role = UserRole.OWNER) { ... }
+// ═══════════════════════════════════════════════════════════
 @Composable
 fun PawCareTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    role: UserRole = UserRole.OWNER,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
-    val view = LocalView.current
-    if (!view.isInEditMode){
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-        }
-    }
-
+    val colors = if (role == UserRole.VET) VetLight else OwnerLight
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = colors,
+        typography = PawCareType,
         content = content
     )
 }
