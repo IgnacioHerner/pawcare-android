@@ -27,6 +27,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -81,7 +84,9 @@ class HomeViewModel @Inject constructor(
                                     .minByOrNull { it.proximaDosis!! },
                                 medicamentoActivo = medicamentos
                                     .firstOrNull { it.status == MedicationStatus.ACTIVO },
-                                ultimoPeso = pesos.firstOrNull()
+                                ultimoPeso = pesos.firstOrNull(),
+                                totalVacunas = vacunas.size,
+                                totalMedicamentos = medicamentos.size
                             )
                         }
                         _uiState.value = HomeUiState.Success(summaries)
@@ -105,6 +110,79 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun calcularAlertas(summaries: List<PetSummary>): List<HomeAlert> {
+        val alertas = mutableListOf<HomeAlert>()
+        val hoy = LocalDate.now()
+
+        summaries.forEach { summary ->
+            // Vacunas vencidas o proximas (en los proximos 7 dias)
+            summary.proximaVacuna?.let { vacuna ->
+                val proximaDosis = vacuna.proximaDosis ?: return@let
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                val fechaProxima = LocalDate.parse(proximaDosis, formatter)
+                val diasRestantes = java.time.temporal.ChronoUnit.DAYS
+                    .between(hoy, fechaProxima)
+
+                when{
+                    diasRestantes < 0 -> {
+                        // Vacuna vencida
+                        alertas.add(
+                            HomeAlert(
+                                tipo = AlertType.VACUNA_VENCIDA,
+                                petName = summary.pet.nombre,
+                                titulo = "Vacuna vencida",
+                                descripcion = "${summary.pet.nombre} tiene la vacuna ${vacuna.nombre} vencida"
+                            )
+                        )
+                    }
+                    diasRestantes <= 7 -> {
+                        // Vacuna proxima
+                        alertas.add(
+                            HomeAlert(
+                                tipo = AlertType.VACUNA_PROXIMA,
+                                petName = summary.pet.nombre,
+                                titulo = "Vacuna próxima",
+                                descripcion = "${summary.pet.nombre} necesita ${vacuna.nombre} en $diasRestantes días"
+                            )
+                        )
+                    }
+                }
+            }
+            // Medicamento activo
+            summary.medicamentoActivo?.let { medicamento ->
+                alertas.add(
+                    HomeAlert(
+                        tipo = AlertType.MEDICAMENTO_ACTIVO,
+                        petName = summary.pet.nombre,
+                        titulo = "Tratamiento en curso",
+                        descripcion = "${summary.pet.nombre} está tomando ${medicamento.nombre}"
+                    )
+                )
+            }
+        }
+        return alertas.take(2)
+    }
+
+    // Calcula el estado de salud general de una mascota
+    fun calcularEstadoMascota(summary: PetSummary): EstadoMascota {
+        val hoy = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+        // ¿Vacuna vencida?
+        summary.proximaVacuna?.proximaDosis?.let { proximaDosis ->
+            val fechaProxima = LocalDate.parse(proximaDosis, formatter)
+            val diasRestantes = ChronoUnit.DAYS.between(hoy, fechaProxima)
+
+            return when {
+                diasRestantes < 0 -> EstadoMascota.URGENTE
+                diasRestantes <= 14 -> EstadoMascota.ATENCION
+                else -> EstadoMascota.OK
+            }
+        }
+
+        return EstadoMascota.OK
+    }
 }
 
 sealed class HomeUiState {
@@ -113,3 +191,14 @@ sealed class HomeUiState {
     data class Success(val summaries: List<PetSummary>) : HomeUiState()
     data class Error(val mensaje: String) : HomeUiState()
 }
+
+data class HomeAlert(
+    val tipo: AlertType,
+    val petName: String,
+    val titulo: String,
+    val descripcion: String
+)
+
+enum class AlertType{VACUNA_VENCIDA, VACUNA_PROXIMA, MEDICAMENTO_ACTIVO}
+
+enum class EstadoMascota { OK, ATENCION, URGENTE }

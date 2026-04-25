@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -31,60 +32,26 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     authViewModel: AuthViewModel,
     ownerViewModel: OwnerViewModel = hiltViewModel()
-){
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Settings
-    )
-
-    var selectedIndex by remember { mutableIntStateOf(0) }
-
+) {
     Scaffold(
-        bottomBar = {
-            NavigationBar {
-                items.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = if (selectedIndex == index)
-                                    item.selectedIcon else item.icon,
-                                contentDescription = item.label
-                            )
-                        },
-                        label = { Text(item.label)},
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index}
-                    )
-                }
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToAddPet,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Agregar mascota")
             }
         },
-        floatingActionButton = {
-            if (selectedIndex == 0) {
-                FloatingActionButton(onClick = onNavigateToAddPet) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar mascota")
-                }
-            }
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        when (selectedIndex){
-            0 -> HomeScreen(
-                onNavigateToPetDetail = onNavigateToPetDetail,
-                onNavigateToAddPet = onNavigateToAddPet,
-                onNavigateToEdit = onNavigateToEdit,
-                onNavigateToOwnerDetail = onNavigateToOwnerDetail,
-                onNavigateToSettings = { selectedIndex = 1},
-                bottomPadding = innerPadding.calculateBottomPadding()
-            )
-            1 -> SettingsScreen(
-                onNavigateBack = { selectedIndex = 0},
-                onNavigateToLogin = {
-                    navController.navigate(PawCareDestinations.LOGIN) {
-                        popUpTo(0) { inclusive = true}
-                    }
-                },
-                onNavigateToOwnerDetail = onNavigateToOwnerDetail,
-                authViewModel = authViewModel
-            )
-        }
+        HomeScreen(
+            onNavigateToPetDetail = onNavigateToPetDetail,
+            onNavigateToAddPet = onNavigateToAddPet,
+            onNavigateToEdit = onNavigateToEdit,
+            onNavigateToOwnerDetail = onNavigateToOwnerDetail,
+            onNavigateToSettings = onNavigateToSettings,
+            bottomPadding = innerPadding.calculateBottomPadding()
+        )
     }
 }
