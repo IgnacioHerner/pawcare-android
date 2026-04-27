@@ -88,6 +88,9 @@ fun PetFormScreen(
     var fotoUri by remember { mutableStateOf("") }
     var castrado by remember { mutableStateOf(false) }
     var fechaCastracion by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
+    var codigo by remember { mutableStateOf("") }
+    var ownerId by remember { mutableStateOf("") }
 
 
     var showFechaCastracionPicker by remember { mutableStateOf(false) }
@@ -173,6 +176,9 @@ fun PetFormScreen(
             fechaCastracion = pet.fechaCastracion ?: ""
             fechaNacimientoTipo = pet.fechaNacimientoTipo
             fotoUri = pet.fotoUri ?: ""
+            firestoreId = pet.firestoreId
+            codigo = pet.codigo
+            ownerId = pet.ownerId
         }
     }
 
@@ -567,6 +573,9 @@ fun PetFormScreen(
                 onClick = {
                     val nuevaMascota = Pet(
                         id = petId ?: 0L,
+                        firestoreId = firestoreId,
+                        ownerId = ownerId,
+                        codigo = codigo,
                         nombre = nombre,
                         especie = especieSeleccionada,
                         raza = raza.ifBlank { null },
