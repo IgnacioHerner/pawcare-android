@@ -296,7 +296,7 @@ private fun VetLibretaSanitaria(
                         icon = Icons.Default.LocalPharmacy,
                         titulo = "Medicamento activo",
                         contenido = summary.medicamentoActivo?.nombre ?: "Sin activos",
-                        subtitulo = summary.medicamentoActivo?.dosis,
+                        subtitulo = summary.medicamentoActivo?.dosisDisplay,
                         color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.MEDICAMENTOS) },
                         modifier = Modifier.weight(1f)

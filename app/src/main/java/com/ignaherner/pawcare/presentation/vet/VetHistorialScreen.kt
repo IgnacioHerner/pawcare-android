@@ -234,33 +234,32 @@ private fun VetMedicamentosList(items: List<Medication>) {
                             onClick = {},
                             label = {
                                 Text(
-                                    if (medication.status == MedicationStatus.ACTIVO)
-                                        "Activo" else "Finalizado",
+                                    text = medication.status.displayName,
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             }
                         )
                     }
                     Text(
-                        text = "💊 ${medication.dosis}",
+                        text = "${medication.dosisDisplay} · ${medication.viaAdministracion.displayName}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "📅 Inicio: ${medication.fechaInicio.toFriendlyDate()}",
+                        text = "Inicio: ${medication.fechaInicio.toFriendlyDate()}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (!medication.esUnicaDosis) {
                         Text(
-                            text = "⏱ Cada ${medication.intervaloHoras}h · ${medication.duracionDias} días",
+                            text = "Cada ${medication.intervaloHoras}h · ${medication.duracionDias} días",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     medication.recetadoPor?.let {
                         Text(
-                            text = "👨‍⚕️ $it",
+                            text = it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

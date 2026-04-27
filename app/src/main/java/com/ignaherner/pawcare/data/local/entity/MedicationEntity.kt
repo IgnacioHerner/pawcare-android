@@ -23,12 +23,13 @@ data class MedicationEntity(
     val firestoreId: String,
     val petId: Long,
     val nombre: String,
+    val dosisCantidad: Double,
+    val dosisUnidad: String,
+    val viaAdministracion: String,
+    val esUnicaDosis: Int = 0,
     val fechaInicio: String,
     val duracionDias: Int,
-    val recetadoPor: String?,
     val intervaloHoras: Int,
-    val dosis: String,
-    val esUnicaDosis: Int = 0,
-    val notas: String?,
-    val status: String
+    val recetadoPor: String?,
+    val notas: String?
 )

@@ -28,35 +28,31 @@ class WorkManagerSyncManager @Inject constructor(
 
         // Reprogramar solo los Workers válidos
         pets.forEach { pet ->
-            // Medicamentos activos
+            // Medicamentos activos — status se calcula automáticamente
             val medicamentos = medicationRepository
                 .getMedicationByPetId(pet.id)
                 .firstOrNull() ?: emptyList()
 
             medicamentos
-                .filter { it.status == MedicationStatus.ACTIVO }
+                .filter { it.status == MedicationStatus.ACTIVO && !it.esUnicaDosis }
                 .forEach { medication ->
-                    val fechaFin = calcularFechaFin(
-                        medication.fechaInicio,
-                        medication.duracionDias
+                    workManagerHelper.programarRecordatorioMedicamento(
+                        medication, pet.nombre
                     )
-                    val diasRestantes = diasHastaFecha(fechaFin)
+                }
 
-                    if (diasRestantes <= 0) {
-                        // El tratamiento ya terminó — finalizar directamente
-                        val medicacionFinalizada = medication.copy(
-                            status = MedicationStatus.FINALIZADO
-                        )
-                        medicationRepository.updateMedication(medicacionFinalizada)
-                    } else {
-                        // Todavía activo — reprogramar Workers
-                        workManagerHelper.programarRecordatorioMedicamento(
-                            medication, pet.nombre
-                        )
-                        workManagerHelper.programarFinMedicamento(medication)
-                    }
+            // Vacunas con próxima dosis
+            val vacunas = vaccineRepository
+                .getVaccinesByPetId(pet.id)
+                .firstOrNull() ?: emptyList()
+
+            vacunas
+                .filter { it.proximaDosis != null }
+                .forEach { vaccine ->
+                    workManagerHelper.programarRecordatorioVacuna(
+                        vaccine, pet.nombre
+                    )
                 }
         }
     }
-
 }

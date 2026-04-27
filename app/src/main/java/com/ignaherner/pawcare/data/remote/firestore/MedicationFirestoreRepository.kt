@@ -3,32 +3,35 @@ package com.ignaherner.pawcare.data.remote.firestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.ignaherner.pawcare.domain.model.DosisUnidad
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.domain.model.ViaAdministracion
 
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MedicationFirestoreRepository @Inject constructor(){
+class MedicationFirestoreRepository @Inject constructor() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun guardarMedicamento(medication: Medication, petFirestoreId: String): Result<String>{
+    suspend fun guardarMedicamento(medication: Medication, petFirestoreId: String): Result<String> {
         return try {
             val medicationData = hashMapOf(
                 "petId" to petFirestoreId,
                 "nombre" to medication.nombre,
+                "dosisCantidad" to medication.dosisCantidad,
+                "dosisUnidad" to medication.dosisUnidad.name,
+                "viaAdministracion" to medication.viaAdministracion.name,
+                "esUnicaDosis" to medication.esUnicaDosis,
                 "fechaInicio" to medication.fechaInicio,
                 "duracionDias" to medication.duracionDias,
                 "intervaloHoras" to medication.intervaloHoras,
                 "recetadoPor" to medication.recetadoPor,
-                "dosis" to medication.dosis,
-                "esUnicaDosis" to medication.esUnicaDosis,
-                "notas" to medication.notas,
-                "status" to medication.status.name
+                "notas" to medication.notas
             )
 
             val docRef = firestore.collection("pets")
@@ -43,23 +46,24 @@ class MedicationFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun actualizarMedicamento(medication: Medication, petFirestoreId: String): Result<Unit>{
+    suspend fun actualizarMedicamento(medication: Medication, petFirestoreId: String): Result<Unit> {
         return try {
-            if(medication.firestoreId.isBlank()) return Result.failure(
+            if (medication.firestoreId.isBlank()) return Result.failure(
                 Exception("Sin firestoreId")
             )
 
             val medicationData = hashMapOf(
                 "petId" to petFirestoreId,
                 "nombre" to medication.nombre,
+                "dosisCantidad" to medication.dosisCantidad,
+                "dosisUnidad" to medication.dosisUnidad.name,
+                "viaAdministracion" to medication.viaAdministracion.name,
+                "esUnicaDosis" to medication.esUnicaDosis,
                 "fechaInicio" to medication.fechaInicio,
                 "duracionDias" to medication.duracionDias,
                 "intervaloHoras" to medication.intervaloHoras,
                 "recetadoPor" to medication.recetadoPor,
-                "dosis" to medication.dosis,
-                "esUnicaDosis" to medication.esUnicaDosis,
-                "notas" to medication.notas,
-                "status" to medication.status.name
+                "notas" to medication.notas
             )
             firestore.collection("pets")
                 .document(petFirestoreId)
@@ -74,7 +78,7 @@ class MedicationFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun eliminarMedicamento(firestoreId: String, petFirestoreId: String): Result<Unit>{
+    suspend fun eliminarMedicamento(firestoreId: String, petFirestoreId: String): Result<Unit> {
         return try {
             firestore.collection("pets")
                 .document(petFirestoreId)
@@ -84,7 +88,7 @@ class MedicationFirestoreRepository @Inject constructor(){
                 .await()
 
             Result.success(Unit)
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -103,16 +107,23 @@ class MedicationFirestoreRepository @Inject constructor(){
                     firestoreId = doc.id,
                     petId = 0L,
                     nombre = doc.getString("nombre") ?: "",
+                    dosisCantidad = doc.getDouble("dosisCantidad") ?: 1.0,
+                    dosisUnidad = try {
+                        DosisUnidad.valueOf(doc.getString("dosisUnidad") ?: "COMPRIMIDO")
+                    } catch (e: Exception) {
+                        DosisUnidad.COMPRIMIDO
+                    },
+                    viaAdministracion = try {
+                        ViaAdministracion.valueOf(doc.getString("viaAdministracion") ?: "ORAL")
+                    } catch (e: Exception) {
+                        ViaAdministracion.ORAL
+                    },
+                    esUnicaDosis = doc.getBoolean("esUnicaDosis") ?: false,
                     fechaInicio = doc.getString("fechaInicio") ?: "",
                     duracionDias = doc.getLong("duracionDias")?.toInt() ?: 1,
                     intervaloHoras = doc.getLong("intervaloHoras")?.toInt() ?: 8,
-                    dosis = doc.getString("dosis") ?: "",
-                    esUnicaDosis = doc.getBoolean("esUnicaDosis") ?: false,
-                    notas = doc.getString("notas"),
                     recetadoPor = doc.getString("recetadoPor"),
-                    status = MedicationStatus.valueOf(
-                        doc.getString("status") ?: MedicationStatus.ACTIVO.name
-                    )
+                    notas = doc.getString("notas")
                 )
             }
             Result.success(medication)

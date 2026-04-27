@@ -216,12 +216,14 @@ fun MedicationScreen(
                         }
                     }
                     is MedicationUiState.Success -> {
-                        val medicationsFiltradas = when(filtroSeleccionado) {
+                        val medicationsFiltradas = when (filtroSeleccionado) {
                             null -> state.medications
                             MedicationStatus.ACTIVO -> state.medications.filter {
                                 it.status == MedicationStatus.ACTIVO
                             }
-
+                            MedicationStatus.PROGRAMADO -> state.medications.filter {
+                                it.status == MedicationStatus.PROGRAMADO
+                            }
                             MedicationStatus.FINALIZADO -> state.medications.filter {
                                 it.status == MedicationStatus.FINALIZADO
                             }

@@ -118,7 +118,6 @@ class SyncRepository @Inject constructor(
 
                         if(medicacionConId.status == MedicationStatus.ACTIVO && !medicacionConId.esUnicaDosis){
                             workManagerHelper.programarRecordatorioMedicamento(medicacionConId, pet.nombre)
-                            workManagerHelper.programarFinMedicamento(medicacionConId)
                         }
 
                     } else {

@@ -3,9 +3,11 @@ package com.ignaherner.pawcare.presentation.vet
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,8 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ignaherner.pawcare.domain.model.DosisUnidad
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
+import com.ignaherner.pawcare.domain.model.ViaAdministracion
+import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 
@@ -53,20 +60,22 @@ fun VetMedicationFormScreen(
     viewModel: VetViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
+    var dosisCantidad by remember { mutableStateOf("1") }
+    var dosisUnidad by remember { mutableStateOf(DosisUnidad.COMPRIMIDO) }
+    var viaAdministracion by remember { mutableStateOf(ViaAdministracion.ORAL) }
+    var esUnicaDosis by remember { mutableStateOf(false) }
     var fechaInicio by remember { mutableStateOf(fechaHoy()) }
     var duracionDias by remember { mutableStateOf("") }
     var intervaloHoras by remember { mutableStateOf("") }
-    var dosis by remember { mutableStateOf("") }
-    var esUnicaDosis by remember { mutableStateOf(false) }
     var recetadoPor by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
-    var statusSeleccionado by remember { mutableStateOf(MedicationStatus.ACTIVO) }
-    var dosisExpanded by remember { mutableStateOf(false) }
+
+    var unidadDropdownExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-    val opcionesDosis = listOf("1/8", "1/4", "1/2", "1", "1½", "2", "3", "4")
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -97,25 +106,92 @@ fun VetMedicationFormScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(PawSpace.lg)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
                 label = { Text("Nombre del medicamento") },
+                placeholder = { Text("Ej: Amoxicilina") },
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Dosis
+            Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                Text(text = "Dosis", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                    OutlinedTextField(
+                        value = dosisCantidad,
+                        onValueChange = { dosisCantidad = it },
+                        label = { Text("Cantidad") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.weight(1f)
+                    )
+                    ExposedDropdownMenuBox(
+                        expanded = unidadDropdownExpanded,
+                        onExpandedChange = { unidadDropdownExpanded = it },
+                        modifier = Modifier.weight(1.5f)
+                    ) {
+                        OutlinedTextField(
+                            value = dosisUnidad.displayName,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Unidad") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = unidadDropdownExpanded)
+                            },
+                            modifier = Modifier.fillMaxWidth().menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = unidadDropdownExpanded,
+                            onDismissRequest = { unidadDropdownExpanded = false }
+                        ) {
+                            DosisUnidad.values().forEach { unidad ->
+                                DropdownMenuItem(
+                                    text = { Text(unidad.displayName) },
+                                    onClick = {
+                                        dosisUnidad = unidad
+                                        unidadDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Vía
+            Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                Text("Vía de administración", style = MaterialTheme.typography.titleSmall)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+                ) {
+                    ViaAdministracion.values().forEach { via ->
+                        FilterChip(
+                            selected = viaAdministracion == via,
+                            onClick = { viaAdministracion = via },
+                            label = { Text(via.displayName) }
+                        )
+                    }
+                }
+            }
+
+            // Única dosis
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -123,57 +199,37 @@ fun VetMedicationFormScreen(
             ) {
                 Column {
                     Text("¿Es de única dosis?", style = MaterialTheme.typography.bodyLarge)
-                    Text("Se administra una sola vez",
+                    Text(
+                        "Se administra una sola vez",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                Switch(checked = esUnicaDosis, onCheckedChange = {
-                    esUnicaDosis = it
-                    if (it) { duracionDias = "1"; intervaloHoras = "0" }
-                })
+                Switch(
+                    checked = esUnicaDosis,
+                    onCheckedChange = {
+                        esUnicaDosis = it
+                        if (it) { duracionDias = "0"; intervaloHoras = "0" }
+                    }
+                )
             }
 
             if (!esUnicaDosis) {
-                OutlinedTextField(
-                    value = duracionDias,
-                    onValueChange = { duracionDias = it },
-                    label = { Text("Duración en días") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = intervaloHoras,
-                    onValueChange = { intervaloHoras = it },
-                    label = { Text("Cada cuántas horas") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            ExposedDropdownMenuBox(
-                expanded = dosisExpanded,
-                onExpandedChange = { dosisExpanded = it }
-            ) {
-                OutlinedTextField(
-                    value = dosis,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Dosis") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dosisExpanded)
-                    },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = dosisExpanded,
-                    onDismissRequest = { dosisExpanded = false }
-                ) {
-                    opcionesDosis.forEach { opcion ->
-                        DropdownMenuItem(
-                            text = { Text("$opcion comprimido/s") },
-                            onClick = { dosis = opcion; dosisExpanded = false }
-                        )
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                    OutlinedTextField(
+                        value = duracionDias,
+                        onValueChange = { duracionDias = it },
+                        label = { Text("Días") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = intervaloHoras,
+                        onValueChange = { intervaloHoras = it },
+                        label = { Text("Cada X horas") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
 
@@ -193,7 +249,7 @@ fun VetMedicationFormScreen(
             OutlinedTextField(
                 value = recetadoPor,
                 onValueChange = { recetadoPor = it },
-                label = { Text("Recetado por") },
+                label = { Text("Recetado por (opcional)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -201,8 +257,8 @@ fun VetMedicationFormScreen(
                 value = notas,
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Button(
@@ -212,21 +268,22 @@ fun VetMedicationFormScreen(
                         firestoreId = "",
                         petId = 0L,
                         nombre = nombre,
-                        fechaInicio = fechaInicio,
-                        duracionDias = if (esUnicaDosis) 1 else duracionDias.toIntOrNull() ?: 1,
-                        intervaloHoras = if (esUnicaDosis) 0 else intervaloHoras.toIntOrNull() ?: 8,
-                        dosis = dosis,
+                        dosisCantidad = dosisCantidad.toDoubleOrNull() ?: 1.0,
+                        dosisUnidad = dosisUnidad,
+                        viaAdministracion = viaAdministracion,
                         esUnicaDosis = esUnicaDosis,
-                        notas = notas.ifBlank { null },
+                        fechaInicio = fechaInicio,
+                        duracionDias = if (esUnicaDosis) 0 else duracionDias.toIntOrNull() ?: 1,
+                        intervaloHoras = if (esUnicaDosis) 0 else intervaloHoras.toIntOrNull() ?: 8,
                         recetadoPor = recetadoPor.ifBlank { null },
-                        status = statusSeleccionado
+                        notas = notas.ifBlank { null }
                     )
                     viewModel.guardarMedicamento(nuevoMed, petFirestoreId)
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank() && dosis.isNotBlank() &&
+                enabled = nombre.isNotBlank() && dosisCantidad.isNotBlank() &&
                         (esUnicaDosis || (duracionDias.isNotBlank() && intervaloHoras.isNotBlank())),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(56.dp)
             ) { Text("Guardar") }
         }
     }

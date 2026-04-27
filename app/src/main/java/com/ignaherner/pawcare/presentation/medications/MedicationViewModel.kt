@@ -64,15 +64,12 @@ class MedicationViewModel @Inject constructor(
                     repository.updateMedication(medicationConId.copy(firestoreId = firestoreId))
                 }
             }
-            if (medicationConId.status == MedicationStatus.ACTIVO) {
-                if (!medicationConId.esUnicaDosis) {
-                    workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
-                    workManagerHelper.programarFinMedicamento(medicationConId)
-                    showSnackbar("Recordatorio cada ${medicationConId.intervaloHoras}h programado 💊")
-                } else {
-                    repository.updateMedication(medicationConId.copy(status = MedicationStatus.FINALIZADO))
-                    showSnackbar("Medicamento de única dosis registrado 💊")
-                }
+            // Solo programar recordatorios si está ACTIVO y no es única dosis
+            if (medicationConId.status == MedicationStatus.ACTIVO && !medicationConId.esUnicaDosis) {
+                workManagerHelper.programarRecordatorioMedicamento(medicationConId, petName)
+                showSnackbar("Recordatorio cada ${medicationConId.intervaloHoras}h programado")
+            } else {
+                showSnackbar("Medicamento registrado")
             }
         }
     }
@@ -85,7 +82,8 @@ class MedicationViewModel @Inject constructor(
             if (medication.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
                 firestoreRepository.actualizarMedicamento(medication, petFirestoreId)
             }
-            if (medication.status == MedicationStatus.ACTIVO) {
+            // Reprogramar recordatorios según el status calculado
+            if (medication.status == MedicationStatus.ACTIVO && !medication.esUnicaDosis) {
                 workManagerHelper.programarRecordatorioMedicamento(medication, petName)
             } else {
                 workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
@@ -96,7 +94,6 @@ class MedicationViewModel @Inject constructor(
     fun deleteMedication(medication: Medication) {
         safeLaunch(onError = "Error al eliminar") {
             workManagerHelper.cancelarRecordatorioMedicamento(medication.id)
-            workManagerHelper.cancelarFinMedicamento(medication.id)
             repository.deleteMedication(medication)
             val pet = petRepository.getPetById(medication.petId).firstOrNull()
             val petFirestoreId = pet?.firestoreId ?: ""
@@ -106,8 +103,6 @@ class MedicationViewModel @Inject constructor(
             showSnackbar("${medication.nombre} eliminado")
         }
     }
-
-
 }
 
 sealed class MedicationUiState {
