@@ -8,19 +8,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Notes
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -28,15 +35,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.utils.toFriendlyDate
-import com.ignaherner.pawcare.presentation.components.InfoRow
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.ui.theme.Danger
+import com.ignaherner.pawcare.ui.theme.DangerSoft
+import com.ignaherner.pawcare.ui.theme.Info
+import com.ignaherner.pawcare.ui.theme.InfoSoft
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.ui.theme.Success
+import com.ignaherner.pawcare.ui.theme.SuccessSoft
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,89 +111,161 @@ fun VaccineDetailScreen(
     }
 }
 
+
 @Composable
 fun VaccineDetailContent(
     vaccine: Vaccine,
     modifier: Modifier
 ) {
+    val (toneBg, toneFg) = when (vaccine.status) {
+        is VaccineStatus.Aplicada -> SuccessSoft to Success
+        is VaccineStatus.Programada -> InfoSoft to Info
+        is VaccineStatus.Vencida -> DangerSoft to Danger
+    }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(PawSpace.lg),
+        verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        // Header con tipo + status
+        Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
             Text(
-                text = vaccine.nombre,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                text = vaccine.tipo.displayName,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            AssistChip(
-                onClick = {},
-                label = {
-                    Text(
-                        text = when (vaccine.status) {
-                            is VaccineStatus.Aplicada -> "Aplicada"
-                            is VaccineStatus.Pendiente -> "Pendiente"
-                            is VaccineStatus.Programada -> "Programada"
-                        },
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = when (vaccine.status) {
-                        is VaccineStatus.Aplicada -> Color(0xFF4CAF50).copy(alpha = 0.15f)
-                        is VaccineStatus.Programada -> Color(0xFF2196F3).copy(alpha = 0.15f)
-                        is VaccineStatus.Pendiente -> Color(0xFFFF9800).copy(alpha = 0.15f)
-                    },
-                    labelColor = when (vaccine.status) {
-                        is VaccineStatus.Aplicada -> Color(0xFF4CAF50)
-                        is VaccineStatus.Programada -> Color(0xFF2196F3)
-                        is VaccineStatus.Pendiente -> Color(0xFFFF9800)
-                    }
+            vaccine.nombreComercial?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            )
-        }
-
-        // Info de la vacuna
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            }
+            Surface(
+                shape = RoundedCornerShape(PawRadii.xs),
+                color = toneBg
             ) {
                 Text(
-                    text = "Información",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    text = vaccine.status.displayName(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = toneFg,
+                    modifier = Modifier.padding(horizontal = PawSpace.md, vertical = PawSpace.xs)
+                )
+            }
+        }
+
+        // Card de info
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(PawRadii.md),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(PawSpace.lg),
+                verticalArrangement = Arrangement.spacedBy(PawSpace.md)
+            ) {
+                Text(
+                    text = "INFORMACIÓN",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                vaccine.fecha?.let {
-                    InfoRow("📅 Fecha aplicación", it.toFriendlyDate())
-                }
+                DetailRow(
+                    icon = Icons.Outlined.CalendarMonth,
+                    label = "Fecha aplicación",
+                    value = vaccine.fechaAplicacion.toFriendlyDate()
+                )
 
-                InfoRow(
-                    "🔄 Es anual",
-                    if (vaccine.esAnual) "Sí" else "No"
+                DetailRow(
+                    icon = Icons.Outlined.Repeat,
+                    label = "Frecuencia",
+                    value = vaccine.frecuencia.displayName
                 )
 
                 vaccine.proximaDosis?.let {
-                    InfoRow("💉 Próxima dosis", it.toFriendlyDate())
+                    DetailRow(
+                        icon = Icons.Outlined.Schedule,
+                        label = "Próxima dosis",
+                        value = it.toFriendlyDate()
+                    )
                 }
 
                 vaccine.veterinario?.let {
-                    InfoRow("👨‍⚕️ Veterinario", it)
+                    DetailRow(
+                        icon = Icons.Outlined.Person,
+                        label = "Veterinario",
+                        value = it
+                    )
                 }
 
                 vaccine.notas?.let {
-                    InfoRow("📝 Notas", it)
+                    DetailRow(
+                        icon = Icons.Outlined.Notes,
+                        label = "Notas",
+                        value = it
+                    )
                 }
             }
+        }
+
+        // Descripción de la vacuna
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(PawRadii.md),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(PawSpace.lg),
+                verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+            ) {
+                Text(
+                    text = "SOBRE ESTA VACUNA",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = vaccine.tipo.descripcion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PawCareIcon(
+            icon = icon,
+            contentDescription = null,
+            size = PawIconSize.default,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

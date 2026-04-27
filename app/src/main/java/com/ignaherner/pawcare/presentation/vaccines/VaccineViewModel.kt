@@ -94,7 +94,7 @@ class VaccineViewModel @Inject constructor(
             if (vaccine.firestoreId.isNotBlank() && petFirestoreId.isNotBlank()) {
                 firestoreRepository.eliminarVacuna(vaccine.firestoreId, petFirestoreId)
             }
-            showSnackbar("${vaccine.nombre} eliminada")
+            showSnackbar("${vaccine.tipo.displayName} eliminada")
         }
     }
 }

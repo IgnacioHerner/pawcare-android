@@ -184,7 +184,7 @@ fun PetSummaryCard(
                             tint = toneFg
                         )
                         Text(
-                            text = "${vacuna.nombre} ${
+                            text = "${vacuna.tipo.displayName} ${
                                 when (estado) {
                                     EstadoMascota.URGENTE -> "vencida"
                                     EstadoMascota.ATENCION -> "vence pronto"

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface VaccineDao {
 
-    @Query("SELECT * FROM vaccines WHERE petId = :petId ORDER BY fecha DESC")
+    @Query("SELECT * FROM vaccines WHERE petId = :petId ORDER BY fechaAplicacion DESC")
     fun getVaccinesByPetId(petId: Long): Flow<List<VaccineEntity>>
 
     @Query("SELECT * FROM vaccines WHERE id = :vaccineId")

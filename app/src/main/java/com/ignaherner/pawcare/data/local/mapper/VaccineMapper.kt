@@ -1,51 +1,46 @@
 package com.ignaherner.pawcare.data.local.mapper
 
 import com.ignaherner.pawcare.data.local.entity.VaccineEntity
+import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
+import com.ignaherner.pawcare.domain.model.TipoVacuna
 import com.ignaherner.pawcare.domain.model.Vaccine
-import com.ignaherner.pawcare.domain.model.VaccineStatus
+
+// ═══════════════════════════════════════════════════════════
+// VACCINE MAPPER
+// Convierte entre Entity (Room) y Domain (Vaccine)
+// El status NO se guarda — se calcula dinámicamente
+// ═══════════════════════════════════════════════════════════
 
 fun VaccineEntity.toDomain(): Vaccine = Vaccine(
     id = id,
     firestoreId = firestoreId,
     petId = petId,
-    nombre = nombre,
-    fecha = fecha,
-    esAnual = esAnual == 1,
+    tipo = try {
+        TipoVacuna.valueOf(tipo)
+    } catch (e: Exception) {
+        TipoVacuna.OTRA
+    },
+    nombreComercial = nombreComercial,
+    fechaAplicacion = fechaAplicacion,
+    frecuencia = try {
+        FrecuenciaVacuna.valueOf(frecuencia)
+    } catch (e: Exception) {
+        FrecuenciaVacuna.UNICA
+    },
     proximaDosis = proximaDosis,
     veterinario = veterinario,
-    notas = notas,
-    status = when (status) {
-        "PROGRAMADA" -> VaccineStatus.Programada(fecha ?: "")
-        "APLICADA" -> VaccineStatus.Aplicada(fecha ?: "")
-        else -> VaccineStatus.Pendiente
-    }
+    notas = notas
 )
 
 fun Vaccine.toEntity(): VaccineEntity = VaccineEntity(
     id = id,
     firestoreId = firestoreId,
     petId = petId,
-    nombre = nombre,
-    fecha = fecha,
-    esAnual = if (esAnual) 1 else 0,
+    tipo = tipo.name,
+    nombreComercial = nombreComercial,
+    fechaAplicacion = fechaAplicacion,
+    frecuencia = frecuencia.name,
     proximaDosis = proximaDosis,
     veterinario = veterinario,
-    notas = notas,
-    status = when (status) {
-        is VaccineStatus.Pendiente -> "PENDIENTE"
-        is VaccineStatus.Programada -> "PROGRAMADA"
-        is VaccineStatus.Aplicada -> "APLICADA"
-    }
+    notas = notas
 )
-
-fun VaccineStatus.toFirestoreString(): String = when (this) {
-    is VaccineStatus.Aplicada -> "Aplicada"
-    is VaccineStatus.Pendiente -> "Pendiente"
-    is VaccineStatus.Programada -> "Programada"
-}
-
-fun String.toVaccineStatus(): VaccineStatus = when (this) {
-    "Aplicada" -> VaccineStatus.Aplicada(fechaAplicacion = "")
-    "Programada" -> VaccineStatus.Programada(fechaProgramada = "")
-    else -> VaccineStatus.Pendiente
-}

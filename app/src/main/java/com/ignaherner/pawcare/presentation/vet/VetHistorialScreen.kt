@@ -169,7 +169,7 @@ private fun VetVacunasList(items: List<Vaccine>) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = vaccine.nombre,
+                            text = vaccine.tipo.displayName,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -177,33 +177,27 @@ private fun VetVacunasList(items: List<Vaccine>) {
                             onClick = {},
                             label = {
                                 Text(
-                                    when (vaccine.status) {
-                                        is VaccineStatus.Aplicada -> "Aplicada"
-                                        is VaccineStatus.Pendiente -> "Pendiente"
-                                        is VaccineStatus.Programada -> "Programada"
-                                    },
+                                    text = vaccine.status.displayName(),
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             }
                         )
                     }
-                    vaccine.fecha?.let {
-                        Text(
-                            text = "📅 ${it.toFriendlyDate()}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "Aplicación: ${vaccine.fechaAplicacion.toFriendlyDate()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     vaccine.proximaDosis?.let {
                         Text(
-                            text = "💉 Próxima: ${it.toFriendlyDate()}",
+                            text = "Próxima: ${it.toFriendlyDate()}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
                     vaccine.veterinario?.let {
                         Text(
-                            text = "👨‍⚕️ $it",
+                            text = it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

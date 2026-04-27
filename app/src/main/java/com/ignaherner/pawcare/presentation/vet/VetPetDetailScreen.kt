@@ -285,8 +285,8 @@ private fun VetLibretaSanitaria(
                     DashboardCard(
                         icon = Icons.Default.Favorite,
                         titulo = "Última vacuna",
-                        contenido = summary.ultimaVacuna?.nombre ?: "Sin registros",
-                        subtitulo = summary.ultimaVacuna?.fecha?.toFriendlyDate(),
+                        contenido = summary.ultimaVacuna?.tipo?.displayName ?: "Sin registros",
+                        subtitulo = summary.ultimaVacuna?.fechaAplicacion?.toFriendlyDate(),
                         color = Color(0xFFE91E63),
                         onClick = { onNavigateToHistorial(VetHistorialTipo.VACUNAS) },
                         modifier = Modifier.weight(1f)

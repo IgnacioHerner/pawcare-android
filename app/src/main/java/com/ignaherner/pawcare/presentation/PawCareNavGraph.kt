@@ -665,6 +665,7 @@ fun PawCareNavGraph(
             VaccineScreen(
                 petId = petId,
                 petName = petName,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack()},
                 onNavigateToEdit = { vaccineId ->
                     navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
@@ -823,7 +824,7 @@ fun PawCareNavGraph(
                 viewModel = viewModel,
                 petId = petId,
                 petName = petName,
-                isVeterinario = false,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { medicationId ->
                     navController.navigate(

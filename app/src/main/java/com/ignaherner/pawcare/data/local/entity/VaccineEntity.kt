@@ -22,11 +22,11 @@ data class VaccineEntity(
     val id: Long = 0,
     val firestoreId: String = "",
     val petId: Long,
-    val nombre: String,
-    val fecha: String?,
-    val esAnual: Int = 0,
+    val tipo: String, // TipoVacuna como String (ej: "ANTIRRABICA_CANINA")
+    val nombreComercial: String?,
+    val fechaAplicacion: String,
+    val frecuencia: String, // FrecuenciaVacuna como String (ej: "ANUAL")
     val proximaDosis: String?,
     val veterinario: String?,
-    val notas: String?,
-    val status: String
+    val notas: String?
 )

@@ -3,16 +3,15 @@ package com.ignaherner.pawcare.data.remote.firestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.ignaherner.pawcare.data.local.mapper.toFirestoreString
-import com.ignaherner.pawcare.data.local.mapper.toVaccineStatus
+import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
+import com.ignaherner.pawcare.domain.model.TipoVacuna
 import com.ignaherner.pawcare.domain.model.Vaccine
-import com.ignaherner.pawcare.domain.model.VaccineStatus
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class VaccineFirestoreRepository @Inject constructor(){
+class VaccineFirestoreRepository @Inject constructor() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -21,13 +20,13 @@ class VaccineFirestoreRepository @Inject constructor(){
         return try {
             val vaccineData = hashMapOf(
                 "petId" to petFirestoreId,
-                "nombre" to vaccine.nombre,
-                "fecha" to vaccine.fecha,
-                "esAnual" to vaccine.esAnual,
+                "tipo" to vaccine.tipo.name,
+                "nombreComercial" to vaccine.nombreComercial,
+                "fechaAplicacion" to vaccine.fechaAplicacion,
+                "frecuencia" to vaccine.frecuencia.name,
                 "proximaDosis" to vaccine.proximaDosis,
                 "veterinario" to vaccine.veterinario,
-                "notas" to vaccine.notas,
-                "status" to vaccine.status.toFirestoreString()
+                "notas" to vaccine.notas
             )
 
             val docRef = firestore.collection("pets")
@@ -48,13 +47,13 @@ class VaccineFirestoreRepository @Inject constructor(){
                 Exception("Sin firestoreId")
             )
             val vaccineData = hashMapOf(
-                "nombre" to vaccine.nombre,
-                "fecha" to vaccine.fecha,
-                "esAnual" to vaccine.esAnual,
+                "tipo" to vaccine.tipo.name,
+                "nombreComercial" to vaccine.nombreComercial,
+                "fechaAplicacion" to vaccine.fechaAplicacion,
+                "frecuencia" to vaccine.frecuencia.name,
                 "proximaDosis" to vaccine.proximaDosis,
                 "veterinario" to vaccine.veterinario,
-                "notas" to vaccine.notas,
-                "status" to vaccine.status.toFirestoreString()
+                "notas" to vaccine.notas
             )
             firestore.collection("pets")
                 .document(petFirestoreId)
@@ -95,14 +94,21 @@ class VaccineFirestoreRepository @Inject constructor(){
                     id = 0L,
                     firestoreId = doc.id,
                     petId = 0L,
-                    nombre = doc.getString("nombre") ?: "",
-                    fecha = doc.getString("fecha"),
-                    esAnual = doc.getBoolean("esAnual") ?: false,
+                    tipo = try {
+                        TipoVacuna.valueOf(doc.getString("tipo") ?: "OTRA")
+                    } catch (e: Exception) {
+                        TipoVacuna.OTRA
+                    },
+                    nombreComercial = doc.getString("nombreComercial"),
+                    fechaAplicacion = doc.getString("fechaAplicacion") ?: "",
+                    frecuencia = try {
+                        FrecuenciaVacuna.valueOf(doc.getString("frecuencia") ?: "UNICA")
+                    } catch (e: Exception) {
+                        FrecuenciaVacuna.UNICA
+                    },
                     proximaDosis = doc.getString("proximaDosis"),
                     veterinario = doc.getString("veterinario"),
-                    notas = doc.getString("notas"),
-                    status = doc.getString("status")?.toVaccineStatus()
-                        ?: VaccineStatus.Pendiente
+                    notas = doc.getString("notas")
                 )
             }
             Result.success(vacunas)

@@ -3,13 +3,19 @@ package com.ignaherner.pawcare.presentation.vaccines
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -17,15 +23,17 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,13 +46,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
+import com.ignaherner.pawcare.domain.model.TipoVacuna
 import com.ignaherner.pawcare.domain.model.Vaccine
-import com.ignaherner.pawcare.domain.model.VaccineStatus
-import com.ignaherner.pawcare.utils.calcularProximaDosis
-import com.ignaherner.pawcare.domain.model.displayName
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.pets.PetDetailState
+import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.utils.calcularProximaDosisConFrecuencia
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,58 +68,70 @@ fun VaccineFormScreen(
     vaccineId: Long? = null,
     onNavigateBack: () -> Unit,
     viewModel: VaccineViewModel,
-    settingsViewModel: SettingsViewModel = hiltViewModel()
-){
-    // Estado local del formulario
-    var nombre by remember { mutableStateOf("") }
-    var fecha by remember { mutableStateOf(fechaHoy()) }
-    var esAnual by remember { mutableStateOf(false) }
-    var proximaDosis by remember { mutableStateOf("") }
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    petViewModel: PetViewModel = hiltViewModel()
+) {
+    // Estado del formulario
+    var tipoSeleccionado by remember { mutableStateOf<TipoVacuna?>(null) }
+    var nombreComercial by remember { mutableStateOf("") }
+    var fechaAplicacion by remember { mutableStateOf(fechaHoy()) }
+    var frecuencia by remember { mutableStateOf(FrecuenciaVacuna.ANUAL) }
     var veterinario by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
-    var statusSeleccionado by remember { mutableStateOf<VaccineStatus>(VaccineStatus.Pendiente) }
-    var dropdownExpanded by remember { mutableStateOf(false) }
 
-    // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
+    var tipoDropdownExpanded by remember { mutableStateOf(false) }
 
     val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
-
-    // Colecta el detailState
     val vaccineDetailState by viewModel.vaccineDetailState.collectAsStateWithLifecycle()
+    val petDetailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
-    // Cargar la vacuna si estamos editando
+    // Cargar pet para obtener especie
+    LaunchedEffect(petId) {
+        petViewModel.loadPetById(petId)
+    }
+
+    // Cargar vacuna si edita
     LaunchedEffect(vaccineId) {
-        vaccineId?.let{ viewModel.loadVaccineById(it)}
+        vaccineId?.let { viewModel.loadVaccineById(it) }
     }
 
     LaunchedEffect(vaccineDetailState) {
-        if(vaccineDetailState is VaccineDetailState.Success) {
+        if (vaccineDetailState is VaccineDetailState.Success) {
             val vaccine = (vaccineDetailState as VaccineDetailState.Success).vaccine
-            nombre = vaccine.nombre
-            fecha = vaccine.fecha ?: ""
-            esAnual = vaccine.esAnual
+            tipoSeleccionado = vaccine.tipo
+            nombreComercial = vaccine.nombreComercial ?: ""
+            fechaAplicacion = vaccine.fechaAplicacion
+            frecuencia = vaccine.frecuencia
             veterinario = vaccine.veterinario ?: ""
             notas = vaccine.notas ?: ""
-            statusSeleccionado = vaccine.status
         }
     }
 
     LaunchedEffect(nombreVeterinarioState) {
-        if (veterinario.isNotBlank()) {
+        if (veterinario.isBlank()) {
             veterinario = nombreVeterinarioState
         }
     }
 
-    // DatePickerState
+    // Especie del pet para filtrar tipos
+    val especie = when (val state = petDetailState) {
+        is PetDetailState.Success -> state.pet.especie
+        else -> null
+    }
+
+    val tiposDisponibles = remember(especie) {
+        especie?.let { TipoVacuna.porEspecie(it) } ?: TipoVacuna.values().toList()
+    }
+
+    // DatePicker
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
-    // Dialog
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false},
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -114,168 +140,198 @@ fun VaccineFormScreen(
                                 .ofEpochMilli(millis)
                                 .atZone(java.time.ZoneId.systemDefault())
                                 .toLocalDate()
-                            fecha = localDate.toFormattedString()
+                            fechaAplicacion = localDate.toFormattedString()
                         }
                         showDatePicker = false
                     }
-                ) { Text("Aceptar")}
+                ) { Text("Aceptar") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false}) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
             }
         ) {
             DatePicker(state = datePickerState)
         }
     }
 
-    val statusOptions = listOf(
-        VaccineStatus.Pendiente,
-        VaccineStatus.Programada(""),
-        VaccineStatus.Aplicada("")
-    )
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                        Text( if(vaccineId == null) "Nueva Vacuna" else "Editar Vacunar")
-                },
+                title = { Text(if (vaccineId == null) "Nueva vacuna" else "Editar vacuna") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(PawSpace.lg)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            // Nombre
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it},
-                label = { Text("Nombre de la vacuna")},
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Fecha
-            OutlinedTextField(
-                value = fecha,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Fecha de aplicación")},
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true}) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Elegir fecha"
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable{ showDatePicker = true}
-            )
-
-            // Switch anual
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column{
-                    Text(
-                        text = "Vacuna anual",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Calcula la proxima dosis automaticamente",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = esAnual,
-                    onCheckedChange = { esAnual = it}
-                )
-            }
-
-            // Proxima dosis - solo si es anual
-            if(esAnual && fecha.isNotBlank()) {
-                OutlinedTextField(
-                    value = calcularProximaDosis(fecha),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Proxima dosis")},
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-//            // Proxima dosis
-//            OutlinedTextField(
-//                value = proximaDosis,
-//                onValueChange = { proximaDosis = it},
-//                label = { Text("Proxima dosis (dd/mm/yyyy)")},
-//                modifier = Modifier.fillMaxWidth()
-//            )
-
-            // Veterinario
-            OutlinedTextField(
-                value = nombreVeterinarioState,
-                onValueChange = {},
-                label = { Text("Veterinario")},
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Notas opcional
-            OutlinedTextField(
-                value = notas,
-                onValueChange = { notas = it},
-                label = { Text("Notas")},
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Dropdown status de la vacuna
+            // Tipo de vacuna - dropdown
             ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it}
+                expanded = tipoDropdownExpanded,
+                onExpandedChange = { tipoDropdownExpanded = it }
             ) {
                 OutlinedTextField(
-                    value = statusSeleccionado.displayName(),
+                    value = tipoSeleccionado?.displayName ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Estado")},
+                    label = { Text("Tipo de vacuna") },
+                    placeholder = { Text("Seleccioná una vacuna") },
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded =  dropdownExpanded)
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = tipoDropdownExpanded)
+                    },
+                    supportingText = tipoSeleccionado?.let {
+                        { Text(it.descripcion) }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor()
                 )
                 ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false}
+                    expanded = tipoDropdownExpanded,
+                    onDismissRequest = { tipoDropdownExpanded = false }
                 ) {
-                    statusOptions.forEach { status ->
+                    tiposDisponibles.forEach { tipo ->
                         DropdownMenuItem(
-                            text = { Text(status.displayName()) },
+                            text = {
+                                Column {
+                                    Text(
+                                        text = tipo.displayName,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        text = tipo.descripcion,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
                             onClick = {
-                                statusSeleccionado = status
-                                dropdownExpanded = false
+                                tipoSeleccionado = tipo
+                                tipoDropdownExpanded = false
                             }
                         )
                     }
                 }
             }
 
+            // Nombre comercial - opcional
+            OutlinedTextField(
+                value = nombreComercial,
+                onValueChange = { nombreComercial = it },
+                label = { Text("Nombre comercial (opcional)") },
+                placeholder = { Text("Ej: Nobivac DHPPi") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Fecha de aplicación
+            OutlinedTextField(
+                value = fechaAplicacion,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha de aplicación") },
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
+            )
+
+            // Frecuencia - chips
+            Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                Text(
+                    text = "Frecuencia",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+                ) {
+                    FrecuenciaVacuna.values().forEach { freq ->
+                        FilterChip(
+                            selected = frecuencia == freq,
+                            onClick = { frecuencia = freq },
+                            label = { Text(freq.displayName) }
+                        )
+                    }
+                }
+            }
+
+            // Próxima dosis calculada
+            if (frecuencia != FrecuenciaVacuna.UNICA && fechaAplicacion.isNotBlank()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(PawRadii.sm)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(PawSpace.md),
+                        horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.Schedule,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Column {
+                            Text(
+                                text = "Próxima dosis",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = calcularProximaDosisConFrecuencia(fechaAplicacion, frecuencia),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Veterinario
+            OutlinedTextField(
+                value = veterinario,
+                onValueChange = { veterinario = it },
+                label = { Text("Veterinario (opcional)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Notas
+            OutlinedTextField(
+                value = notas,
+                onValueChange = { notas = it },
+                label = { Text("Notas (opcional)") },
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Botón guardar
             Button(
                 onClick = {
+                    val tipo = tipoSeleccionado ?: return@Button
+                    val proximaDosis = if (frecuencia != FrecuenciaVacuna.UNICA) {
+                        calcularProximaDosisConFrecuencia(fechaAplicacion, frecuencia)
+                    } else null
+
                     val nuevaVacuna = Vaccine(
                         id = vaccineId ?: 0L,
                         firestoreId = when (val state = vaccineDetailState) {
@@ -283,23 +339,25 @@ fun VaccineFormScreen(
                             else -> ""
                         },
                         petId = petId,
-                        nombre = nombre,
-                        fecha = fecha.ifBlank { null },
-                        esAnual = esAnual,
-                        proximaDosis = if (esAnual) calcularProximaDosis(fecha) else null,
+                        tipo = tipo,
+                        nombreComercial = nombreComercial.ifBlank { null },
+                        fechaAplicacion = fechaAplicacion,
+                        frecuencia = frecuencia,
+                        proximaDosis = proximaDosis,
                         veterinario = veterinario.ifBlank { null },
-                        notas = notas.ifBlank { null },
-                        status = statusSeleccionado
+                        notas = notas.ifBlank { null }
                     )
-                    if (vaccineId == null){
+                    if (vaccineId == null) {
                         viewModel.insertVaccine(nuevaVacuna, petName)
                     } else {
                         viewModel.updateVaccine(nuevaVacuna, petName)
                     }
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
+                enabled = tipoSeleccionado != null && fechaAplicacion.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
                 Text(if (vaccineId == null) "Guardar" else "Actualizar")
             }

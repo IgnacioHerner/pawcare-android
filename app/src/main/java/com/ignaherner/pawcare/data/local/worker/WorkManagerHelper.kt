@@ -80,7 +80,7 @@ class WorkManagerHelper @Inject constructor(
 
         val inputData = Data.Builder()
             .putString(VaccineWorker.KEY_PET_NAME, petName)
-            .putString(VaccineWorker.KEY_VACCINE_NAME, vaccine.nombre)
+            .putString(VaccineWorker.KEY_VACCINE_NAME, vaccine.tipo.displayName)
             .putString(VaccineWorker.KEY_FECHA, proximaDosis)
             .putString(VaccineWorker.KEY_VACCINE_ID, vaccine.id.toInt().toString())
             .build()

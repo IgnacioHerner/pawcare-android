@@ -132,7 +132,7 @@ class HomeViewModel @Inject constructor(
                                 tipo = AlertType.VACUNA_VENCIDA,
                                 petName = summary.pet.nombre,
                                 titulo = "Vacuna vencida",
-                                descripcion = "${summary.pet.nombre} tiene la vacuna ${vacuna.nombre} vencida"
+                                descripcion = "${summary.pet.nombre} tiene la vacuna ${vacuna.tipo.displayName} vencida"
                             )
                         )
                     }
@@ -143,7 +143,7 @@ class HomeViewModel @Inject constructor(
                                 tipo = AlertType.VACUNA_PROXIMA,
                                 petName = summary.pet.nombre,
                                 titulo = "Vacuna próxima",
-                                descripcion = "${summary.pet.nombre} necesita ${vacuna.nombre} en $diasRestantes días"
+                                descripcion = "${summary.pet.nombre} necesita ${vacuna.tipo.displayName} en $diasRestantes días"
                             )
                         )
                     }

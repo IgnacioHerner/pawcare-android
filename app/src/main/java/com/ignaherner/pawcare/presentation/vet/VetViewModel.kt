@@ -80,7 +80,7 @@ class VetViewModel @Inject constructor(
                         _historialState.value = if (result.isSuccess) {
                             val vacunas = result.getOrNull() ?: emptyList()
                             if (vacunas.isEmpty()) VetHistorialState.Empty
-                            else VetHistorialState.Vacunas(vacunas.sortedByDescending { it.fecha })
+                            else VetHistorialState.Vacunas(vacunas.sortedByDescending { it.fechaAplicacion })
                         } else VetHistorialState.Error("Error al cargar vacunas")
                     }
                     VetHistorialTipo.MEDICAMENTOS -> {
@@ -241,7 +241,7 @@ class VetViewModel @Inject constructor(
                 val summary = VetPetSummary(
                     pet = pet,
                     owner = owner,
-                    ultimaVacuna = vacunas.maxByOrNull { it.fecha ?: "" },
+                    ultimaVacuna = vacunas.maxByOrNull { it.fechaAplicacion ?: "" },
                     medicamentoActivo = medicamentos.firstOrNull {
                         it.status == MedicationStatus.ACTIVO
                     },
