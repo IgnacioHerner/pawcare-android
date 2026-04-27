@@ -915,7 +915,7 @@ fun PawCareNavGraph(
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             WeightScreen(
                 petId = petId,
-                isVeterinario = false,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = { navController.navigate(PawCareDestinations.weightForm(petId)) },
                 onNavigateToEdit = { weightId ->
@@ -963,7 +963,7 @@ fun PawCareNavGraph(
             ConditionScreen(
                 petId = petId,
                 petName = petName,
-                isVeterinario = false,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.conditionForm(petId, petName))
@@ -1024,7 +1024,7 @@ fun PawCareNavGraph(
             DewormingScreen(
                 petId = petId,
                 petName = petName,
-                isVeterinario = false,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.dewormingForm(petId, petName))

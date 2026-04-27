@@ -47,3 +47,19 @@ val Danger = Color(0xFFB8422E)
 val DangerSoft = Color(0xFFF2DED8)
 val Info = Color(0xFF3A6A9E)
 val InfoSoft = Color(0xFFDCE5F0)
+
+// ═══════════════════════════════════════════════════════════
+// CATEGORÍAS — color propio de cada sección
+// ═══════════════════════════════════════════════════════════
+val CatVaccine = Color(0xFF3A8A5C)       // verde esmeralda
+val CatVaccineSoft = Color(0xFFDCF0E4)
+val CatMedication = Color(0xFFB87821)    // ámbar
+val CatMedicationSoft = Color(0xFFF5ECD6)
+val CatCondition = Color(0xFFB8422E)     // rojo suave
+val CatConditionSoft = Color(0xFFF2DED8)
+val CatDeworming = Color(0xFF6B5B3E)     // marrón cálido
+val CatDewormingSoft = Color(0xFFF0EAD8)
+val CatWeight = Color(0xFF3A6A9E)        // azul
+val CatWeightSoft = Color(0xFFDCE5F0)
+val CatAppointment = Color(0xFF7A5A8C)   // púrpura suave
+val CatAppointmentSoft = Color(0xFFEDE0F0)

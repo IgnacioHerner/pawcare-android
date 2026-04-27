@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,17 +33,11 @@ fun CategoryRow(
     title: String,
     count: Int,
     hint: String,
-    tone: Tone,
+    color: Color,
+    colorSoft: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (toneBg, toneFg) = when (tone) {
-        Tone.OK -> SuccessSoft to Success
-        Tone.INFO -> InfoSoft to Info
-        Tone.WARN -> WarnSoft to Warn
-        Tone.MUTED -> SurfaceSunk to InkMuted
-    }
-
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -62,14 +57,14 @@ fun CategoryRow(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(PawRadii.sm))
-                    .background(toneBg),
+                    .background(colorSoft),
                 contentAlignment = Alignment.Center
             ) {
                 PawCareIcon(
                     icon = icon,
                     contentDescription = title,
                     size = PawIconSize.medium,
-                    tint = toneFg
+                    tint = color
                 )
             }
 
@@ -88,16 +83,15 @@ fun CategoryRow(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
                     )
-                    // Badge count
                     if (count > 0) {
                         Surface(
                             shape = RoundedCornerShape(PawRadii.xs),
-                            color = toneBg
+                            color = colorSoft
                         ) {
                             Text(
                                 text = count.toString(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = toneFg,
+                                color = color,
                                 modifier = Modifier.padding(
                                     horizontal = 6.dp,
                                     vertical = 2.dp
