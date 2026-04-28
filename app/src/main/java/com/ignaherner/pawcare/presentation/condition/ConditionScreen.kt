@@ -1,20 +1,32 @@
 package com.ignaherner.pawcare.presentation.condition
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.HealthAndSafety
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,8 +35,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,16 +47,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.domain.model.Condition
+import com.ignaherner.pawcare.domain.model.ConditionEstado
+import com.ignaherner.pawcare.domain.model.Severidad
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +74,7 @@ fun ConditionScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
+    onNavigateToDetail: (Long) -> Unit,
     isVeterinario: Boolean = false,
     viewModel: ConditionViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
@@ -60,6 +83,7 @@ fun ConditionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     var conditionToDelete by remember { mutableStateOf<Condition?>(null) }
+    var filtroSeleccionado by remember { mutableStateOf<ConditionEstado?>(null) }
 
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
@@ -83,7 +107,7 @@ fun ConditionScreen(
                 viewModel.deleteCondition(condition)
                 conditionToDelete = null
             },
-            onDismiss = { conditionToDelete = null}
+            onDismiss = { conditionToDelete = null }
         )
     }
 
@@ -93,19 +117,16 @@ fun ConditionScreen(
             TopAppBar(
                 title = {
                     Column {
-                        // Nombre + emoji si ya cargó
                         val titulo = when (val state = detailState) {
-                            is PetDetailState.Success ->
-                                "${state.pet.nombre} ${state.pet.especie.emoji()}"
+                            is PetDetailState.Success -> state.pet.nombre
                             else -> ""
                         }
                         Text(
                             text = titulo,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Medicamentos \uD83C\uDFE5",
+                            text = "Condiciones",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -115,79 +136,143 @@ fun ConditionScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
-            if (isVeterinario){
-                FloatingActionButton(onClick = onNavigateToForm) {
+            if (isVeterinario) {
+                FloatingActionButton(
+                    onClick = onNavigateToForm,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar condición")
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when(val state = uiState) {
-                is ConditionUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+            // Filtros
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PawSpace.lg, vertical = PawSpace.sm),
+                horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)
+            ) {
+                item {
+                    FilterChip(
+                        selected = filtroSeleccionado == null,
+                        onClick = { filtroSeleccionado = null },
+                        label = { Text("Todas") }
                     )
                 }
-                is ConditionUiState.Empty -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("\uD83C\uDFE5", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = "Sin condiciones registradas",
-                            style = MaterialTheme.typography.titleMedium
+                item {
+                    FilterChip(
+                        selected = filtroSeleccionado == ConditionEstado.ACTIVA,
+                        onClick = { filtroSeleccionado = ConditionEstado.ACTIVA },
+                        label = { Text("Activas") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = DangerSoft,
+                            selectedLabelColor = Danger
                         )
-                        Text(
-                            text = "Toca el + para agregar",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = filtroSeleccionado == ConditionEstado.EN_TRATAMIENTO,
+                        onClick = { filtroSeleccionado = ConditionEstado.EN_TRATAMIENTO },
+                        label = { Text("En tratamiento") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = WarnSoft,
+                            selectedLabelColor = Warn
+                        )
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = filtroSeleccionado == ConditionEstado.RESUELTA,
+                        onClick = { filtroSeleccionado = ConditionEstado.RESUELTA },
+                        label = { Text("Resueltas") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = SuccessSoft,
+                            selectedLabelColor = Success
+                        )
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (val state = uiState) {
+                    is ConditionUiState.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    is ConditionUiState.Empty -> {
+                        EmptyState(
+                            icon = Icons.Outlined.HealthAndSafety,
+                            title = "Sin condiciones registradas",
+                            body = if (isVeterinario)
+                                "Tocá el + para registrar una condición"
+                            else
+                                "El veterinario podrá registrar condiciones de tu mascota"
                         )
                     }
-                }
-                is ConditionUiState.Success -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 80.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(
-                            items = state.conditions,
-                            key = {it.id}
-                        ) { condition ->
-                            if (isVeterinario){
-                                SwipeRevealCard(
-                                    onDelete = { conditionToDelete = condition},
-                                    onEdit = { onNavigateToEdit(condition.id) }
-                                ) {
-                                    ConditionCard(condition = condition)
-                                }
-                            } else {
-                                ConditionCard(condition = condition)
-                            }
+                    is ConditionUiState.Success -> {
+                        val conditionsFiltradas = when (filtroSeleccionado) {
+                            null -> state.conditions
+                            else -> state.conditions.filter { it.estado == filtroSeleccionado }
+                        }
 
+                        if (conditionsFiltradas.isEmpty()) {
+                            EmptyState(
+                                icon = Icons.Outlined.FilterAlt,
+                                title = "Sin resultados",
+                                body = "No hay condiciones con el filtro seleccionado"
+                            )
+                        } else {
+                            LazyColumn(
+                                contentPadding = PaddingValues(
+                                    top = PawSpace.sm,
+                                    bottom = 96.dp
+                                )
+                            ) {
+                                items(
+                                    items = conditionsFiltradas,
+                                    key = { it.id }
+                                ) { condition ->
+                                    if (isVeterinario) {
+                                        SwipeRevealCard(
+                                            onDelete = { conditionToDelete = condition },
+                                            onEdit = { onNavigateToEdit(condition.id) }
+                                        ) {
+                                            ConditionCard(
+                                                condition = condition,
+                                                onClick = { onNavigateToDetail(condition.id)}
+                                            )
+                                        }
+                                    } else {
+                                        ConditionCard(
+                                            condition = condition,
+                                            onClick = { onNavigateToDetail(condition.id)}
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-                is ConditionUiState.Error -> {
-                    Text(
-                        text = state.mensaje,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    is ConditionUiState.Error -> {
+                        Text(
+                            text = state.mensaje,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
             }
         }
@@ -195,33 +280,131 @@ fun ConditionScreen(
 }
 
 @Composable
-private fun ConditionCard(condition: Condition) {
+private fun ConditionCard(
+    condition: Condition,
+    onClick: () -> Unit = {}
+) {
+    val (severidadBg, severidadFg) = when (condition.severidad) {
+        Severidad.LEVE -> SuccessSoft to Success
+        Severidad.MODERADA -> WarnSoft to Warn
+        Severidad.GRAVE -> DangerSoft to Danger
+    }
+
+    val (estadoBg, estadoFg) = when (condition.estado) {
+        ConditionEstado.ACTIVA -> DangerSoft to Danger
+        ConditionEstado.EN_TRATAMIENTO -> WarnSoft to Warn
+        ConditionEstado.RESUELTA -> SuccessSoft to Success
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
+        shape = RoundedCornerShape(PawRadii.md),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(PawSpace.md),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
         ) {
-            Text(
-                text = condition.nombre,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            condition.fechaDiagnostico?.let {
+            // Header — nombre + severidad
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(PawRadii.sm))
+                        .background(severidadBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PawCareIcon(
+                        icon = Icons.Outlined.HealthAndSafety,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = severidadFg
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = condition.nombre,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = condition.fechaDiagnostico.toFriendlyDate(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Estado pill
+                Surface(
+                    shape = RoundedCornerShape(PawRadii.xs),
+                    color = estadoBg
+                ) {
+                    Text(
+                        text = condition.estado.displayName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = estadoFg,
+                        modifier = Modifier.padding(horizontal = PawSpace.sm, vertical = 4.dp)
+                    )
+                }
+            }
+
+            // Severidad pill
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PawCareIcon(
+                    icon = Icons.Outlined.Warning,
+                    contentDescription = null,
+                    size = PawIconSize.small,
+                    tint = severidadFg
+                )
                 Text(
-                    text = "📅 Diagnóstico: ${it.toFriendlyDate()}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Severidad: ${condition.severidad.displayName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = severidadFg
                 )
             }
+
+            // Veterinario
+            condition.veterinario?.let {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Person,
+                        contentDescription = null,
+                        size = PawIconSize.small,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Notas
             condition.notas?.let {
                 Text(
-                    text = "📝 $it",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = FontStyle.Italic
                 )
             }
         }

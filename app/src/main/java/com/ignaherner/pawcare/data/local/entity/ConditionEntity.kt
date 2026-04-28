@@ -20,9 +20,12 @@ import androidx.room.PrimaryKey
 data class ConditionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val firestoreId: String,
+    val firestoreId: String = "",
     val petId: Long,
     val nombre: String,
-    val fechaDiagnostico: String?,
+    val fechaDiagnostico: String,
+    val severidad: String,
+    val estado: String,
+    val veterinario: String?,
     val notas: String?
 )

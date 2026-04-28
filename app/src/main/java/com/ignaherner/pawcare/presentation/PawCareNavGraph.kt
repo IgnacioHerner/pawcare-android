@@ -24,6 +24,7 @@ import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import com.ignaherner.pawcare.presentation.auth.LoginScreen
 import com.ignaherner.pawcare.presentation.auth.RegisterScreen
+import com.ignaherner.pawcare.presentation.condition.ConditionDetailScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionViewModel
@@ -104,6 +105,7 @@ object PawCareDestinations {
     // Condition
     const val CONDITION_LIST = "condition_list/{petId}/{petName}"
     const val CONDITION_FORM = "condition_form/{petId}/{petName}?conditionId={conditionId}"
+    const val CONDITION_DETAIL = "condition_detail/{conditionId}"
 
     //
     const val DEWORMING_LIST = "deworming_list/{petId}/{petName}"
@@ -185,6 +187,8 @@ object PawCareDestinations {
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?conditionId=$conditionId"
         else
             "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun conditionDetail(conditionId: Long) = "condition_detail/$conditionId"
 
     fun dewormingList(petId: Long, petName: String) =
         "deworming_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
@@ -438,6 +442,23 @@ fun PawCareNavGraph(
             VetConditionFormScreen(
                 petFirestoreId = firestoreId,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // ConditionDetailScreen
+        composable(
+            route = PawCareDestinations.CONDITION_DETAIL,
+            arguments = listOf(
+                navArgument("conditionId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
+            ConditionDetailScreen(
+                conditionId = conditionId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id ->
+                    // TODO: navegar a editar condición
+                }
             )
         }
 
@@ -971,7 +992,12 @@ fun PawCareNavGraph(
                 onNavigateToEdit = { conditionId ->
                     navController.navigate(
                         PawCareDestinations.conditionForm(petId, petName, conditionId)
-                    )}
+                    )},
+                onNavigateToDetail = { conditionId ->
+                    navController.navigate(
+                        PawCareDestinations.conditionDetail(conditionId)
+                    )
+                }
             )
         }
 

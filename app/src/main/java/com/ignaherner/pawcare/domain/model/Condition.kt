@@ -5,6 +5,9 @@ data class Condition(
     val firestoreId: String = "",
     val petId: Long,
     val nombre: String,
-    val fechaDiagnostico: String?,
+    val fechaDiagnostico: String, // dd/MM/yyyy - obligatorio
+    val severidad: Severidad,
+    val estado: ConditionEstado,
+    val veterinario: String?,
     val notas: String?
 )
