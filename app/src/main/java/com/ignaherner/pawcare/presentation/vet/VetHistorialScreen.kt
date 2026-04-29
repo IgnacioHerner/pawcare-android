@@ -412,7 +412,7 @@ private fun VetDesparasitacionesList(items: List<Deworming>) {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = deworming.fecha.toFriendlyDate(),
+                        text = deworming.fechaAplicacion.toFriendlyDate(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -423,7 +423,7 @@ private fun VetDesparasitacionesList(items: List<Deworming>) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    deworming.proximaFecha?.let {
+                    deworming.proximaDosis?.let {
                         Text(
                             text = "📅 Próxima: ${it.toFriendlyDate()}",
                             style = MaterialTheme.typography.bodySmall,

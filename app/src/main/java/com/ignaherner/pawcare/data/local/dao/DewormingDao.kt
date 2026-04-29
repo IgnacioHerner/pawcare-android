@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DewormingDao {
 
-    @Query("SELECT * FROM dewormings WHERE petId = :petId ORDER BY fecha ASC")
+    @Query("SELECT * FROM dewormings WHERE petId = :petId ORDER BY fechaAplicacion DESC")
     fun getDewormingsByPetId(petId: Long): Flow<List<DewormingEntity>>
-
     @Query("SELECT * FROM dewormings WHERE id = :dewormingId")
     suspend fun getDewormingById(dewormingId: Long): DewormingEntity?
 

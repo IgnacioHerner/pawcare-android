@@ -28,6 +28,7 @@ import com.ignaherner.pawcare.presentation.condition.ConditionDetailScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionViewModel
+import com.ignaherner.pawcare.presentation.deworming.DewormingDetailScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingFormScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingViewModel
@@ -110,6 +111,8 @@ object PawCareDestinations {
     //
     const val DEWORMING_LIST = "deworming_list/{petId}/{petName}"
     const val DEWORMING_FORM = "deworming_form/{petId}/{petName}?dewormingId={dewormingId}"
+
+    const val DEWORMING_DETAIL = "deworming_detail/{dewormingId}"
 
     // Splash
     const val SPLASH = "splash"
@@ -198,6 +201,8 @@ object PawCareDestinations {
             "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?dewormingId=$dewormingId"
         else
             "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun dewormingDetail(dewormingId: Long) = "deworming_detail/$dewormingId"
 
     fun qrScreen(petId: Long) = "qr_screen/$petId"
 
@@ -445,22 +450,6 @@ fun PawCareNavGraph(
             )
         }
 
-        // ConditionDetailScreen
-        composable(
-            route = PawCareDestinations.CONDITION_DETAIL,
-            arguments = listOf(
-                navArgument("conditionId") { type = NavType.LongType }
-            )
-        ) { backStackEntry ->
-            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
-            ConditionDetailScreen(
-                conditionId = conditionId,
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToEdit = { id ->
-                    // TODO: navegar a editar condición
-                }
-            )
-        }
 
         // VetDewormingForm
         composable(
@@ -1034,6 +1023,23 @@ fun PawCareNavGraph(
             )
         }
 
+        // Condition Detail Screen
+        composable(
+            route = PawCareDestinations.CONDITION_DETAIL,
+            arguments = listOf(
+                navArgument("conditionId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
+            ConditionDetailScreen(
+                conditionId = conditionId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id ->
+                    // TODO: navegar a editar condición
+                }
+            )
+        }
+
         // Lista desparasitacion
         composable(
             route = PawCareDestinations.DEWORMING_LIST,
@@ -1058,6 +1064,11 @@ fun PawCareNavGraph(
                 onNavigateToEdit = { dewormingId ->
                     navController.navigate(
                         PawCareDestinations.dewormingForm(petId, petName, dewormingId)
+                    )
+                },
+                onNavigateToDetail = { dewormingId ->
+                    navController.navigate(
+                        PawCareDestinations.dewormingDetail(dewormingId)
                     )
                 }
             )
@@ -1092,6 +1103,40 @@ fun PawCareNavGraph(
                 dewormingId = dewormingId,
                 onNavigateBack = { navController.popBackStack()},
                 viewModel = viewModel
+            )
+        }
+
+        // Condition Deworming Screen
+        composable(
+            route = PawCareDestinations.DEWORMING_DETAIL,
+            arguments = listOf(
+                navArgument("dewormingId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val dewormingId = backStackEntry.arguments?.getLong("dewormingId") ?: return@composable
+            DewormingDetailScreen(
+                dewormingId = dewormingId,
+                onNavigateBack = { navController.popBackStack()},
+                onNavigateToEdit = { id ->
+                    // TODO: Navegar a editar condicion
+                }
+            )
+        }
+
+        // Condition Detail Screen
+        composable(
+            route = PawCareDestinations.CONDITION_DETAIL,
+            arguments = listOf(
+                navArgument("conditionId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
+            ConditionDetailScreen(
+                conditionId = conditionId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id ->
+                    // TODO: navegar a editar condición
+                }
             )
         }
     }

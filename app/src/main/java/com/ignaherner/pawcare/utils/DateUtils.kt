@@ -1,6 +1,7 @@
 package com.ignaherner.pawcare.utils
 
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
+import com.ignaherner.pawcare.domain.model.FrecuenciaDeworming
 import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
 import com.ignaherner.pawcare.domain.model.Weight
 import java.time.LocalDate
@@ -129,6 +130,18 @@ fun calcularEdad(fechaNacimiento: String?, tipo: FechaNacimientoTipo): String {
 }
 
 fun calcularProximaDosisConFrecuencia(fechaAplicacion: String, frecuencia: FrecuenciaVacuna): String {
+    if (frecuencia.meses == null) return ""
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val fecha = LocalDate.parse(fechaAplicacion, formatter)
+        val proxima = fecha.plusMonths(frecuencia.meses.toLong())
+        proxima.format(formatter)
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun calcularProximaDosisDeworming(fechaAplicacion: String, frecuencia: FrecuenciaDeworming): String {
     if (frecuencia.meses == null) return ""
     return try {
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")

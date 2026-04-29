@@ -1,18 +1,24 @@
 package com.ignaherner.pawcare.presentation.deworming
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -23,8 +29,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,9 +49,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.ui.theme.CatDeworming
+import com.ignaherner.pawcare.ui.theme.CatDewormingSoft
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +68,11 @@ fun DewormingScreen(
     onNavigateBack: () -> Unit,
     onNavigateToForm: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
+    onNavigateToDetail: (Long) -> Unit = {},
     isVeterinario: Boolean = false,
     viewModel: DewormingViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
-){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
@@ -77,13 +94,13 @@ fun DewormingScreen(
 
     dewormingToDelete?.let { deworming ->
         ConfirmDeleteDialog(
-            titulo = "Eliminar ${deworming.fecha}?",
+            titulo = "¿Eliminar ${deworming.producto}?",
             mensaje = "Esta acción no se puede deshacer.",
             onConfirm = {
                 viewModel.deleteDeworming(deworming)
                 dewormingToDelete = null
             },
-            onDismiss = { dewormingToDelete = null}
+            onDismiss = { dewormingToDelete = null }
         )
     }
 
@@ -94,17 +111,15 @@ fun DewormingScreen(
                 title = {
                     Column {
                         val titulo = when (val state = detailState) {
-                            is PetDetailState.Success ->
-                                "${state.pet.nombre} ${state.pet.especie.emoji()}"
+                            is PetDetailState.Success -> state.pet.nombre
                             else -> ""
                         }
                         Text(
                             text = titulo,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Desparasitacion \uD83E\uDEB1",
+                            text = "Desparasitación",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -114,71 +129,71 @@ fun DewormingScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
-            if(isVeterinario) {
-                FloatingActionButton(onClick = onNavigateToForm) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar desparasitacion")
+            if (isVeterinario) {
+                FloatingActionButton(
+                    onClick = onNavigateToForm,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar desparasitación")
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ){
+        ) {
             when (val state = uiState) {
                 is DewormingUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is DewormingUiState.Empty -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("\uD83E\uDEB1", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = "Sin desparacitaciones registradas",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "Toca el + para agregar",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    EmptyState(
+                        icon = Icons.Outlined.Shield,
+                        title = "Sin desparasitaciones registradas",
+                        body = if (isVeterinario)
+                            "Tocá el + para registrar una desparasitación"
+                        else
+                            "El veterinario podrá registrar las desparasitaciones de tu mascota"
+                    )
                 }
                 is DewormingUiState.Success -> {
                     LazyColumn(
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 80.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            top = PawSpace.sm,
+                            bottom = 96.dp
+                        )
                     ) {
                         items(
                             items = state.deworming,
-                            key = {it.id}
+                            key = { it.id }
                         ) { deworming ->
-                            if (isVeterinario){
+                            if (isVeterinario) {
                                 SwipeRevealCard(
-                                    onDelete = { dewormingToDelete = deworming},
-                                    onEdit = {onNavigateToEdit(deworming.id)}
+                                    onDelete = { dewormingToDelete = deworming },
+                                    onEdit = { onNavigateToEdit(deworming.id) }
                                 ) {
-                                    DewormingCard(deworming = deworming)
+                                    DewormingCard(
+                                        deworming = deworming,
+                                        onClick = { onNavigateToDetail(deworming.id) }
+                                    )
                                 }
                             } else {
-                                DewormingCard(deworming = deworming)
+                                DewormingCard(
+                                    deworming = deworming,
+                                    onClick = { onNavigateToDetail(deworming.id) }
+                                )
                             }
-
                         }
                     }
                 }
@@ -194,40 +209,77 @@ fun DewormingScreen(
 }
 
 @Composable
-private fun DewormingCard(deworming: Deworming) {
+private fun DewormingCard(
+    deworming: Deworming,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
+        shape = RoundedCornerShape(PawRadii.md),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(PawSpace.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
         ) {
-            Text(
-                text = deworming.fecha,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            deworming.producto?.let {
-                Text(
-                    text = "\uD83D\uDC8A Producto: $it",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            // Tile ícono
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .background(CatDewormingSoft),
+                contentAlignment = Alignment.Center
+            ) {
+                PawCareIcon(
+                    icon = Icons.Outlined.Shield,
+                    contentDescription = null,
+                    size = PawIconSize.medium,
+                    tint = CatDeworming
                 )
             }
-            deworming.proximaFecha?.let {
+
+            // Info
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 Text(
-                    text = "\uD83D\uDCC5 Proxima fecha: ${it.toFriendlyDate()}",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = deworming.producto,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "${deworming.tipo.displayName} · ${deworming.fechaAplicacion.toFriendlyDate()}",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                deworming.proximaDosis?.let {
+                    Text(
+                        text = "Próxima: ${it.toFriendlyDate()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = CatDeworming
+                    )
+                }
             }
-            deworming.notas?.let {
+
+            // Tipo pill
+            Surface(
+                shape = RoundedCornerShape(PawRadii.xs),
+                color = CatDewormingSoft
+            ) {
                 Text(
-                    text = "📝 $it",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = deworming.tipo.displayName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CatDeworming,
+                    modifier = Modifier.padding(horizontal = PawSpace.sm, vertical = 4.dp)
                 )
             }
         }

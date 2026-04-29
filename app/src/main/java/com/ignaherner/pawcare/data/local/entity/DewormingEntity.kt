@@ -20,10 +20,13 @@ import androidx.room.PrimaryKey
 data class DewormingEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val firestoreId: String,
+    val firestoreId: String = "",
     val petId: Long,
-    val fecha: String,
-    val producto: String?,
-    val proximaFecha: String?,
+    val producto: String,
+    val tipo: String,
+    val fechaAplicacion: String,
+    val frecuencia: String,
+    val proximaDosis: String?,
+    val veterinario: String?,
     val notas: String?
 )

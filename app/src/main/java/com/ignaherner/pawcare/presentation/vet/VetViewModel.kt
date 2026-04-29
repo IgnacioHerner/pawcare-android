@@ -120,7 +120,7 @@ class VetViewModel @Inject constructor(
                         _historialState.value = if (result.isSuccess) {
                             val desparasitaciones = result.getOrNull() ?: emptyList()
                             if (desparasitaciones.isEmpty()) VetHistorialState.Empty
-                            else VetHistorialState.Desparasitaciones(desparasitaciones.sortedByDescending { it.fecha })
+                            else VetHistorialState.Desparasitaciones(desparasitaciones.sortedByDescending { it.fechaAplicacion })
                         } else VetHistorialState.Error("Error al cargar desparasitaciones")
                     }
                 }
@@ -247,7 +247,7 @@ class VetViewModel @Inject constructor(
                     },
                     ultimoPeso = pesos.maxByOrNull { it.fecha },
                     ultimoTurno = turnos.maxByOrNull { it.fecha ?: "" },
-                    ultimaDesparasitacion = desparasitaciones.maxByOrNull { it.fecha },
+                    ultimaDesparasitacion = desparasitaciones.maxByOrNull { it.fechaAplicacion },
                     condiciones = condiciones
                 )
                 _summaryState.value = VetSummaryState.Success(summary)

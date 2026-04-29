@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.ignaherner.pawcare.domain.model.Deworming
+import com.ignaherner.pawcare.domain.model.DewormingTipo
+import com.ignaherner.pawcare.domain.model.FrecuenciaDeworming
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import kotlinx.coroutines.tasks.await
@@ -11,24 +13,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DewormingFirestoreRepository @Inject constructor(){
+class DewormingFirestoreRepository @Inject constructor() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun guardarDesparasitacion(deworming: Deworming, petFirestoreId: String): Result<String>{
+    suspend fun guardarDesparasitacion(deworming: Deworming, petFirestoreId: String): Result<String> {
         return try {
             val dewormingData = hashMapOf(
                 "petId" to petFirestoreId,
-                "fecha" to deworming.fecha,
                 "producto" to deworming.producto,
-                "proximaFecha" to deworming.proximaFecha,
+                "tipo" to deworming.tipo.name,
+                "fechaAplicacion" to deworming.fechaAplicacion,
+                "frecuencia" to deworming.frecuencia.name,
+                "proximaDosis" to deworming.proximaDosis,
+                "veterinario" to deworming.veterinario,
                 "notas" to deworming.notas
             )
 
             val docRef = firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("deworming")
+                .collection("dewormings")
                 .add(dewormingData)
                 .await()
 
@@ -38,22 +43,24 @@ class DewormingFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun actualizarDesparasitacion(deworming: Deworming, petFirestoreId: String): Result<Unit>{
+    suspend fun actualizarDesparasitacion(deworming: Deworming, petFirestoreId: String): Result<Unit> {
         return try {
-            if(deworming.firestoreId.isBlank()) return Result.failure(
+            if (deworming.firestoreId.isBlank()) return Result.failure(
                 Exception("Sin firestoreId")
             )
 
             val dewormingData = hashMapOf(
-                "petId" to petFirestoreId,
-                "fecha" to deworming.fecha,
                 "producto" to deworming.producto,
-                "proximaFecha" to deworming.proximaFecha,
+                "tipo" to deworming.tipo.name,
+                "fechaAplicacion" to deworming.fechaAplicacion,
+                "frecuencia" to deworming.frecuencia.name,
+                "proximaDosis" to deworming.proximaDosis,
+                "veterinario" to deworming.veterinario,
                 "notas" to deworming.notas
             )
             firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("deworming")
+                .collection("dewormings")
                 .document(deworming.firestoreId)
                 .set(dewormingData, SetOptions.merge())
                 .await()
@@ -64,17 +71,17 @@ class DewormingFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun eliminarDesparasitacion(firestoreId: String, petFirestoreId: String): Result<Unit>{
+    suspend fun eliminarDesparasitacion(firestoreId: String, petFirestoreId: String): Result<Unit> {
         return try {
             firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("deworming")
+                .collection("dewormings")
                 .document(firestoreId)
                 .delete()
                 .await()
 
             Result.success(Unit)
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -83,22 +90,33 @@ class DewormingFirestoreRepository @Inject constructor(){
         return try {
             val documentos = firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("deworming")
+                .collection("dewormings")
                 .get()
                 .await()
 
-            val deworming = documentos.map { doc ->
+            val dewormings = documentos.map { doc ->
                 Deworming(
                     id = 0L,
                     firestoreId = doc.id,
                     petId = 0L,
-                    fecha = doc.getString("fecha") ?: "",
-                    producto = doc.getString("producto"),
-                    proximaFecha = doc.getString("proximaFecha"),
+                    producto = doc.getString("producto") ?: "",
+                    tipo = try {
+                        DewormingTipo.valueOf(doc.getString("tipo") ?: "INTERNA")
+                    } catch (e: Exception) {
+                        DewormingTipo.INTERNA
+                    },
+                    fechaAplicacion = doc.getString("fechaAplicacion") ?: "",
+                    frecuencia = try {
+                        FrecuenciaDeworming.valueOf(doc.getString("frecuencia") ?: "UNICA")
+                    } catch (e: Exception) {
+                        FrecuenciaDeworming.UNICA
+                    },
+                    proximaDosis = doc.getString("proximaDosis"),
+                    veterinario = doc.getString("veterinario"),
                     notas = doc.getString("notas")
                 )
             }
-            Result.success(deworming)
+            Result.success(dewormings)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -333,7 +333,7 @@ private fun VetLibretaSanitaria(
                 DashboardCard(
                     icon = Icons.Default.Vaccines,
                     titulo = "Última desparasitación",
-                    contenido = summary.ultimaDesparasitacion?.fecha?.toFriendlyDate() ?: "Sin registros",
+                    contenido = summary.ultimaDesparasitacion?.fechaAplicacion?.toFriendlyDate() ?: "Sin registros",
                     subtitulo = summary.ultimaDesparasitacion?.producto,
                     color = MaterialTheme.colorScheme.tertiary,
                     onClick = { onNavigateToHistorial(VetHistorialTipo.DESPARASITACIONES) },
