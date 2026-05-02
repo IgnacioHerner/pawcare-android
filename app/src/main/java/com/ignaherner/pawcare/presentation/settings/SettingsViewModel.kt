@@ -49,4 +49,13 @@ class SettingsViewModel @Inject constructor(
             authRepository.logout()
         }
     }
+
+    val onboardingCompleted: StateFlow<Boolean> = settingsDataStore.onboardingCompleted
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            settingsDataStore.setOnboardingCompleted()
+        }
+    }
 }

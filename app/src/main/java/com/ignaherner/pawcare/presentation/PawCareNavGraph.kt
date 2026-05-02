@@ -23,7 +23,10 @@ import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import com.ignaherner.pawcare.presentation.auth.LoginScreen
+import com.ignaherner.pawcare.presentation.auth.OnboardingScreen
 import com.ignaherner.pawcare.presentation.auth.RegisterScreen
+import com.ignaherner.pawcare.presentation.auth.RoleSelectScreen
+import com.ignaherner.pawcare.presentation.auth.WelcomeScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionDetailScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionFormScreen
 import com.ignaherner.pawcare.presentation.condition.ConditionScreen
@@ -44,6 +47,7 @@ import com.ignaherner.pawcare.presentation.pets.PetDetailScreen
 import com.ignaherner.pawcare.presentation.pets.PetFormScreen
 import com.ignaherner.pawcare.presentation.pets.QRScreen
 import com.ignaherner.pawcare.presentation.settings.SettingsScreen
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
@@ -122,6 +126,10 @@ object PawCareDestinations {
     // Login y Register
     const val LOGIN = "login"
     const val REGISTER = "register"
+    const val ONBOARDING = "onboarding"
+    const val ROLE_SELECT = "role_select"
+    const val WELCOME = "welcome/{nombre}"
+
 
     // VETERINARIO
     const val VET_HOME = "vet_home"
@@ -217,6 +225,9 @@ object PawCareDestinations {
     fun vetAppointmentForm(firestoreId: String) = "vet_appointment_form/$firestoreId"
     fun vetConditionForm(firestoreId: String) = "vet_condition_form/$firestoreId"
     fun vetDewormingForm(firestoreId: String) = "vet_deworming_form/$firestoreId"
+
+    fun welcome(nombre: String) = "welcome/${URLEncoder.encode(nombre, "UTF-8")}"
+
 }
 
 @Composable
@@ -235,20 +246,67 @@ fun PawCareNavGraph(
         startDestination = PawCareDestinations.SPLASH
     ) {
         composable(PawCareDestinations.SPLASH) {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val onboardingCompleted by settingsViewModel.onboardingCompleted.collectAsStateWithLifecycle(
+                initialValue = null
+            )
+
             SplashScreen(
                 onSplashFinished = {
-                    if (authViewModel.isLoggedIn) {
-                        navController.navigate(PawCareDestinations.LOADING) {
-                            popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                    when {
+                        // Ya logueado → cargar app
+                        authViewModel.isLoggedIn -> {
+                            navController.navigate(PawCareDestinations.LOADING) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
                         }
-                    } else {
-                        navController.navigate(PawCareDestinations.LOGIN) {
-                            popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                        // Primera vez → onboarding
+                        onboardingCompleted == false -> {
+                            navController.navigate(PawCareDestinations.ONBOARDING) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
+                        }
+                        // Ya vio onboarding → login
+                        else -> {
+                            navController.navigate(PawCareDestinations.LOGIN) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
                         }
                     }
                 }
             )
         }
+
+        composable(PawCareDestinations.ONBOARDING) {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+
+            OnboardingScreen(
+                onFinished = {
+                    settingsViewModel.completeOnboarding()
+                    navController.navigate(PawCareDestinations.ROLE_SELECT) {
+                        popUpTo(PawCareDestinations.ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = PawCareDestinations.WELCOME,
+            arguments = listOf(
+                navArgument("nombre") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
+            WelcomeScreen(
+                nombreUsuario = URLDecoder.decode(nombre, "UTF-8"),
+                onNavigateToAddPet = {
+                    navController.navigate(PawCareDestinations.petForm()) {
+                        popUpTo(PawCareDestinations.WELCOME) { inclusive = true }
+                    }
+                }
+            )
+        }
+
 
         composable(PawCareDestinations.LOADING) {
             val ownerViewModel: OwnerViewModel = hiltViewModel()
@@ -313,9 +371,23 @@ fun PawCareNavGraph(
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onRegisterSuccess = {
-                    navController.navigate(PawCareDestinations.LOADING) {
+                onRegisterSuccess = { nombre ->
+                    navController.navigate(PawCareDestinations.welcome(nombre)) {
                         popUpTo(PawCareDestinations.REGISTER) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(PawCareDestinations.ROLE_SELECT) {
+            RoleSelectScreen(
+                onRoleSelected = { rol ->
+                    authViewModel.setSelectedRole(rol)
+                    navController.navigate(PawCareDestinations.REGISTER) {
+                        popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
                     }
                 }
             )

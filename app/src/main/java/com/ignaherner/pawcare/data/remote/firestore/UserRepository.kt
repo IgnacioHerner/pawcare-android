@@ -16,13 +16,13 @@ class UserRepository @Inject constructor() {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun guardarUsuario(rol: Rol, uid: String): Result<Unit> {
+    suspend fun guardarUsuario(rol: Rol, uid: String, nombre: String = ""): Result<Unit> {
         return try {
-
             val usuario = hashMapOf(
                 "uid" to uid,
                 "email" to (auth.currentUser?.email ?: ""),
                 "rol" to rol.name,
+                "nombre" to nombre,
                 "fechaCreacion" to System.currentTimeMillis()
             )
 

@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.data.local
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -24,6 +25,8 @@ class SettingsDataStore @Inject constructor(
     companion object {
         val NOMBRE_VETERINARIO = stringPreferencesKey("nombre_veterinario")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
     }
 
@@ -51,6 +54,13 @@ class SettingsDataStore @Inject constructor(
         context.dataStore.edit { preferences ->
             preferences[NOMBRE_VETERINARIO] = nombre
         }
+    }
+
+    val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map {
+        it[ONBOARDING_COMPLETED] ?: false
+    }
+    suspend fun setOnboardingCompleted() {
+        context.dataStore.edit { it[ONBOARDING_COMPLETED] = true }
     }
 
 }

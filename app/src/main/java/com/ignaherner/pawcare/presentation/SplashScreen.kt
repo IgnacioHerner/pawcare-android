@@ -1,16 +1,15 @@
 package com.ignaherner.pawcare.presentation
 
-import android.window.SplashScreen
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.R
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
 import kotlinx.coroutines.delay
 
 @Composable
@@ -35,36 +37,55 @@ fun SplashScreen(
 
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
-        animationSpec = tween ( durationMillis = 1000 ),
+        animationSpec = tween(durationMillis = 1000),
         label = "splash_alpha"
     )
 
     LaunchedEffect(Unit) {
         visible = true
-        delay(2500)
+        delay(2000)
         onSplashFinished()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg),
             modifier = Modifier.alpha(alpha)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_pawcare),
-                contentDescription = "PawCare Logo",
-                modifier = Modifier.size(180.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            // Logo — cuadrado redondeado con patita
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(PawRadii.lg))
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_paw),
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+
+            // Nombre
             Text(
-                text = "La salud de tu mascota en un solo lugar",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "PawCare",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+
+            // Subtítulo
+            Text(
+                text = "La libreta sanitaria de tu mascota",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
             )
         }
     }

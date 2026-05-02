@@ -26,12 +26,20 @@ class AuthViewModel @Inject constructor(
     private val _rol = MutableStateFlow<Rol?>(null)
     val rol: StateFlow<Rol?> = _rol.asStateFlow()
 
+    private val _selectedRole = MutableStateFlow<String?>(null)
+    val selectedRole: StateFlow<String?> = _selectedRole.asStateFlow()
+
+
     private var rolJob: Job? = null  // ← nuevo
 
     init {
         if (authRepository.isLoggedIn && _rol.value == null) {
             cargarRol()
         }
+    }
+
+    fun setSelectedRole(rol: String) {
+        _selectedRole.value = rol
     }
 
     fun cargarRol() {
@@ -65,7 +73,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun register(email: String, password: String, rol: Rol) {
+    fun register(email: String, password: String, rol: Rol, nombre: String = "") {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
@@ -74,10 +82,10 @@ class AuthViewModel @Inject constructor(
 
                 if (result.isSuccess) {
                     val uid = result.getOrNull()?.uid ?: ""
-                    val rolResult = userRepository.guardarUsuario(rol, uid)
+                    val rolResult = userRepository.guardarUsuario(rol, uid, nombre)
 
                     if (rolResult.isSuccess) {
-                        cargarRol() // ← cargar el rol antes de navegar
+                        cargarRol()
                         _authState.value = AuthState.Success
                     } else {
                         _authState.value = AuthState.Error("Error al guardar el perfil")

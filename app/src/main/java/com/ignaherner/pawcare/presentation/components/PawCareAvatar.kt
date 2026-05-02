@@ -48,7 +48,10 @@ fun PawCareAvatar(
             )
         } else {
             Text(
-                text = nombre.first().uppercaseChar().toString(),
+                text = if (nombre.isNotBlank())
+                    nombre.first().uppercaseChar().toString()
+                else
+                    "?",
                 style = textStyle,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
