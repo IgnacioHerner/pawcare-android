@@ -5,24 +5,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,10 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
-import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
+import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,34 +47,21 @@ fun AppointmentFormScreen(
     petId: Long,
     appointmentId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: AppointmentViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    viewModel: AppointmentViewModel = hiltViewModel()
 ) {
-    // Estado local del formulario
     var fecha by remember { mutableStateOf(fechaHoy()) }
-    var veterinario by remember { mutableStateOf("") }
     var motivo by remember { mutableStateOf("") }
+    var veterinario by remember { mutableStateOf("") }
+    var clinica by remember { mutableStateOf("") }
+    var diagnostico by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
-    var statusSeleccionado by remember { mutableStateOf<AppointmentStatus>(AppointmentStatus.PENDIENTE) }
-    var dropdownExpanded by remember { mutableStateOf(false) }
 
-    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
-
-    // Estado para controlar si el dialog esta abierto
     var showDatePicker by remember { mutableStateOf(false) }
+    val appointmentDetailState by viewModel.appointentDetailState.collectAsStateWithLifecycle()
 
-    // DatePickerState
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-
-    LaunchedEffect(nombreVeterinarioState) {
-        if (veterinario.isNotBlank()) {
-            veterinario = nombreVeterinarioState
-        }
-    }
-
-    val appointmentDetailState by viewModel.appointentDetailState.collectAsStateWithLifecycle()
 
     LaunchedEffect(appointmentId) {
         appointmentId?.let { viewModel.loadAppointmentById(it) }
@@ -83,164 +71,144 @@ fun AppointmentFormScreen(
         if (appointmentDetailState is AppointmentDetailState.Success) {
             val appointment = (appointmentDetailState as AppointmentDetailState.Success).appointments
             fecha = appointment.fecha
+            motivo = appointment.motivo
             veterinario = appointment.veterinario ?: ""
-            motivo = appointment.motivo ?: ""
+            clinica = appointment.clinica ?: ""
+            diagnostico = appointment.diagnostico ?: ""
             notas = appointment.notas ?: ""
-            statusSeleccionado = appointment.status
         }
     }
 
-    // Dialog
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false},
+            onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val localDate = java.time.Instant
-                                .ofEpochMilli(millis)
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toLocalDate()
-                            fecha = localDate.toFormattedString()
-                        }
-                        showDatePicker = false
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val localDate = java.time.Instant
+                            .ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                        fecha = localDate.toFormattedString()
                     }
-                ) { Text("Aceptar")}
+                    showDatePicker = false
+                }) { Text("Aceptar") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false}) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
             }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    LaunchedEffect(nombreVeterinarioState) {
-        if (veterinario.isNotBlank()) {
-            veterinario = nombreVeterinarioState
-        }
+        ) { DatePicker(state = datePickerState) }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if(appointmentId == null) "Nuevo turno" else "Editar turno")
+                    Text(if (appointmentId == null) "Nueva visita" else "Editar visita")
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(PawSpace.lg)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
             OutlinedTextField(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha del turno") },
+                label = { Text("Fecha de la visita") },
                 trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true}) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Elegir fecha"
-                        )
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable{ showDatePicker = true}
-            )
-
-            OutlinedTextField(
-                value = nombreVeterinarioState,
-                onValueChange = {},
-                label = { Text("Veterinario")},
-                modifier = Modifier.fillMaxWidth()
+                    .clickable { showDatePicker = true }
             )
 
             OutlinedTextField(
                 value = motivo,
-                onValueChange = { motivo = it},
-                label = { Text("Motivo")},
+                onValueChange = { motivo = it },
+                label = { Text("Motivo de la visita") },
+                placeholder = { Text("Ej: Control anual, vacunación") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = veterinario,
+                onValueChange = { veterinario = it },
+                label = { Text("Veterinario (opcional)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = clinica,
+                onValueChange = { clinica = it },
+                label = { Text("Clínica (opcional)") },
+                placeholder = { Text("Ej: Veterinaria San Martín") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = diagnostico,
+                onValueChange = { diagnostico = it },
+                label = { Text("Diagnóstico (opcional)") },
+                minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = notas,
-                onValueChange = { notas = it},
-                label = { Text("Notas")},
+                onValueChange = { notas = it },
+                label = { Text("Notas (opcional)") },
+                minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it}
-            ) {
-                OutlinedTextField(
-                    value = statusSeleccionado.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Estado")},
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = {dropdownExpanded = false}
-                ) {
-                    AppointmentStatus.entries.forEach { status ->
-                        DropdownMenuItem(
-                            text = { Text(status.displayName)},
-                            onClick = {
-                                statusSeleccionado = status
-                                dropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
             Button(
                 onClick = {
-                    val nuevoTurno = Appointment(
+                    val nuevaVisita = Appointment(
                         id = appointmentId ?: 0L,
-                        firestoreId = when(val state = appointmentDetailState) {
+                        firestoreId = when (val state = appointmentDetailState) {
                             is AppointmentDetailState.Success -> state.appointments.firestoreId
                             else -> ""
                         },
                         petId = petId,
                         fecha = fecha,
+                        motivo = motivo,
                         veterinario = veterinario.ifBlank { null },
-                        motivo = motivo.ifBlank { null },
-                        notas = notas.ifBlank { null },
-                        status = statusSeleccionado
+                        clinica = clinica.ifBlank { null },
+                        diagnostico = diagnostico.ifBlank { null },
+                        notas = notas.ifBlank { null }
                     )
                     if (appointmentId == null) {
-                        viewModel.insertAppointment(nuevoTurno)
+                        viewModel.insertAppointment(nuevaVisita)
                     } else {
-                        viewModel.updateAppointment(nuevoTurno)
+                        viewModel.updateAppointment(nuevaVisita)
                     }
                     onNavigateBack()
                 },
-                enabled = fecha.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
+                enabled = fecha.isNotBlank() && motivo.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
-                Text(if(appointmentId == null) "Guardar" else "Actualizar")
+                Text(if (appointmentId == null) "Guardar" else "Actualizar")
             }
         }
     }

@@ -759,6 +759,7 @@ fun PawCareNavGraph(
             )
             AppointmentScreen(
                 petId = petId,
+                isVeterinario = true,
                 onNavigateBack = { navController.popBackStack()},
                 onNavigateToEdit = { appointmentId ->
                     navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},

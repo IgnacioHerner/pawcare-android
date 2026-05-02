@@ -5,14 +5,9 @@ data class Appointment (
     val firestoreId: String = "",
     val petId: Long,
     val fecha: String,
+    val motivo: String,
     val veterinario: String?,
-    val motivo: String?,
-    val notas: String?,
-    val status: AppointmentStatus
+    val clinica: String?,
+    val diagnostico: String?,
+    val notas: String?
 )
-
-enum class AppointmentStatus(val displayName: String) {
-    PENDIENTE("Pendiente"),
-    AGENDADO("Agendado"),
-    REALIZADO("Realizado")
-}

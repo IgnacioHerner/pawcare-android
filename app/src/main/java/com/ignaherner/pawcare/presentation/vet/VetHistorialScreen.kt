@@ -38,13 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
 import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.domain.model.Medication
-import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.Vaccine
-import com.ignaherner.pawcare.domain.model.VaccineStatus
 import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.utils.toFriendlyDate
@@ -314,40 +311,33 @@ private fun VetTurnosList(items: List<Appointment>) {
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Text(
+                        text = appointment.motivo,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = appointment.fecha.toFriendlyDate(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    appointment.veterinario?.let {
                         Text(
-                            text = appointment.motivo ?: "Sin motivo",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        AssistChip(
-                            onClick = {},
-                            label = {
-                                Text(
-                                    when (appointment.status) {
-                                        AppointmentStatus.PENDIENTE -> "Pendiente"
-                                        AppointmentStatus.AGENDADO -> "Agendado"
-                                        AppointmentStatus.REALIZADO -> "Realizado"
-                                    },
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        )
-                    }
-                    appointment.fecha?.let {
-                        Text(
-                            text = "📅 ${it.toFriendlyDate()}",
+                            text = it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    appointment.veterinario?.let {
+                    appointment.clinica?.let {
                         Text(
-                            text = "👨‍⚕️ $it",
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    appointment.diagnostico?.let {
+                        Text(
+                            text = "Diagnóstico: $it",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -357,7 +347,6 @@ private fun VetTurnosList(items: List<Appointment>) {
         }
     }
 }
-
 @Composable
 private fun VetCondicionesList(items: List<Condition>) {
     LazyColumn(

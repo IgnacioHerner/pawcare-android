@@ -20,11 +20,12 @@ import androidx.room.PrimaryKey
 data class AppointmentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val firestoreId: String,
+    val firestoreId: String = "",
     val petId: Long,
     val fecha: String,
+    val motivo: String,
     val veterinario: String?,
-    val motivo: String?,
-    val notas: String?,
-    val status: String
+    val clinica: String?,
+    val diagnostico: String?,
+    val notas: String?
 )

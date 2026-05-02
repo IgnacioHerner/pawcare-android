@@ -4,33 +4,31 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
-import com.ignaherner.pawcare.domain.model.Medication
-import com.ignaherner.pawcare.domain.model.MedicationStatus
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AppointmentFirestoreRepository @Inject constructor(){
+class AppointmentFirestoreRepository @Inject constructor() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun guardarTurno(appointment: Appointment, petFirestoreId: String): Result<String>{
+    suspend fun guardarTurno(appointment: Appointment, petFirestoreId: String): Result<String> {
         return try {
             val appointmentData = hashMapOf(
                 "petId" to petFirestoreId,
                 "fecha" to appointment.fecha,
-                "veterinario" to appointment.veterinario,
                 "motivo" to appointment.motivo,
-                "notas" to appointment.notas,
-                "status" to appointment.status.name
+                "veterinario" to appointment.veterinario,
+                "clinica" to appointment.clinica,
+                "diagnostico" to appointment.diagnostico,
+                "notas" to appointment.notas
             )
 
             val docRef = firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("appointment")
+                .collection("appointments")
                 .add(appointmentData)
                 .await()
 
@@ -40,23 +38,23 @@ class AppointmentFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun actualizarTurno(appointment: Appointment, petFirestoreId: String): Result<Unit>{
+    suspend fun actualizarTurno(appointment: Appointment, petFirestoreId: String): Result<Unit> {
         return try {
-            if(appointment.firestoreId.isBlank()) return Result.failure(
+            if (appointment.firestoreId.isBlank()) return Result.failure(
                 Exception("Sin firestoreId")
             )
 
             val appointmentData = hashMapOf(
-                "petId" to petFirestoreId,
                 "fecha" to appointment.fecha,
-                "veterinario" to appointment.veterinario,
                 "motivo" to appointment.motivo,
-                "notas" to appointment.notas,
-                "status" to appointment.status.name
+                "veterinario" to appointment.veterinario,
+                "clinica" to appointment.clinica,
+                "diagnostico" to appointment.diagnostico,
+                "notas" to appointment.notas
             )
             firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("appointment")
+                .collection("appointments")
                 .document(appointment.firestoreId)
                 .set(appointmentData, SetOptions.merge())
                 .await()
@@ -67,17 +65,17 @@ class AppointmentFirestoreRepository @Inject constructor(){
         }
     }
 
-    suspend fun eliminarTurno(firestoreId: String, petFirestoreId: String): Result<Unit>{
+    suspend fun eliminarTurno(firestoreId: String, petFirestoreId: String): Result<Unit> {
         return try {
             firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("appointment")
+                .collection("appointments")
                 .document(firestoreId)
                 .delete()
                 .await()
 
             Result.success(Unit)
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -86,25 +84,24 @@ class AppointmentFirestoreRepository @Inject constructor(){
         return try {
             val documentos = firestore.collection("pets")
                 .document(petFirestoreId)
-                .collection("appointment")
+                .collection("appointments")
                 .get()
                 .await()
 
-            val appointment = documentos.map { doc ->
+            val appointments = documentos.map { doc ->
                 Appointment(
                     id = 0L,
                     firestoreId = doc.id,
                     petId = 0L,
                     fecha = doc.getString("fecha") ?: "",
+                    motivo = doc.getString("motivo") ?: "",
                     veterinario = doc.getString("veterinario"),
-                    motivo = doc.getString("motivo"),
-                    notas = doc.getString("notas"),
-                    status = AppointmentStatus.valueOf(
-                        doc.getString("status") ?: AppointmentStatus.PENDIENTE.name
-                    )
+                    clinica = doc.getString("clinica"),
+                    diagnostico = doc.getString("diagnostico"),
+                    notas = doc.getString("notas")
                 )
             }
-            Result.success(appointment)
+            Result.success(appointments)
         } catch (e: Exception) {
             Result.failure(e)
         }

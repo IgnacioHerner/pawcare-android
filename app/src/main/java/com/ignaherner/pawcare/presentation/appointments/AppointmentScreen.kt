@@ -1,22 +1,27 @@
 package com.ignaherner.pawcare.presentation.appointments
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,20 +41,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
-import com.ignaherner.pawcare.domain.model.MedicationStatus
-import com.ignaherner.pawcare.domain.model.VaccineStatus
-import com.ignaherner.pawcare.presentation.components.AppointmentCard
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.ui.theme.CatAppointment
+import com.ignaherner.pawcare.ui.theme.CatAppointmentSoft
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.utils.toFriendlyDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,28 +67,13 @@ fun AppointmentScreen(
     onNavigateToEdit: (Long) -> Unit,
     onNavigateToForm: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
+    isVeterinario: Boolean = false,
     viewModel: AppointmentViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
-){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
-
-    var filtroSeleccionado by remember { mutableStateOf<AppointmentStatus?>(null) }
-
     var appointmentToDelete by remember { mutableStateOf<Appointment?>(null) }
-
-    appointmentToDelete?.let { appointment ->
-        ConfirmDeleteDialog(
-            titulo = "¿Eliminar a ${appointment.motivo}?",
-            mensaje = "Esta accion no se puede deshacer. ",
-            onConfirm = {
-                viewModel.deleteAppointment(appointment)
-                appointmentToDelete = null
-            },
-            onDismiss = { appointmentToDelete = null}
-        )
-    }
 
     LaunchedEffect(petId) {
         viewModel.loadAppointments(petId)
@@ -91,12 +85,21 @@ fun AppointmentScreen(
 
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let {
-            snackbarHostState.showSnackbar(
-                message = it,
-                duration = SnackbarDuration.Short
-            )
+            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
             viewModel.clearSnackbar()
         }
+    }
+
+    appointmentToDelete?.let { appointment ->
+        ConfirmDeleteDialog(
+            titulo = "¿Eliminar visita?",
+            mensaje = "Se eliminará el registro de ${appointment.motivo}. Esta acción no se puede deshacer.",
+            onConfirm = {
+                viewModel.deleteAppointment(appointment)
+                appointmentToDelete = null
+            },
+            onDismiss = { appointmentToDelete = null }
+        )
     }
 
     Scaffold(
@@ -105,19 +108,16 @@ fun AppointmentScreen(
             TopAppBar(
                 title = {
                     Column {
-                        // Nombre + emoji si ya cargó
                         val titulo = when (val state = detailState) {
-                            is PetDetailState.Success ->
-                                "${state.pet.nombre} ${state.pet.especie.emoji()}"
+                            is PetDetailState.Success -> state.pet.nombre
                             else -> ""
                         }
                         Text(
                             text = titulo,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Turnos \uD83D\uDCC5",
+                            text = "Visitas",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -127,145 +127,153 @@ fun AppointmentScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToForm) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar turno")
+            if (isVeterinario) {
+                FloatingActionButton(
+                    onClick = onNavigateToForm,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar visita")
+                }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado == null,
-                        onClick = { filtroSeleccionado = null },
-                        label = { Text("Todas", style = MaterialTheme.typography.labelSmall) }
+            when (val state = uiState) {
+                is AppointmentUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is AppointmentUiState.Empty -> {
+                    EmptyState(
+                        icon = Icons.Outlined.CalendarMonth,
+                        title = "Sin visitas registradas",
+                        body = if (isVeterinario)
+                            "Tocá el + para registrar una visita"
+                        else
+                            "El veterinario podrá registrar las visitas de tu mascota"
                     )
                 }
-
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado == AppointmentStatus.PENDIENTE,
-                        onClick = { filtroSeleccionado = AppointmentStatus.PENDIENTE },
-                        label = { Text("Pendiente", style = MaterialTheme.typography.labelSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFF44336).copy(alpha = 0.15f),
-                            selectedLabelColor = Color(0xFFF44336)
+                is AppointmentUiState.Success -> {
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            top = PawSpace.sm,
+                            bottom = 96.dp
                         )
-                    )
-                }
-
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado == AppointmentStatus.AGENDADO,
-                        onClick = { filtroSeleccionado = AppointmentStatus.AGENDADO },
-                        label = { Text("Agendado", style = MaterialTheme.typography.labelSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF2196F3).copy(alpha = 0.15f),
-                            selectedLabelColor = Color(0xFF2196F3)
-                        )
-                    )
-                }
-
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado == AppointmentStatus.REALIZADO,
-                        onClick = { filtroSeleccionado = AppointmentStatus.REALIZADO },
-                        label = { Text("Realizado", style = MaterialTheme.typography.labelSmall) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF4CAF50).copy(alpha = 0.08f),
-                            selectedLabelColor = Color(0xFF4CAF50)
-                        )
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                when (val state = uiState) {
-                    is AppointmentUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-
-                    is AppointmentUiState.Empty -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "\uD83D\uDCC5",
-                                style = MaterialTheme.typography.displayLarge
-                            )
-                            Text(
-                                text = "Todavía no tenés visitas programadas",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Tocá el + para agregar la primera",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    is AppointmentUiState.Success -> {
-                        // Filtar segun el chip seleccionado
-                        val appointmentFiltradas = when(val filtro = filtroSeleccionado) {
-                            null -> state.appointments
-                            AppointmentStatus.PENDIENTE -> state.appointments.filter {
-                                it.status == AppointmentStatus.PENDIENTE
-                            }
-                            AppointmentStatus.AGENDADO -> state.appointments.filter {
-                                it.status == AppointmentStatus.AGENDADO
-                            }
-                            AppointmentStatus.REALIZADO -> state.appointments.filter {
-                                it.status == AppointmentStatus.REALIZADO
-                            }
-                        }
-
-                        LazyColumn(contentPadding = PaddingValues(bottom = 80.dp)) {
-                            items(
-                                items = appointmentFiltradas,
-                                key = { it.id }
-                            ) { appointment ->
+                    ) {
+                        items(
+                            items = state.appointments,
+                            key = { it.id }
+                        ) { appointment ->
+                            if (isVeterinario) {
                                 SwipeRevealCard(
-                                    onDelete = { appointmentToDelete = appointment},
-                                    onEdit = { onNavigateToEdit(appointment.id)}
+                                    onDelete = { appointmentToDelete = appointment },
+                                    onEdit = { onNavigateToEdit(appointment.id) }
                                 ) {
                                     AppointmentCard(
                                         appointment = appointment,
-                                        onClick = {onNavigateToDetail(appointment.id)},
-                                        onDeleteClick = { viewModel.deleteAppointment(appointment) }
+                                        onClick = { onNavigateToDetail(appointment.id) }
                                     )
                                 }
+                            } else {
+                                AppointmentCard(
+                                    appointment = appointment,
+                                    onClick = { onNavigateToDetail(appointment.id) }
+                                )
                             }
                         }
                     }
-
-                    is AppointmentUiState.Error -> {
-                        Text(
-                            text = state.mensaje,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
+                }
+                is AppointmentUiState.Error -> {
+                    Text(
+                        text = state.mensaje,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AppointmentCard(
+    appointment: Appointment,
+    onClick: () -> Unit = {}
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
+        shape = RoundedCornerShape(PawRadii.md),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PawSpace.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
+        ) {
+            // Tile ícono
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .background(CatAppointmentSoft),
+                contentAlignment = Alignment.Center
+            ) {
+                PawCareIcon(
+                    icon = Icons.Outlined.CalendarMonth,
+                    contentDescription = null,
+                    size = PawIconSize.medium,
+                    tint = CatAppointment
+                )
+            }
+
+            // Info
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = appointment.motivo,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = appointment.fecha.toFriendlyDate(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                appointment.veterinario?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            PawCareIcon(
+                icon = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                size = PawIconSize.medium,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

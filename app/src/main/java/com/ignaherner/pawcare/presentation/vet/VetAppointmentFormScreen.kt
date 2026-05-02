@@ -3,9 +3,9 @@ package com.ignaherner.pawcare.presentation.vet
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,14 +16,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
+import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 
@@ -45,11 +46,13 @@ fun VetAppointmentFormScreen(
     onNavigateBack: () -> Unit,
     viewModel: VetViewModel = hiltViewModel()
 ) {
-    var motivo by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf(fechaHoy()) }
+    var motivo by remember { mutableStateOf("") }
     var veterinario by remember { mutableStateOf("") }
+    var clinica by remember { mutableStateOf("") }
+    var diagnostico by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
-    var statusSeleccionado by remember { mutableStateOf(AppointmentStatus.AGENDADO) }
+
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
@@ -79,95 +82,101 @@ fun VetAppointmentFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nuevo turno") },
+                title = { Text("Nueva visita") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(PawSpace.lg)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            OutlinedTextField(
-                value = motivo,
-                onValueChange = { motivo = it },
-                label = { Text("Motivo de la consulta") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
             OutlinedTextField(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha") },
+                label = { Text("Fecha de la visita") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Fecha")
                     }
                 },
-                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
+            )
+
+            OutlinedTextField(
+                value = motivo,
+                onValueChange = { motivo = it },
+                label = { Text("Motivo de la visita") },
+                placeholder = { Text("Ej: Control anual, vacunación") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = veterinario,
                 onValueChange = { veterinario = it },
-                label = { Text("Veterinario") },
+                label = { Text("Veterinario (opcional)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Status
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AppointmentStatus.entries.forEach { status ->
-                    FilterChip(
-                        selected = statusSeleccionado == status,
-                        onClick = { statusSeleccionado = status },
-                        label = {
-                            Text(when (status) {
-                                AppointmentStatus.PENDIENTE -> "Pendiente"
-                                AppointmentStatus.AGENDADO -> "Agendado"
-                                AppointmentStatus.REALIZADO -> "Realizado"
-                            })
-                        }
-                    )
-                }
-            }
+            OutlinedTextField(
+                value = clinica,
+                onValueChange = { clinica = it },
+                label = { Text("Clínica (opcional)") },
+                placeholder = { Text("Ej: Veterinaria San Martín") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = diagnostico,
+                onValueChange = { diagnostico = it },
+                label = { Text("Diagnóstico (opcional)") },
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             OutlinedTextField(
                 value = notas,
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = {
-                    val nuevoTurno = Appointment(
+                    val nuevaVisita = Appointment(
                         id = 0L,
                         firestoreId = "",
                         petId = 0L,
-                        motivo = motivo.ifBlank { null },
                         fecha = fecha,
+                        motivo = motivo,
                         veterinario = veterinario.ifBlank { null },
-                        notas = notas.ifBlank { null },
-                        status = statusSeleccionado
+                        clinica = clinica.ifBlank { null },
+                        diagnostico = diagnostico.ifBlank { null },
+                        notas = notas.ifBlank { null }
                     )
-                    viewModel.guardarTurno(nuevoTurno, petFirestoreId)
+                    viewModel.guardarTurno(nuevaVisita, petFirestoreId)
                     onNavigateBack()
                 },
-                enabled = motivo.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
+                enabled = motivo.isNotBlank() && fecha.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) { Text("Guardar") }
         }
     }

@@ -27,7 +27,7 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         ConditionEntity::class,
         DewormingEntity::class
         ],
-    version = 31,
+    version = 32,
     exportSchema = false
 )
 abstract class PawCareDatabase : RoomDatabase() {

@@ -8,35 +8,41 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocalHospital
+import androidx.compose.material.icons.outlined.MedicalServices
+import androidx.compose.material.icons.outlined.Notes
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
-import com.ignaherner.pawcare.domain.model.AppointmentStatus
 import com.ignaherner.pawcare.utils.toFriendlyDate
-import com.ignaherner.pawcare.presentation.components.InfoRow
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,19 +61,31 @@ fun AppointmentDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle del turno") },
+                title = { Text("Detalle de visita") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onNavigateToEdit(appointmentId)}) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar turno")
+                    IconButton(onClick = { onNavigateToEdit(appointmentId) }) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.Edit,
+                            contentDescription = "Editar",
+                            size = PawIconSize.medium
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -76,9 +94,7 @@ fun AppointmentDetailScreen(
         ) {
             when (val state = detailState) {
                 is AppointmentDetailState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is AppointmentDetailState.Error -> {
                     Text(
@@ -88,7 +104,7 @@ fun AppointmentDetailScreen(
                 }
                 is AppointmentDetailState.Success -> {
                     AppointmentDetailContent(
-                        appoinment = state.appointments,
+                        appointment = state.appointments,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -98,80 +114,123 @@ fun AppointmentDetailScreen(
 }
 
 @Composable
-fun AppointmentDetailContent(
-    appoinment: Appointment,
-    modifier: Modifier
+private fun AppointmentDetailContent(
+    appointment: Appointment,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(PawSpace.lg),
+        verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        // Header
+        Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
             Text(
-                text = appoinment.fecha,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                text = appointment.motivo,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            AssistChip(
-                onClick = {},
-                label = {
-                    Text(
-                        text = when (appoinment.status) {
-                            AppointmentStatus.PENDIENTE -> "Pendiente"
-                            AppointmentStatus.AGENDADO -> "Agendado"
-                            AppointmentStatus.REALIZADO -> "Realizado"
-                        },
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = when (appoinment.status) {
-                        AppointmentStatus.PENDIENTE -> Color(0xFFFF9800).copy(alpha = 0.15f)
-                        AppointmentStatus.AGENDADO -> Color(0xFF2196F3).copy(alpha = 0.15f)
-                        AppointmentStatus.REALIZADO -> Color(0xFF4CAF50).copy(alpha = 0.15f)
-                    },
-                    labelColor = when (appoinment.status) {
-                        AppointmentStatus.PENDIENTE -> Color(0xFFFF9800)
-                        AppointmentStatus.AGENDADO -> Color(0xFF2196F3)
-                        AppointmentStatus.REALIZADO -> Color(0xFF4CAF50)
-                    }
-                )
+            Text(
+                text = appointment.fecha.toFriendlyDate(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Card(modifier = Modifier.fillMaxWidth()) {
+
+        // Info card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(PawRadii.md),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(PawSpace.lg),
+                verticalArrangement = Arrangement.spacedBy(PawSpace.md)
             ) {
                 Text(
-                    text = "Información",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    text = "INFORMACIÓN",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                InfoRow("📅 Fecha", appoinment.fecha.toFriendlyDate())
+                DetailRow(
+                    icon = Icons.Outlined.CalendarMonth,
+                    label = "Fecha",
+                    value = appointment.fecha.toFriendlyDate()
+                )
 
-                appoinment.veterinario?.let {
-                    InfoRow("👨‍⚕️ Veterinario", it)
+                DetailRow(
+                    icon = Icons.Outlined.Description,
+                    label = "Motivo",
+                    value = appointment.motivo
+                )
+
+                appointment.veterinario?.let {
+                    DetailRow(
+                        icon = Icons.Outlined.Person,
+                        label = "Veterinario",
+                        value = it
+                    )
                 }
 
-                appoinment.motivo?.let {
-                    InfoRow("📋 Motivo", it)
+                appointment.clinica?.let {
+                    DetailRow(
+                        icon = Icons.Outlined.LocalHospital,
+                        label = "Clínica",
+                        value = it
+                    )
                 }
 
-                appoinment.notas?.let {
-                    InfoRow("📝 Notas", it)
+                appointment.diagnostico?.let {
+                    DetailRow(
+                        icon = Icons.Outlined.MedicalServices,
+                        label = "Diagnóstico",
+                        value = it
+                    )
                 }
 
+                appointment.notas?.let {
+                    DetailRow(
+                        icon = Icons.Outlined.Notes,
+                        label = "Notas",
+                        value = it
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun DetailRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PawCareIcon(
+            icon = icon,
+            contentDescription = null,
+            size = PawIconSize.default,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
