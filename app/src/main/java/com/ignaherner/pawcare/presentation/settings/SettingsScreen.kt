@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
@@ -94,13 +95,11 @@ fun SettingsScreen(
             item {
                 when (val state = ownerState) {
                     is OwnerState.Success -> {
-                        Card(
-                            onClick = onNavigateToOwnerDetail,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
+                        PawCard(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                            onClick = onNavigateToOwnerDetail
+                            ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -152,11 +151,9 @@ fun SettingsScreen(
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp)
+                PawCard(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -207,11 +204,9 @@ fun SettingsScreen(
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp)
+                PawCard(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -252,11 +247,9 @@ fun SettingsScreen(
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp)
+                PawCard(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier

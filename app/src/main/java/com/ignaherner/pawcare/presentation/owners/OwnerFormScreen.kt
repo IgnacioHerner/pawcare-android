@@ -8,16 +8,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,13 +51,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Owner
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +71,7 @@ fun OwnerFormScreen(
     ownerId: Long?,
     onNavigateBack: () -> Unit,
     viewModel: OwnerViewModel = hiltViewModel()
-){
-    // Estado local del formulario
+) {
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -75,12 +94,10 @@ fun OwnerFormScreen(
         viewModel.loadOwner()
     }
 
-    // cuando ownerState cambia, actualizamos los campos
     val ownerState by viewModel.ownerState.collectAsStateWithLifecycle()
 
-    // Pre-llenar campos al editar
     LaunchedEffect(ownerState) {
-        if(ownerState is OwnerState.Success) {
+        if (ownerState is OwnerState.Success) {
             val owner = (ownerState as OwnerState.Success).owner
             nombre = owner.nombre
             apellido = owner.apellido
@@ -96,99 +113,206 @@ fun OwnerFormScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (ownerId == null) "Nuevo usuario" else "Editar usuario")
+                    Text(if (ownerId == null) "Completá tu perfil" else "Editar perfil")
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = PawSpace.xl)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            // Foto del dueno
+            Spacer(modifier = Modifier.height(PawSpace.sm))
+
+            // Foto
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(100.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .align(Alignment.CenterHorizontally)
-                    .clickable{ galleryLauncher.launch("image/*")}
+                    .clickable { galleryLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
             ) {
-                if(fotoUri.isNotBlank()) {
+                if (fotoUri.isNotBlank()) {
                     AsyncImage(
                         model = fotoUri,
-                        contentDescription = "Foto del dueño",
+                        contentDescription = "Foto de perfil",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                }else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Agregar foto",
-                        modifier = Modifier
-                            .size(48.dp)
-                            .align(Alignment.Center),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.CameraAlt,
+                            contentDescription = null,
+                            size = PawIconSize.large,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Foto",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
 
             // Nombre
             OutlinedTextField(
                 value = nombre,
-                onValueChange = { nombre = it},
-                label = { Text("Nombre")},
+                onValueChange = { nombre = it },
+                placeholder = { Text("Nombre") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.PersonOutline,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
-           // Apellido
+            // Apellido
             OutlinedTextField(
                 value = apellido,
-                onValueChange = { apellido = it},
-                label = { Text("Apellido")},
+                onValueChange = { apellido = it },
+                placeholder = { Text("Apellido") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.PersonOutline,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
                 modifier = Modifier.fillMaxWidth()
             )
-            // Telefono
+
+            // Teléfono
             OutlinedTextField(
                 value = telefono,
-                onValueChange = { telefono = it},
-                label = { Text("Telefono")},
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { telefono = it },
+                placeholder = { Text("Teléfono") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Phone,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone
-                )
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
             )
+
             // Email
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it},
-                label = { Text("Email")},
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { email = it },
+                placeholder = { Text("Email (opcional)") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Email,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
             )
+
             // Ciudad
             OutlinedTextField(
                 value = ciudad,
-                onValueChange = { ciudad = it},
-                label = { Text("Ciudad")},
-                modifier = Modifier.fillMaxWidth(),
-            )
-            // Direccion
-            OutlinedTextField(
-                value = direccion,
-                onValueChange = { direccion = it},
-                label = { Text("Direccion")},
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { ciudad = it },
+                placeholder = { Text("Ciudad") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // Boton guardar
+            // Dirección
+            OutlinedTextField(
+                value = direccion,
+                onValueChange = { direccion = it },
+                placeholder = { Text("Dirección (opcional)") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Home,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(PawSpace.sm))
+
+            // Botón guardar
             Button(
                 onClick = {
                     val nuevoOwner = Owner(
@@ -208,11 +332,24 @@ fun OwnerFormScreen(
                     }
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank() && apellido.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
+                enabled = nombre.isNotBlank() && apellido.isNotBlank() &&
+                        telefono.isNotBlank() && ciudad.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Text(if (ownerId == null ) "Guardar" else "Actualizar")
+                Text(
+                    text = if (ownerId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
+
+            Spacer(modifier = Modifier.height(PawSpace.xl))
         }
     }
 }

@@ -53,6 +53,7 @@ import com.ignaherner.pawcare.utils.calcularDiaNumero
 import com.ignaherner.pawcare.utils.calcularFechaFin
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.InfoRow
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.Info
@@ -162,13 +163,7 @@ fun MedicationDetailContent(
 
         // Progreso
         if (medication.status == MedicationStatus.ACTIVO && !medication.esUnicaDosis) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PawRadii.md),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
+            PawCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier.padding(PawSpace.lg),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
@@ -199,13 +194,7 @@ fun MedicationDetailContent(
         }
 
         // Info card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(PawRadii.md),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
+        PawCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(PawSpace.lg),
                 verticalArrangement = Arrangement.spacedBy(PawSpace.md)

@@ -50,6 +50,7 @@ import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
 import com.ignaherner.pawcare.presentation.components.EmptyState
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
@@ -213,16 +214,12 @@ private fun DewormingCard(
     deworming: Deworming,
     onClick: () -> Unit = {}
 ) {
-    Card(
-        onClick = onClick,
+    PawCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
-        shape = RoundedCornerShape(PawRadii.md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
+        onClick = onClick
+    )  {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

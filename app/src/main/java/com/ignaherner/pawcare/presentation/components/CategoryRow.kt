@@ -38,12 +38,9 @@ fun CategoryRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    PawCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(PawRadii.md),
-        tonalElevation = 0.dp
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -52,7 +49,6 @@ fun CategoryRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
         ) {
-            // Tile del ícono
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -68,7 +64,6 @@ fun CategoryRow(
                 )
             }
 
-            // Título + hint
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -107,7 +102,6 @@ fun CategoryRow(
                 )
             }
 
-            // Chevron
             PawCareIcon(
                 icon = Icons.Outlined.ChevronRight,
                 contentDescription = null,

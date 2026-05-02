@@ -53,15 +53,11 @@ fun PetSummaryCard(
     vacunaCount: Int = 0,
     medicamentoCount: Int = 0
 ) {
-    Card(
+    PawCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
-        shape = RoundedCornerShape(PawRadii.md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs)
     ) {
         Column(
             modifier = Modifier
@@ -93,7 +89,6 @@ fun PetSummaryCard(
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        // Dot de estado
                         if (estado != EstadoMascota.OK) {
                             Box(
                                 modifier = Modifier
@@ -130,7 +125,7 @@ fun PetSummaryCard(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            // Stats grid 3 columnas
+            // Stats grid
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -155,7 +150,7 @@ fun PetSummaryCard(
                 )
             }
 
-            // Mini-alert si hay urgencia
+            // Mini-alert
             if (estado != EstadoMascota.OK) {
                 summary.proximaVacuna?.let { vacuna ->
                     val toneBg = when (estado) {

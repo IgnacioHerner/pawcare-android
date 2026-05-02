@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
@@ -139,13 +140,7 @@ private fun AppointmentDetailContent(
         }
 
         // Info card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(PawRadii.md),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
+        PawCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(PawSpace.lg),
                 verticalArrangement = Arrangement.spacedBy(PawSpace.md)

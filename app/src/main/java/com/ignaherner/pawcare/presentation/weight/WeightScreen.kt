@@ -44,6 +44,7 @@ import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.utils.WeightMetrics
 import com.ignaherner.pawcare.utils.calcularMetricas
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.components.WeightCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
@@ -253,12 +254,7 @@ private fun MetricsCard(metricas: WeightMetrics) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        PawCard(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Resumen",
                 style = MaterialTheme.typography.titleMedium,
@@ -338,11 +334,7 @@ private fun WeightChart(weights: List<Weight>) {
         }
     }
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
+    PawCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

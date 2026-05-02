@@ -58,6 +58,7 @@ import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.presentation.appointments.AppointmentUiState
 import com.ignaherner.pawcare.presentation.appointments.AppointmentViewModel
 import com.ignaherner.pawcare.presentation.components.CategoryRow
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
@@ -415,13 +416,7 @@ private fun PetVitalStats(
     ultimoPeso: Weight?,
     pesoAnterior: Weight?
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(PawRadii.md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
+    PawCard(modifier = Modifier.fillMaxWidth()){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -572,14 +567,10 @@ private fun TutorCard(
     owner: Owner,
     onClick: () -> Unit
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(PawRadii.md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
+        PawCard(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

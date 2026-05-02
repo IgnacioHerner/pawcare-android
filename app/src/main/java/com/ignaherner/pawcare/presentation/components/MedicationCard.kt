@@ -56,15 +56,11 @@ fun MedicationCard(
         MedicationStatus.FINALIZADO -> SurfaceSunk to InkMuted
     }
 
-    Card(
-        onClick = onClick,
+    PawCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs),
-        shape = RoundedCornerShape(PawRadii.md),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier

@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Vaccine
 import com.ignaherner.pawcare.domain.model.VaccineStatus
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
@@ -157,13 +158,7 @@ fun VaccineDetailContent(
         }
 
         // Card de info
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(PawRadii.md),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
+        PawCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(PawSpace.lg),
                 verticalArrangement = Arrangement.spacedBy(PawSpace.md)
@@ -213,13 +208,7 @@ fun VaccineDetailContent(
         }
 
         // Descripción de la vacuna
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(PawRadii.md),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        ) {
+        PawCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(PawSpace.lg),
                 verticalArrangement = Arrangement.spacedBy(PawSpace.sm)

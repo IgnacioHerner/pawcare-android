@@ -37,12 +37,7 @@ fun WeightCard(
     // pesoAnterior = 32.0 → variacion = 34.0 - 32.0 = 2.0
     val variacion = pesoAnterior?.let { weight.peso - it }
 
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
+    PawCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
