@@ -7,23 +7,36 @@ import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -41,6 +54,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,7 +68,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +80,11 @@ import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.Pet
 import com.ignaherner.pawcare.domain.model.Sex
+import com.ignaherner.pawcare.presentation.components.PawCard
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.toFormattedString
 import java.io.File
 import java.time.LocalDate
@@ -74,17 +96,11 @@ fun PetFormScreen(
     onNavigateBack: () -> Unit,
     viewModel: PetViewModel = hiltViewModel()
 ) {
-    // Estado local del formulario
     var nombre by remember { mutableStateOf("") }
     var especieSeleccionada by remember { mutableStateOf(Especie.PERRO) }
     var raza by remember { mutableStateOf("") }
     var sexoSeleccionado by remember { mutableStateOf(Sex.MACHO) }
     var fechaNacimiento by remember { mutableStateOf("") }
-    var fechaNacimientoTipo by remember {
-        mutableStateOf(FechaNacimientoTipo.DESCONOCIDA)
-    }
-    var dropdownExpanded by remember { mutableStateOf(false) }
-    var sexoDropdownExpanded by remember { mutableStateOf(false) }
     var fotoUri by remember { mutableStateOf("") }
     var castrado by remember { mutableStateOf(false) }
     var fechaCastracion by remember { mutableStateOf("") }
@@ -92,122 +108,34 @@ fun PetFormScreen(
     var codigo by remember { mutableStateOf("") }
     var ownerId by remember { mutableStateOf("") }
 
-
-    var showFechaCastracionPicker by remember { mutableStateOf(false) }
-    val fechaCastracionPickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
-    )
-    if (showFechaCastracionPicker) {
-        DatePickerDialog(
-            onDismissRequest = { showFechaCastracionPicker = false},
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        fechaCastracionPickerState.selectedDateMillis?.let { millis ->
-                            val localDate = java.time.Instant
-                                .ofEpochMilli(millis)
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toLocalDate()
-                            fechaCastracion = localDate.toFormattedString()
-                        }
-                        showFechaCastracionPicker = false
-                    }
-                ) { Text("Aceptar")}
-            },
-            dismissButton = {
-                TextButton(onClick = { showFechaCastracionPicker = false}) {
-                    Text("Cancelar")
-                }
-            }
-        ) {
-            DatePicker(state = fechaCastracionPickerState)
-        }
-    }
-
     var showFechaNacimientoPicker by remember { mutableStateOf(false) }
+    var showFechaCastracionPicker by remember { mutableStateOf(false) }
+
     val fechaNacimientoPickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-    if (showFechaNacimientoPicker) {
-        DatePickerDialog(
-            onDismissRequest = { showFechaNacimientoPicker = false},
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        fechaNacimientoPickerState.selectedDateMillis?.let { millis ->
-                            val localDate = java.time.Instant
-                                .ofEpochMilli(millis)
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toLocalDate()
-                            fechaNacimiento = localDate.toFormattedString()
-                        }
-                        showFechaNacimientoPicker = false
-                    }
-                ) { Text("Aceptar")}
-            },
-            dismissButton = {
-                TextButton(onClick = {showFechaNacimientoPicker = false}) {
-                    Text("Cancelar")
-                }
-            }
-        ) {
-            DatePicker(state = fechaNacimientoPickerState)
-        }
-    }
-
-    // Cargar las mascotas si estamos editando
-    LaunchedEffect(petId) {
-        petId?.let { viewModel.loadPetById(it) }
-    }
-
-    // Pre-llenar campos cuando los datos cargan
-    val detailState by viewModel.detailState.collectAsStateWithLifecycle()
-
-    // Cuando detailState cambia, actualizá los campos
-    LaunchedEffect(detailState) {
-        if(detailState is PetDetailState.Success){
-            val pet = (detailState as PetDetailState.Success).pet
-            nombre = pet.nombre
-            especieSeleccionada = pet.especie
-            castrado = pet.castrado
-            raza = pet.raza ?: ""
-            sexoSeleccionado = pet.sexo ?: Sex.MACHO
-            fechaNacimiento = pet.fechaNacimiento ?: ""
-            fechaCastracion = pet.fechaCastracion ?: ""
-            fechaNacimientoTipo = pet.fechaNacimientoTipo
-            fotoUri = pet.fotoUri ?: ""
-            firestoreId = pet.firestoreId
-            codigo = pet.codigo
-            ownerId = pet.ownerId
-        }
-    }
+    val fechaCastracionPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
 
     val context = LocalContext.current
-
-    // Launcher para galeria
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { sourceUri ->
-            // Copiar la foto al almacenamiento interno
             val savedUri = copyImageToInternalStorage(context, sourceUri)
             savedUri?.let { fotoUri = it.toString() }
         }
     }
 
-    // Uri temporal para la camara
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
-
-    // Launcher para camara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
-        if(success){
+        if (success) {
             tempCameraUri?.let { fotoUri = it.toString() }
         }
     }
-
-    // Launcher para permiso de camara
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -218,359 +146,320 @@ fun PetFormScreen(
         }
     }
 
+    LaunchedEffect(petId) {
+        petId?.let { viewModel.loadPetById(it) }
+    }
+
+    val detailState by viewModel.detailState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(detailState) {
+        if (detailState is PetDetailState.Success) {
+            val pet = (detailState as PetDetailState.Success).pet
+            nombre = pet.nombre
+            especieSeleccionada = pet.especie
+            castrado = pet.castrado
+            raza = pet.raza ?: ""
+            sexoSeleccionado = pet.sexo ?: Sex.MACHO
+            fechaNacimiento = pet.fechaNacimiento ?: ""
+            fechaCastracion = pet.fechaCastracion ?: ""
+            fotoUri = pet.fotoUri ?: ""
+            firestoreId = pet.firestoreId
+            codigo = pet.codigo
+            ownerId = pet.ownerId
+        }
+    }
+
+    // DatePicker dialogs
+    if (showFechaNacimientoPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showFechaNacimientoPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    fechaNacimientoPickerState.selectedDateMillis?.let { millis ->
+                        val localDate = java.time.Instant
+                            .ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                        fechaNacimiento = localDate.toFormattedString()
+                    }
+                    showFechaNacimientoPicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFechaNacimientoPicker = false }) { Text("Cancelar") }
+            }
+        ) { DatePicker(state = fechaNacimientoPickerState) }
+    }
+
+    if (showFechaCastracionPicker) {
+        DatePickerDialog(
+            onDismissRequest = { showFechaCastracionPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    fechaCastracionPickerState.selectedDateMillis?.let { millis ->
+                        val localDate = java.time.Instant
+                            .ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                        fechaCastracion = localDate.toFormattedString()
+                    }
+                    showFechaCastracionPicker = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFechaCastracionPicker = false }) { Text("Cancelar") }
+            }
+        ) { DatePicker(state = fechaCastracionPickerState) }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (petId == null) "Nueva Mascota" else "Editar Mascota")
+                    Text(
+                        text = if (petId == null) "Nueva mascota" else "Editar mascota",
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = if (petId == null) Icons.Outlined.Close else Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = PawSpace.xl)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            // Foto de mascota
+            Spacer(modifier = Modifier.height(PawSpace.sm))
+
+            // Foto
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(100.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = CircleShape
+                    )
                     .align(Alignment.CenterHorizontally)
-                    .clickable{ galleryLauncher.launch("image/*")}
-            ){
+                    .clickable { galleryLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
                 if (fotoUri.isNotBlank()) {
                     AsyncImage(
                         model = fotoUri,
-                        contentDescription = "Foto de ${nombre}",
+                        contentDescription = "Foto de $nombre",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                }else {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Agregar foto",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(Alignment.Center),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.CameraAlt,
+                            contentDescription = null,
+                            size = PawIconSize.large,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "AGREGAR FOTO",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
                 }
             }
 
-            // Botones galeria y camara
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ){
-                OutlinedButton(
-                    onClick = { galleryLauncher.launch("image/*")},
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("📷 Galería")
-                }
-                OutlinedButton(
-                    onClick = {
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("📸 Cámara")
-                }
-            }
-
-            // Campo nombre
+            // Nombre
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
-                label = { Text("Nombre") },
+                placeholder = { Text("Nombre") },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo raza
-            OutlinedTextField(
-                value = raza,
-                onValueChange = { raza = it},
-                label = { Text("Raza")},
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Dropdown sexo
-            ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { sexoDropdownExpanded = it}
-            ) {
-                OutlinedTextField(
-                    value = sexoSeleccionado.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Sexo")},
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sexoDropdownExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
+            // Especie
+            Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                Text(
+                    text = "ESPECIE",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 1.sp
                 )
-                ExposedDropdownMenu(
-                    expanded = sexoDropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false}
-                ) {
-                    Sex.entries.forEach { sexo ->
-                        DropdownMenuItem(
-                            text = { Text(sexo.displayName) },
-                            onClick = {
-                                sexoSeleccionado = sexo
-                                sexoDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Tipo de fecha de nacimiento
-            Text(
-                text = "Fecha de nacimiento",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FechaNacimientoTipo.entries.forEach { tipo ->
-                    FilterChip(
-                        selected = fechaNacimientoTipo == tipo,
-                        onClick = {
-                            fechaNacimientoTipo = tipo
-                            if (tipo  == FechaNacimientoTipo.DESCONOCIDA) {
-                                fechaNacimiento = ""
-                            }
-                        },
-                        label = {
-                            Text(
-                                text = when(tipo) {
-                                    FechaNacimientoTipo.EXACTA -> "Exacta"
-                                    FechaNacimientoTipo.APROXIMADA -> "Aproximada"
-                                    FechaNacimientoTipo.DESCONOCIDA -> "Desconocida"
-                                },
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    )
-                }
-            }
-
-            // DatePicker solo si no es DESCONOCIDA
-            if (fechaNacimientoTipo != FechaNacimientoTipo.DESCONOCIDA) {
-                if (fechaNacimientoTipo == FechaNacimientoTipo.APROXIMADA) {
-                    // Dos dropdowns - mes y año
-                    var mesExpanded by remember { mutableStateOf(false) }
-                    var anioExpanded by remember { mutableStateOf(false) }
-                    var mesSeleccionado by remember { mutableStateOf("") }
-                    var anioSeleccionado by remember { mutableStateOf("") }
-
-                    val meses = listOf(
-                        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-                    )
-
-                    val anioActual = LocalDate.now().year
-                    val anios = (anioActual downTo anioActual - 30).map { it.toString() }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Dropdown Mes
-                        ExposedDropdownMenuBox(
-                            expanded = mesExpanded,
-                            onExpandedChange = { mesExpanded = it},
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            OutlinedTextField(
-                                value = mesSeleccionado.ifBlank { "Mes" },
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text ("Mes aprox.")},
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = mesExpanded)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = mesExpanded,
-                                onDismissRequest = { mesExpanded = false}
-                            ) {
-                                meses.forEachIndexed { index, mes ->
-                                    DropdownMenuItem(
-                                        text = { Text(mes)},
-                                        onClick = {
-                                            mesSeleccionado = mes
-                                            mesExpanded = false
-                                            // Actualizar fechaNacimiento
-                                            if(anioSeleccionado.isNotBlank()){
-                                                val mesNum = (index + 1).toString().padStart(2,'0')
-                                                fechaCastracion = "01/$mesNum/$anioSeleccionado"
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        // Dropdown año
-                        ExposedDropdownMenuBox(
-                            expanded = anioExpanded,
-                            onExpandedChange = { anioExpanded = it},
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            OutlinedTextField(
-                                value = anioSeleccionado.ifBlank { "Año" },
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text ("Año aprox.")},
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = mesExpanded)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = anioExpanded,
-                                onDismissRequest = { anioExpanded = false}
-                            ) {
-                                anios.forEach { anio ->
-                                    DropdownMenuItem(
-                                        text = { Text(anio) },
-                                        onClick = {
-                                            anioSeleccionado = anio
-                                            anioExpanded = false
-                                            // Actualizar fechaNacimiento
-                                            if (mesSeleccionado.isNotBlank()) {
-                                                val mesNum = (meses.indexOf(mesSeleccionado) + 1)
-                                                    .toString().padStart(2, '0')
-                                                fechaNacimiento = "01/$mesNum/$anio"
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // EXACTA → DatePicker normal
-                    OutlinedTextField(
-                        value = fechaNacimiento,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Fecha de nacimiento") },
-                        trailingIcon = {
-                            IconButton(onClick = { showFechaNacimientoPicker = true }) {
-                                Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showFechaNacimientoPicker = true }
-                    )
-                }
-            }
-
-            // Dropdown especie
-            ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it }
-            ) {
-                OutlinedTextField(
-                    value = especieSeleccionada.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Especie") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
                     Especie.entries.forEach { especie ->
-                        DropdownMenuItem(
-                            text = { Text(especie.displayName) },
-                            onClick = {
-                                especieSeleccionada = especie
-                                dropdownExpanded = false
-                            }
+                        FilterChip(
+                            selected = especieSeleccionada == especie,
+                            onClick = { especieSeleccionada = especie },
+                            label = { Text(especie.displayName) }
                         )
                     }
                 }
             }
 
-            // Castración
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text(
-                        text = "¿Está castrado/a?",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Recomendamos la castración responsable",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = castrado,
-                    onCheckedChange = {
-                        castrado = it
-                        if (!it) fechaCastracion = "" // limpiá la fecha si desactiva
-                    }
+            // Raza
+            OutlinedTextField(
+                value = raza,
+                onValueChange = { raza = it },
+                placeholder = { Text("Raza") },
+                supportingText = { Text("Opcional") },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Sexo
+            Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                Text(
+                    text = "SEXO",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 1.sp
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)
+                ) {
+                    Sex.entries.forEach { sexo ->
+                        FilterChip(
+                            selected = sexoSeleccionado == sexo,
+                            onClick = { sexoSeleccionado = sexo },
+                            label = { Text(sexo.displayName) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
 
-            // Fecha castración — solo si está castrado
+            // Fecha de nacimiento
+            OutlinedTextField(
+                value = fechaNacimiento,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text("Fecha de nacimiento") },
+                supportingText = { Text("Si no la sabés, podés omitirla") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.CalendarMonth,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                trailingIcon = {
+                    if (fechaNacimiento.isNotBlank()) {
+                        IconButton(onClick = { fechaNacimiento = "" }) {
+                            PawCareIcon(
+                                icon = Icons.Outlined.Close,
+                                contentDescription = "Limpiar",
+                                size = PawIconSize.default,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showFechaNacimientoPicker = true }
+            )
+
+            // Castración
+            PawCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PawSpace.lg),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Castrado/a",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Recomendamos la castración responsable",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = castrado,
+                        onCheckedChange = {
+                            castrado = it
+                            if (!it) fechaCastracion = ""
+                        }
+                    )
+                }
+            }
+
+            // Fecha castración
             if (castrado) {
                 OutlinedTextField(
                     value = fechaCastracion,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Fecha de castración") },
-                    trailingIcon = {
-                        IconButton(onClick = { showFechaCastracionPicker = true }) {
-                            Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
-                        }
+                    placeholder = { Text("Fecha de castración") },
+                    leadingIcon = {
+                        PawCareIcon(
+                            icon = Icons.Outlined.CalendarMonth,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     },
+                    shape = RoundedCornerShape(PawRadii.md),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showFechaCastracionPicker = true }
                 )
             }
 
+            Spacer(modifier = Modifier.height(PawSpace.sm))
+
             // Botón guardar
             Button(
                 onClick = {
+                    val fechaNacimientoTipo = when {
+                        fechaNacimiento.isBlank() -> FechaNacimientoTipo.DESCONOCIDA
+                        else -> FechaNacimientoTipo.EXACTA
+                    }
+
                     val nuevaMascota = Pet(
                         id = petId ?: 0L,
                         firestoreId = firestoreId,
@@ -581,11 +470,10 @@ fun PetFormScreen(
                         raza = raza.ifBlank { null },
                         sexo = sexoSeleccionado,
                         fechaNacimientoTipo = fechaNacimientoTipo,
-                        fechaNacimiento = if (fechaNacimientoTipo == FechaNacimientoTipo.DESCONOCIDA) null else fechaNacimiento.ifBlank { null },
+                        fechaNacimiento = fechaNacimiento.ifBlank { null },
                         fotoUri = fotoUri.ifBlank { null },
                         castrado = castrado,
-                        fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null,
-
+                        fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null
                     )
                     if (petId == null) {
                         viewModel.insertPet(nuevaMascota)
@@ -594,11 +482,30 @@ fun PetFormScreen(
                     }
                     onNavigateBack()
                 },
-                enabled = nombre.isNotBlank() && (!castrado || fechaCastracion.isNotBlank()),
-                modifier = Modifier.fillMaxWidth()
+                enabled = nombre.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Text(if (petId == null) "Guardar" else "Actualizar")
+                PawCareIcon(
+                    icon = Icons.Outlined.Check,
+                    contentDescription = null,
+                    size = PawIconSize.default,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(modifier = Modifier.width(PawSpace.sm))
+                Text(
+                    text = if (petId == null) "Guardar mascota" else "Actualizar mascota",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
+
+            Spacer(modifier = Modifier.height(PawSpace.xl))
         }
     }
 }
