@@ -57,15 +57,36 @@ class AuthViewModel @Inject constructor(
 
     val isLoggedIn: Boolean get() = authRepository.isLoggedIn
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, isVetMode: Boolean = false) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            _rol.value = null  // ← limpiar rol anterior
+            _rol.value = null
 
             val result = authRepository.login(email, password)
             if (result.isSuccess) {
-                cargarRol()
-                _authState.value = AuthState.Success
+                val rolResult = userRepository.obtenerRol()
+                if (rolResult.isSuccess) {
+                    val rolObtenido = rolResult.getOrNull()
+
+                    // Verificar que el rol coincida con el modo
+                    val modoEsperado = if (isVetMode) Rol.VETERINARIO else Rol.DUENO
+                    if (rolObtenido != modoEsperado) {
+                        authRepository.logout()
+                        _authState.value = AuthState.Error(
+                            if (isVetMode)
+                                "Esta cuenta no es de veterinario. Usá el modo Dueño para ingresar."
+                            else
+                                "Esta cuenta es de veterinario. Cambiá al modo Veterinario para ingresar."
+                        )
+                        return@launch
+                    }
+
+                    _rol.value = rolObtenido
+                    _authState.value = AuthState.Success
+                } else {
+                    authRepository.logout()
+                    _authState.value = AuthState.Error("Error al obtener el rol")
+                }
             } else {
                 _authState.value = AuthState.Error(
                     result.exceptionOrNull()?.message ?: "Error al iniciar sesión"

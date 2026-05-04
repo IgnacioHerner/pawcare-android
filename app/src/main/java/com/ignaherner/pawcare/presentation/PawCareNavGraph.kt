@@ -287,12 +287,13 @@ fun PawCareNavGraph(
             OnboardingScreen(
                 onFinished = {
                     settingsViewModel.completeOnboarding()
-                    navController.navigate(PawCareDestinations.ROLE_SELECT) {
+                    navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(PawCareDestinations.ONBOARDING) { inclusive = true }
                     }
                 }
             )
         }
+
 
         composable(
             route = PawCareDestinations.WELCOME,
@@ -356,15 +357,17 @@ fun PawCareNavGraph(
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToRegister = {
+                    authViewModel.setSelectedRole("DUENO")
                     navController.navigate(PawCareDestinations.REGISTER)
+                },
+                onNavigateToVetRegister = {
+                    authViewModel.setSelectedRole("VETERINARIO")
+                    navController.navigate(PawCareDestinations.VET_REGISTER)
                 },
                 onLoginSuccess = {
                     navController.navigate(PawCareDestinations.LOADING) {
                         popUpTo(PawCareDestinations.LOGIN) { inclusive = true }
                     }
-                },
-                onNavigateToVetLogin = {
-                    navController.navigate(PawCareDestinations.VET_LOGIN)
                 }
             )
         }
