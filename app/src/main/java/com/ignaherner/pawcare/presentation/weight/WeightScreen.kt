@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +29,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,20 +38,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
-import com.ignaherner.pawcare.utils.WeightMetrics
-import com.ignaherner.pawcare.utils.calcularMetricas
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
 import com.ignaherner.pawcare.presentation.components.PawCard
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
-import com.ignaherner.pawcare.presentation.components.WeightCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.ui.theme.Danger
+import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.ui.theme.Success
+import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -67,7 +74,7 @@ fun WeightScreen(
     isVeterinario: Boolean = false,
     viewModel: WeightViewModel = hiltViewModel(),
     petViewModel: PetViewModel = hiltViewModel()
-){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val detailState by petViewModel.detailState.collectAsStateWithLifecycle()
 
@@ -80,13 +87,13 @@ fun WeightScreen(
 
     weightToDelete?.let { weight ->
         ConfirmDeleteDialog(
-            titulo = "Eliminar a ${weight.fecha}?",
-            mensaje = "Esta accion no se puede deshacer",
+            titulo = "¿Eliminar registro del ${weight.fecha.toFriendlyDate()}?",
+            mensaje = "Esta acción no se puede deshacer.",
             onConfirm = {
                 viewModel.deleteWeight(weight)
                 weightToDelete = null
             },
-            onDismiss = { weightToDelete = null}
+            onDismiss = { weightToDelete = null }
         )
     }
 
@@ -95,10 +102,7 @@ fun WeightScreen(
 
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let {
-            snackbarHostState.showSnackbar(
-                message = it,
-                duration = SnackbarDuration.Short
-            )
+            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
             viewModel.clearSnackbar()
         }
     }
@@ -110,66 +114,67 @@ fun WeightScreen(
                 title = {
                     Column {
                         val titulo = when (val state = detailState) {
-                            is PetDetailState.Success ->
-                                "${state.pet.nombre} ${state.pet.especie.emoji()}"
+                            is PetDetailState.Success -> state.pet.nombre
                             else -> ""
                         }
                         Text(
                             text = titulo,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            letterSpacing = 1.sp
                         )
                         Text(
-                            text = "Registro de peso ⚖️",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "Peso",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
-            if(isVeterinario){
-                FloatingActionButton(onClick = onNavigateToForm) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar pesos")
+            if (isVeterinario) {
+                FloatingActionButton(
+                    onClick = onNavigateToForm,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar peso")
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when(val state = uiState) {
+            when (val state = uiState) {
                 is WeightUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-
                 is WeightUiState.Empty -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("⚖️", style = MaterialTheme.typography.displayLarge)
-                        Text(
-                            text = "Sin registros de peso todavía",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "Tocá el + para agregar el primero",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    EmptyState(
+                        icon = Icons.Outlined.Monitor,
+                        title = "Sin registros de peso",
+                        body = if (isVeterinario)
+                            "Tocá el + para registrar el primer peso"
+                        else
+                            "El veterinario podrá registrar el peso de tu mascota"
+                    )
                 }
                 is WeightUiState.Success -> {
                     WeightContent(
@@ -199,133 +204,114 @@ private fun WeightContent(
     isVeterinario: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val metricas = calcularMetricas(weights)
-
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(bottom = 80.dp)
+        contentPadding = PaddingValues(
+            start = PawSpace.lg,
+            end = PawSpace.lg,
+            top = PawSpace.sm,
+            bottom = 96.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(PawSpace.md)
     ) {
-        metricas?.let { m ->
-            item { MetricsCard(metricas = m) }
+        // Card principal — peso actual + gráfica
+        item {
+            WeightHeroCard(weights = weights)
         }
 
-        if (weights.size >= 2) {
-            item { WeightChart(weights = weights) }
-        } else {
-            item {
-                Text(
-                    text = "Agregá más registros para ver la evolución 📈",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
+        // Historial
         itemsIndexed(weights) { index, weight ->
+            val pesoAnterior = weights.getOrNull(index + 1)?.peso
+
             if (isVeterinario) {
                 SwipeRevealCard(
                     onDelete = { onDeleteWeight(weight) },
                     onEdit = { onEditWeight(weight) }
                 ) {
-                    WeightCard(
+                    WeightHistoryCard(
                         weight = weight,
-                        pesoAnterior = weights.getOrNull(index + 1)?.peso,
-                        onClick = {},
-                        onDeleteClick = { onDeleteWeight(weight) }
+                        variacion = pesoAnterior?.let { weight.peso - it }
                     )
                 }
             } else {
-                WeightCard(
+                WeightHistoryCard(
                     weight = weight,
-                    pesoAnterior = weights.getOrNull(index + 1)?.peso,
-                    onClick = {},
-                    onDeleteClick = {}
+                    variacion = pesoAnterior?.let { weight.peso - it }
                 )
             }
         }
     }
 }
 
+// ═══════════════════════════════════════════════════════════
+// HERO CARD — peso actual + gráfica
+// ═══════════════════════════════════════════════════════════
 @Composable
-private fun MetricsCard(metricas: WeightMetrics) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        PawCard(modifier = Modifier.fillMaxWidth()) {
+private fun WeightHeroCard(weights: List<Weight>) {
+    val ultimoPeso = weights.firstOrNull()
+
+    PawCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PawSpace.lg),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.md)
+        ) {
+            // Label + peso grande
             Text(
-                text = "Resumen",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                text = "PESO ACTUAL",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 1.sp
             )
-            // Tres métricas en una fila
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)
             ) {
-                MetricaItem(
-                    label = "Ultimo peso",
-                    valor = "${"%.1f".format(metricas.ultimoPeso)} kg"
+                Text(
+                    text = ultimoPeso?.let { "${"%.1f".format(it.peso)}" } ?: "—",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                MetricaItem(
-                    label = "Promedio",
-                    valor = "${"%.1f".format(metricas.promedio)} kg"
+                Text(
+                    text = "kg",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 6.dp)
                 )
 
-                metricas.cambio30Dias?.let {
-                    val signo = if (it >= 0) "+" else ""
-                    val color = if (it >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
-                    MetricaItem(
-                        label = "Ultimo 30 dias",
-                        valor = "$signo${"%.1f".format(it)} kg",
-                        color = color
+                // Variación con el anterior
+                if (weights.size >= 2) {
+                    val diff = weights[0].peso - weights[1].peso
+                    val signo = if (diff >= 0) "+" else ""
+                    Text(
+                        text = "$signo${"%.1f".format(diff)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (diff >= 0) Success else Danger,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
             }
-            Text(
-                text = metricas.tendencia,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
+
+            // Gráfica
+            if (weights.size >= 2) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                WeightChartInline(weights = weights)
+            }
         }
     }
 }
 
+// ═══════════════════════════════════════════════════════════
+// GRÁFICA INLINE
+// ═══════════════════════════════════════════════════════════
 @Composable
-private fun MetricaItem(
-    label: String,
-    valor: String,
-    color: Color = Color.Unspecified
-){
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = valor,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun WeightChart(weights: List<Weight>) {
-
-    // 1. Ordenamos ASC para la gráfica (más viejo → más reciente)
+private fun WeightChartInline(weights: List<Weight>) {
     val pesosOrdenados = weights.reversed()
-    //    weights viene DESC: [hoy, ayer, hace2días]
-    //    reversed()    ASC: [hace2días, ayer, hoy] ← la gráfica crece hacia la derecha
-
-    // 2. Creamos el productor de datos de Vico
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    // 3. Cuando cambia la lista, actualizamos la gráfica
     LaunchedEffect(weights) {
         modelProducer.runTransaction {
             lineSeries {
@@ -334,30 +320,67 @@ private fun WeightChart(weights: List<Weight>) {
         }
     }
 
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(),
+            startAxis = rememberStartAxis(),
+            bottomAxis = rememberBottomAxis()
+        ),
+        modelProducer = modelProducer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+    )
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEIGHT HISTORY CARD — cada registro
+// ═══════════════════════════════════════════════════════════
+@Composable
+private fun WeightHistoryCard(
+    weight: Weight,
+    variacion: Double?
+) {
     PawCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(PawSpace.lg),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Evolución de peso",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            // 4. Renderizamos la gráfica
-            CartesianChartHost(
-                chart = rememberCartesianChart(
-                    rememberLineCartesianLayer(), // tipo línea
-                    startAxis = rememberStartAxis(), // eje Y (pesos)
-                    bottomAxis = rememberBottomAxis() // eje X (tiempo)
-                ),
-                modelProducer = modelProducer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "${"%.1f".format(weight.peso)} kg",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = weight.fecha.toFriendlyDate(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                weight.notas?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+            }
+
+            // Variación
+            variacion?.let {
+                val signo = if (it >= 0) "↑" else "↓"
+                val color = if (it >= 0) Success else Danger
+
+                Text(
+                    text = "$signo ${"%.1f".format(kotlin.math.abs(it))}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = color
+                )
+            }
         }
     }
 }
