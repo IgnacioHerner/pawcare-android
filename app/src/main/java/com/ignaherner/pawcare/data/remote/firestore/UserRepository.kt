@@ -16,21 +16,37 @@ class UserRepository @Inject constructor() {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    // ═══════════════════════════════════════════════════════════
+    // DUEÑOS — colección users/
+    // ═══════════════════════════════════════════════════════════
+
     suspend fun guardarUsuario(rol: Rol, uid: String, nombre: String = ""): Result<Unit> {
         return try {
-            val usuario = hashMapOf(
-                "uid" to uid,
-                "email" to (auth.currentUser?.email ?: ""),
-                "rol" to rol.name,
-                "nombre" to nombre,
-                "fechaCreacion" to System.currentTimeMillis()
-            )
-
-            firestore.collection("users")
-                .document(uid)
-                .set(usuario)
-                .await()
-
+            if (rol == Rol.VETERINARIO) {
+                // Solo guardar referencia mínima en users/
+                val userData = hashMapOf(
+                    "uid" to uid,
+                    "email" to (auth.currentUser?.email ?: ""),
+                    "rol" to rol.name,
+                    "fechaCreacion" to System.currentTimeMillis()
+                )
+                firestore.collection("users")
+                    .document(uid)
+                    .set(userData)
+                    .await()
+            } else {
+                val userData = hashMapOf(
+                    "uid" to uid,
+                    "email" to (auth.currentUser?.email ?: ""),
+                    "rol" to rol.name,
+                    "nombre" to nombre,
+                    "fechaCreacion" to System.currentTimeMillis()
+                )
+                firestore.collection("users")
+                    .document(uid)
+                    .set(userData)
+                    .await()
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -42,66 +58,31 @@ class UserRepository @Inject constructor() {
             val uid = auth.currentUser?.uid ?: return Result.failure(
                 Exception("Usuario no autenticado")
             )
-            val documento = firestore.collection("users")
-                .document(uid)
-                .get()
-                .await()
-            val rolString = documento.getString("rol") ?: return Result.failure(
-                Exception("Rol no encontrado")
-            )
-            Result.success(Rol.valueOf(rolString))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
-    suspend fun getVeterinario(): Veterinario? {
-        return try {
-            val uid = auth.currentUser?.uid ?: return null
-            val documento = firestore.collection("users")
+            // Primero buscar en users/
+            val userDoc = firestore.collection("users")
                 .document(uid)
                 .get()
                 .await()
 
-            if (!documento.exists()) return null
-            if (documento.getString("matricula") == null) return null
+            if (userDoc.exists()) {
+                val rolString = userDoc.getString("rol") ?: return Result.failure(
+                    Exception("Rol no encontrado")
+                )
+                return Result.success(Rol.valueOf(rolString))
+            }
 
-            Veterinario(
-                id = uid,
-                nombre = documento.getString("nombre") ?: "",
-                apellido = documento.getString("apellido") ?: "",
-                matricula = documento.getString("matricula") ?: "",
-                telefono = documento.getString("telefono") ?: "",
-                direccionVet = documento.getString("direccionVet"),
-                ciudadVet = documento.getString("ciudadVet"),
-                especialidad = documento.getString("especialidad")
-            )
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    suspend fun vetExists(): Boolean = getVeterinario() != null
-
-    suspend fun guardarVeterinario(vet: Veterinario): Result<Unit> {
-        return try {
-            val uid = auth.currentUser?.uid ?: return Result.failure(
-                Exception("Usuario no autenticado")
-            )
-            val vetData = hashMapOf(
-                "nombre" to vet.nombre,
-                "apellido" to vet.apellido,
-                "matricula" to vet.matricula,
-                "telefono" to vet.telefono,
-                "direccionVet" to vet.direccionVet,
-                "ciudadVet" to vet.ciudadVet,
-                "especialidad" to vet.especialidad
-            )
-            firestore.collection("users")
+            // Si no está en users/, buscar en veterinarios/
+            val vetDoc = firestore.collection("veterinarios")
                 .document(uid)
-                .set(vetData, SetOptions.merge())
+                .get()
                 .await()
-            Result.success(Unit)
+
+            if (vetDoc.exists()) {
+                return Result.success(Rol.VETERINARIO)
+            }
+
+            Result.failure(Exception("Usuario no encontrado"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -131,4 +112,65 @@ class UserRepository @Inject constructor() {
         }
     }
 
+    // ═══════════════════════════════════════════════════════════
+    // VETERINARIOS — colección veterinarios/
+    // ═══════════════════════════════════════════════════════════
+
+    suspend fun guardarVeterinario(vet: Veterinario): Result<Unit> {
+        return try {
+            val uid = auth.currentUser?.uid ?: return Result.failure(
+                Exception("Usuario no autenticado")
+            )
+            val vetData = hashMapOf(
+                "uid" to uid,
+                "email" to (auth.currentUser?.email ?: ""),
+                "nombre" to vet.nombre,
+                "apellido" to vet.apellido,
+                "matricula" to vet.matricula,
+                "especialidad" to vet.especialidad,
+                "telefono" to vet.telefono,
+                "clinica" to vet.clinica,
+                "direccion" to vet.direccion,
+                "ciudad" to vet.ciudad,
+                "fotoUri" to vet.fotoUri,
+                "fechaCreacion" to System.currentTimeMillis()
+            )
+            firestore.collection("veterinarios")
+                .document(uid)
+                .set(vetData, SetOptions.merge())
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getVeterinario(): Veterinario? {
+        return try {
+            val uid = auth.currentUser?.uid ?: return null
+            val documento = firestore.collection("veterinarios")
+                .document(uid)
+                .get()
+                .await()
+
+            if (!documento.exists()) return null
+
+            Veterinario(
+                id = uid,
+                nombre = documento.getString("nombre") ?: "",
+                apellido = documento.getString("apellido") ?: "",
+                matricula = documento.getString("matricula") ?: "",
+                especialidad = documento.getString("especialidad"),
+                telefono = documento.getString("telefono") ?: "",
+                clinica = documento.getString("clinica"),
+                direccion = documento.getString("direccion"),
+                ciudad = documento.getString("ciudad"),
+                fotoUri = documento.getString("fotoUri")
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun vetExists(): Boolean = getVeterinario() != null
 }

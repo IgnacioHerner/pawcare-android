@@ -5,8 +5,10 @@ data class Veterinario(
     val nombre: String,
     val apellido: String,
     val matricula: String,
-    val telefono: String,
-    val direccionVet: String? = null,
-    val ciudadVet: String? = null,
-    val especialidad: String? = null
+    val especialidad: String? = null,
+    val telefono: String = "",
+    val clinica: String? = null,
+    val direccion: String? = null,
+    val ciudad: String? = null,
+    val fotoUri: String? = null
 )

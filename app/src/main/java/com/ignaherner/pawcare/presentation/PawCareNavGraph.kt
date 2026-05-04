@@ -1,6 +1,5 @@
 package com.ignaherner.pawcare.presentation
 
-import android.R.attr.type
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +34,6 @@ import com.ignaherner.pawcare.presentation.deworming.DewormingDetailScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingFormScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingScreen
 import com.ignaherner.pawcare.presentation.deworming.DewormingViewModel
-import com.ignaherner.pawcare.presentation.home.HomeScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationDetailScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationFormScreen
 import com.ignaherner.pawcare.presentation.medications.MedicationScreen
@@ -58,15 +56,17 @@ import com.ignaherner.pawcare.presentation.vet.VetDewormingFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetHistorialScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
+import com.ignaherner.pawcare.presentation.auth.VetLoginScreen
+import com.ignaherner.pawcare.presentation.auth.VetRegisterScreen
 import com.ignaherner.pawcare.presentation.vet.VetMedicationFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetOwnerDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
+import com.ignaherner.pawcare.presentation.vet.VetProfileDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.vet.VetVaccineFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetWeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
-import kotlinx.coroutines.delay
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -130,15 +130,19 @@ object PawCareDestinations {
     const val ROLE_SELECT = "role_select"
     const val WELCOME = "welcome/{nombre}"
 
+    const val VET_LOGIN = "vet_login"
+
+    const val VET_REGISTER = "vet_register"
+
 
     // VETERINARIO
     const val VET_HOME = "vet_home"
     const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
     const val VET_FORM = "vet_form"
     const val VET_HISTORIAL = "vet_historial/{firestoreId}/{tipo}"
-
     const val VET_OWNER_DETAIL = "vet_owner_detail/{ownerId}"
 
+    const val VET_PROFILE_DETAIL = "vet_profile_detail"
     const val VET_VACCINE_FORM = "vet_vaccine_form/{firestoreId}"
     const val VET_MEDICATION_FORM = "vet_medication_form/{firestoreId}"
     const val VET_WEIGHT_FORM = "vet_weight_form/{firestoreId}"
@@ -358,6 +362,9 @@ fun PawCareNavGraph(
                     navController.navigate(PawCareDestinations.LOADING) {
                         popUpTo(PawCareDestinations.LOGIN) { inclusive = true }
                     }
+                },
+                onNavigateToVetLogin = {
+                    navController.navigate(PawCareDestinations.VET_LOGIN)
                 }
             )
         }
@@ -386,9 +393,53 @@ fun PawCareNavGraph(
             RoleSelectScreen(
                 onRoleSelected = { rol ->
                     authViewModel.setSelectedRole(rol)
-                    navController.navigate(PawCareDestinations.REGISTER) {
-                        popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                    if (rol == "VETERINARIO") {
+                        navController.navigate(PawCareDestinations.VET_LOGIN) {
+                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(PawCareDestinations.REGISTER) {
+                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        }
                     }
+                }
+            )
+        }
+
+        composable(PawCareDestinations.VET_LOGIN) {
+            VetLoginScreen(
+                viewModel = authViewModel,
+                onNavigateToVetRegister = {
+                    navController.navigate(PawCareDestinations.VET_REGISTER) {
+                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    }
+                },
+                onLoginSuccess = {
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(PawCareDestinations.VET_REGISTER) {
+            VetRegisterScreen(
+                viewModel = authViewModel,
+                onNavigateToVetLogin = {
+                    navController.navigate(PawCareDestinations.VET_LOGIN) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    }
+                },
+                onRegisterSuccess = { nombre ->
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -401,6 +452,15 @@ fun PawCareNavGraph(
                 },
                 onNavigateToPetDetail = { firestoreId ->
                     navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                }
+            )
+        }
+
+        composable(PawCareDestinations.VET_PROFILE_DETAIL) {
+            VetProfileDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = {
+                    navController.navigate(PawCareDestinations.VET_FORM)
                 }
             )
         }
@@ -450,6 +510,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // VetOwnerDetail
         composable(
             route = PawCareDestinations.VET_OWNER_DETAIL,
             arguments = listOf(
@@ -567,6 +628,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // Home
         composable(PawCareDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }
 
@@ -651,7 +713,9 @@ fun PawCareNavGraph(
                 onNavigateToOwnerDetail = {
                     navController.navigate(PawCareDestinations.OWNER_DETAIL)
                 },
-
+                onNavigateToVetForm = {
+                    navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL)
+                }
             )
         }
 

@@ -1,6 +1,5 @@
 package com.ignaherner.pawcare.presentation.auth
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,23 +14,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,7 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,18 +52,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ignaherner.pawcare.R
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
+import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
+import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    onNavigateToRegister: () -> Unit,
+fun VetLoginScreen(
+    onNavigateToVetRegister: () -> Unit,
     onLoginSuccess: () -> Unit,
-    onNavigateToVetLogin: () -> Unit = {},
+    onNavigateBack: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
@@ -78,7 +82,24 @@ fun LoginScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -87,28 +108,26 @@ fun LoginScreen(
                 .padding(horizontal = PawSpace.xl)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(PawSpace.xxl))
-
-            // Badge "MODO DUEÑO"
+            // Badge "MODO VETERINARIO"
             Surface(
                 shape = RoundedCornerShape(PawRadii.xl),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = VetPrimarySoft
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = PawSpace.md, vertical = PawSpace.sm),
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_paw),
+                    PawCareIcon(
+                        icon = Icons.Outlined.LocalHospital,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        size = PawIconSize.small,
+                        tint = VetPrimaryInk
                     )
                     Text(
-                        text = "MODO DUEÑO",
+                        text = "MODO VETERINARIO",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = VetPrimaryInk
                     )
                 }
             }
@@ -117,7 +136,7 @@ fun LoginScreen(
 
             // Título
             Text(
-                text = "Bienvenido de vuelta",
+                text = "Acceso profesional",
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -126,18 +145,18 @@ fun LoginScreen(
 
             // Subtítulo
             Text(
-                text = "Ingresá para ver la libreta de tus mascotas.",
+                text = "Ingresá con tu matrícula y credenciales para acceder a los historiales clínicos.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(PawSpace.xxl))
 
-            // Email
+            // Email profesional
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Email") },
+                label = { Text("Email profesional") },
                 leadingIcon = {
                     PawCareIcon(
                         icon = Icons.Outlined.PersonOutline,
@@ -157,7 +176,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.md))
 
-            // Password
+            // Contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -201,7 +220,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                TextButton(onClick = { /* TODO: reset password */ }) {
+                TextButton(onClick = { /* TODO */ }) {
                     Text(
                         text = "¿Olvidaste tu contraseña?",
                         style = MaterialTheme.typography.bodySmall,
@@ -223,7 +242,32 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(PawSpace.sm))
             }
 
-            Spacer(modifier = Modifier.height(PawSpace.lg))
+            // Aviso profesional
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(PawRadii.md),
+                color = VetPrimarySoft
+            ) {
+                Row(
+                    modifier = Modifier.padding(PawSpace.md),
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Shield,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = VetPrimaryInk
+                    )
+                    Text(
+                        text = "Al ingresar como profesional, confirmás que los datos que modifiques quedarán registrados con tu identidad y matrícula.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = VetPrimaryInk
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(PawSpace.xl))
 
             // Botón login
             Button(
@@ -235,98 +279,45 @@ fun LoginScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(PawRadii.md),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = VetPrimary,
+                    contentColor = Color.White
                 )
             ) {
                 if (authState is AuthState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Text(
-                        text = "Ingresar",
+                        text = "Ingresar como profesional",
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(PawSpace.xl))
-
-            // Divider con "o"
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
-                Text(
-                    text = "o",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(PawSpace.xl))
-
-            // Google button (placeholder)
-            OutlinedButton(
-                onClick = { /* TODO: Google Sign In */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Text(
-                    text = "Continuar con Google",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
             Spacer(modifier = Modifier.height(PawSpace.lg))
 
-            // Ir a registro
+            // Ir a registro vet
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "¿No tenés cuenta? ",
+                    text = "¿Primera vez? ",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                TextButton(onClick = onNavigateToRegister) {
+                TextButton(onClick = onNavigateToVetRegister) {
                     Text(
-                        text = "Registrate",
+                        text = "Registrarme como veterinario",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = VetPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(PawSpace.sm))
-
-            // Acceso vet
-            TextButton(onClick = onNavigateToVetLogin) {
-                Text(
-                    text = "¿Sos veterinario? Ingresá acá",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = VetPrimary,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
 
             Spacer(modifier = Modifier.height(PawSpace.xl))

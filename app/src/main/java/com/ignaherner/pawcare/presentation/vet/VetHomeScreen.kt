@@ -53,14 +53,14 @@ fun VetHomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToPetDetail: (String) -> Unit,
     viewModel: VetViewModel = hiltViewModel(),
-    ownerViewModel: OwnerViewModel = hiltViewModel()
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()  // ← cambiar
 ) {
     var searchId by remember { mutableStateOf("") }
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
-    val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        ownerViewModel.loadOwner()
+        vetProfileViewModel.loadVeterinario()
     }
 
     LaunchedEffect(searchState) {
@@ -71,8 +71,8 @@ fun VetHomeScreen(
         }
     }
 
-    val nombreVet = when (val state = ownerState) {
-        is OwnerState.Success -> state.owner.nombre
+    val nombreVet = when (val state = vetState) {  // ← cambiar
+        is VetState.Success -> state.vet.nombre
         else -> "Veterinario"
     }
 

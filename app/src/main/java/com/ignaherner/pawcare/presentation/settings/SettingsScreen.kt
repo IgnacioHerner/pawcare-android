@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
@@ -70,6 +71,8 @@ import com.ignaherner.pawcare.presentation.home.HomeUiState
 import com.ignaherner.pawcare.presentation.home.HomeViewModel
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
@@ -79,19 +82,29 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToOwnerDetail: () -> Unit,
+    onNavigateToVetForm: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
     authViewModel: AuthViewModel,
     ownerViewModel: OwnerViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
     val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val rolActual by authViewModel.rol.collectAsStateWithLifecycle()
+
+    val isVet = rolActual == Rol.VETERINARIO
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        ownerViewModel.loadOwner()
-        homeViewModel.loadHome()
+        if (isVet) {
+            vetProfileViewModel.loadVeterinario()
+        } else {
+            ownerViewModel.loadOwner()
+            homeViewModel.loadHome()
+        }
     }
 
     val cantidadMascotas = when (val hs = homeState) {
@@ -136,52 +149,99 @@ fun SettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            // Perfil del dueño
+            // Perfil — dueño o veterinario
             item {
-                when (val state = ownerState) {
-                    is OwnerState.Success -> {
-                        PawCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = onNavigateToOwnerDetail
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(PawSpace.lg),
-                                horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
-                                verticalAlignment = Alignment.CenterVertically
+                if (isVet) {
+                    when (val state = vetState) {
+                        is VetState.Success -> {
+                            PawCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = onNavigateToVetForm
                             ) {
-                                PawCareAvatar(
-                                    fotoUri = state.owner.fotoUri,
-                                    nombre = state.owner.nombre,
-                                    modifier = Modifier.size(56.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "${state.owner.nombre} ${state.owner.apellido}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(PawSpace.lg),
+                                    horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    PawCareAvatar(
+                                        fotoUri = state.vet.fotoUri,
+                                        nombre = state.vet.nombre,
+                                        modifier = Modifier.size(56.dp)
                                     )
-                                    Text(
-                                        text = when (cantidadMascotas) {
-                                            0 -> "Dueño"
-                                            1 -> "Dueño · 1 mascota"
-                                            else -> "Dueño · $cantidadMascotas mascotas"
-                                        },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "Dr. ${state.vet.nombre} ${state.vet.apellido}",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = buildList {
+                                                add("Veterinario")
+                                                state.vet.matricula.let { add("MP $it") }
+                                            }.joinToString(" · "),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    PawCareIcon(
+                                        icon = Icons.Outlined.Edit,
+                                        contentDescription = "Editar perfil",
+                                        size = PawIconSize.medium,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                PawCareIcon(
-                                    icon = Icons.Outlined.Edit,
-                                    contentDescription = "Editar perfil",
-                                    size = PawIconSize.medium,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
+                        else -> {}
                     }
-                    else -> {}
+                } else {
+                    when (val state = ownerState) {
+                        is OwnerState.Success -> {
+                            PawCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = onNavigateToOwnerDetail
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(PawSpace.lg),
+                                    horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    PawCareAvatar(
+                                        fotoUri = state.owner.fotoUri,
+                                        nombre = state.owner.nombre,
+                                        modifier = Modifier.size(56.dp)
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "${state.owner.nombre} ${state.owner.apellido}",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = when (cantidadMascotas) {
+                                                0 -> "Dueño"
+                                                1 -> "Dueño · 1 mascota"
+                                                else -> "Dueño · $cantidadMascotas mascotas"
+                                            },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    PawCareIcon(
+                                        icon = Icons.Outlined.Edit,
+                                        contentDescription = "Editar perfil",
+                                        size = PawIconSize.medium,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        else -> {}
+                    }
                 }
             }
 
@@ -197,7 +257,6 @@ fun SettingsScreen(
 
             item {
                 PawCard(modifier = Modifier.fillMaxWidth()) {
-                    // Notificaciones
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -237,7 +296,6 @@ fun SettingsScreen(
 
             item {
                 PawCard(modifier = Modifier.fillMaxWidth()) {
-                    // Compartir PawCare
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

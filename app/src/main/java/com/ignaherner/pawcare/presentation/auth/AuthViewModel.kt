@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.remote.firestore.AuthRepository
 import com.ignaherner.pawcare.data.remote.firestore.UserRepository
 import com.ignaherner.pawcare.domain.model.Rol
+import com.ignaherner.pawcare.domain.model.Veterinario
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -85,6 +86,55 @@ class AuthViewModel @Inject constructor(
                     val rolResult = userRepository.guardarUsuario(rol, uid, nombre)
 
                     if (rolResult.isSuccess) {
+                        cargarRol()
+                        _authState.value = AuthState.Success
+                    } else {
+                        _authState.value = AuthState.Error("Error al guardar el perfil")
+                    }
+                } else {
+                    _authState.value = AuthState.Error(
+                        result.exceptionOrNull()?.message ?: "Error al registrarse"
+                    )
+                }
+            }
+        }
+    }
+    fun registerVet(
+        email: String,
+        password: String,
+        nombre: String,
+        apellido: String,
+        matricula: String,
+        especialidad: String?,
+        telefono: String = "",
+        clinica: String? = null,
+        ciudad: String? = null,
+        direccion: String? = null
+    ) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+
+            withContext(NonCancellable) {
+                val result = authRepository.register(email, password)
+
+                if (result.isSuccess) {
+                    val uid = result.getOrNull()?.uid ?: ""
+
+                    val rolResult = userRepository.guardarUsuario(Rol.VETERINARIO, uid)
+
+                    val vet = Veterinario(
+                        nombre = nombre,
+                        apellido = apellido,
+                        matricula = matricula,
+                        especialidad = especialidad,
+                        telefono = telefono,
+                        clinica = clinica,
+                        ciudad = ciudad,
+                        direccion = direccion
+                    )
+                    val vetResult = userRepository.guardarVeterinario(vet)
+
+                    if (rolResult.isSuccess && vetResult.isSuccess) {
                         cargarRol()
                         _authState.value = AuthState.Success
                     } else {
