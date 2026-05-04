@@ -450,6 +450,7 @@ fun PawCareNavGraph(
                 onNavigateToSettings = {
                     navController.navigate(PawCareDestinations.SETTINGS)
                 },
+                onNavigateToVetProfile = { navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL) },
                 onNavigateToPetDetail = { firestoreId ->
                     navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
                 }
