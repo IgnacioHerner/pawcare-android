@@ -8,5 +8,8 @@ data class VetPetSummary(
     val ultimoPeso: Weight?,
     val ultimoTurno: Appointment?,
     val ultimaDesparasitacion: Deworming?,
-    val condiciones: List<Condition>
+    val condiciones: List<Condition>,
+    val totalVacunas: Int = 0,
+    val totalMedicamentos: Int = 0,
+    val totalDesparasitaciones: Int = 0
 )

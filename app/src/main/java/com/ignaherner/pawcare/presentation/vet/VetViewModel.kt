@@ -246,9 +246,12 @@ class VetViewModel @Inject constructor(
                         it.status == MedicationStatus.ACTIVO
                     },
                     ultimoPeso = pesos.maxByOrNull { it.fecha },
-                    ultimoTurno = turnos.maxByOrNull { it.fecha ?: "" },
+                    ultimoTurno = turnos.maxByOrNull { it.fecha },
                     ultimaDesparasitacion = desparasitaciones.maxByOrNull { it.fechaAplicacion },
-                    condiciones = condiciones
+                    condiciones = condiciones,
+                    totalVacunas = vacunas.size,
+                    totalMedicamentos = medicamentos.size,
+                    totalDesparasitaciones = desparasitaciones.size
                 )
                 _summaryState.value = VetSummaryState.Success(summary)
             } catch (e: Exception) {

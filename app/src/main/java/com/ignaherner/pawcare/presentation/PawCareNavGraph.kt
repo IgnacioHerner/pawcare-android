@@ -470,18 +470,36 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.VET_PET_DETAIL,
             arguments = listOf(
-                navArgument("firestoreId") { type = NavType.StringType}
+                navArgument("firestoreId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
             VetPetDetailScreen(
                 firestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToHistorial = { id, tipo ->
                     navController.navigate(PawCareDestinations.vetHistorial(id, tipo))
                 },
                 onNavigateToOwnerDetail = { ownerId ->
                     navController.navigate(PawCareDestinations.vetOwnerDetail(ownerId))
+                },
+                onNavigateToVetVaccineForm = { id ->
+                    navController.navigate(PawCareDestinations.vetVaccineForm(id))
+                },
+                onNavigateToVetMedicationForm = { id ->
+                    navController.navigate(PawCareDestinations.vetMedicationForm(id))
+                },
+                onNavigateToVetConditionForm = { id ->
+                    navController.navigate(PawCareDestinations.vetConditionForm(id))
+                },
+                onNavigateToVetDewormingForm = { id ->
+                    navController.navigate(PawCareDestinations.vetDewormingForm(id))
+                },
+                onNavigateToVetAppointmentForm = { id ->
+                    navController.navigate(PawCareDestinations.vetAppointmentForm(id))
+                },
+                onNavigateToVetWeightForm = { id ->
+                    navController.navigate(PawCareDestinations.vetWeightForm(id))
                 }
             )
         }

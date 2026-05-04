@@ -55,6 +55,9 @@ private val VetLight = OwnerLight.copy(
     onPrimary = OnPrimary,
     primaryContainer = VetPrimarySoft,
     onPrimaryContainer = VetPrimaryInk,
+    secondary = VetPrimary,
+    secondaryContainer = VetPrimarySoft,
+    onSecondaryContainer = VetPrimaryInk,
 )
 
 // ═══════════════════════════════════════════════════════════

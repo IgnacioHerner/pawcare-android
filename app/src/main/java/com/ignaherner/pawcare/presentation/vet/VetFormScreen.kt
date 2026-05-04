@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -132,7 +133,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Apellido
@@ -150,7 +156,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Matrícula
@@ -168,7 +179,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Especialidad
@@ -186,7 +202,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Teléfono
@@ -208,7 +229,12 @@ fun VetFormScreen(
                 ),
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Clínica
@@ -226,7 +252,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Dirección
@@ -244,7 +275,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             // Ciudad
@@ -262,7 +298,12 @@ fun VetFormScreen(
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(PawRadii.md),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VetPrimary,
+                    focusedLabelColor = VetPrimary,
+                    cursorColor = VetPrimary
+                )
             )
 
             Spacer(modifier = Modifier.height(PawSpace.sm))
