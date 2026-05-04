@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation.settings
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,12 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,16 +53,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.home.HomeUiState
+import com.ignaherner.pawcare.presentation.home.HomeViewModel
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
+import com.ignaherner.pawcare.ui.theme.Danger
+import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,71 +81,101 @@ fun SettingsScreen(
     onNavigateToOwnerDetail: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     authViewModel: AuthViewModel,
-    ownerViewModel: OwnerViewModel = hiltViewModel()
+    ownerViewModel: OwnerViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val ownerState by ownerViewModel.ownerState.collectAsStateWithLifecycle()
+    val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         ownerViewModel.loadOwner()
+        homeViewModel.loadHome()
+    }
+
+    val cantidadMascotas = when (val hs = homeState) {
+        is HomeUiState.Success -> hs.summaries.size
+        else -> 0
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Configuración") },
+                title = {
+                    Text(
+                        text = "Configuración",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            contentPadding = PaddingValues(
+                start = PawSpace.lg,
+                end = PawSpace.lg,
+                top = PawSpace.lg,
+                bottom = PawSpace.xxl
+            ),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
             // Perfil del dueño
             item {
                 when (val state = ownerState) {
                     is OwnerState.Success -> {
-                        PawCard(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        PawCard(
+                            modifier = Modifier.fillMaxWidth(),
                             onClick = onNavigateToOwnerDetail
-                            ) {
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    .padding(PawSpace.lg),
+                                horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 PawCareAvatar(
                                     fotoUri = state.owner.fotoUri,
                                     nombre = state.owner.nombre,
-                                    modifier = Modifier.size(80.dp)
+                                    modifier = Modifier.size(56.dp)
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "${state.owner.nombre} ${state.owner.apellido}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
-                                    state.owner.email?.let {
-                                        Text(
-                                            text = it,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
+                                    Text(
+                                        text = when (cantidadMascotas) {
+                                            0 -> "Dueño"
+                                            1 -> "Dueño · 1 mascota"
+                                            else -> "Dueño · $cantidadMascotas mascotas"
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
-                                Icon(
-                                    Icons.Default.ChevronRight,
-                                    contentDescription = null,
+                                PawCareIcon(
+                                    icon = Icons.Outlined.Edit,
+                                    contentDescription = "Editar perfil",
+                                    size = PawIconSize.medium,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -138,51 +185,38 @@ fun SettingsScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Sección Preferencias
+            // GENERAL
             item {
                 Text(
-                    text = "PREFERENCIAS",
+                    text = "GENERAL",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    letterSpacing = 1.sp
                 )
             }
 
             item {
-                PawCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                ) {
+                PawCard(modifier = Modifier.fillMaxWidth()) {
+                    // Notificaciones
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                            .padding(PawSpace.lg),
+                        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Column {
-                                Text(
-                                    text = "Notificaciones",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Text(
-                                    text = "Recordatorios de vacunas y medicamentos",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+                        PawCareIcon(
+                            icon = Icons.Outlined.Notifications,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Notificaciones",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
                         Switch(
                             checked = notificationsEnabled,
                             onCheckedChange = { viewModel.setNotificationsEnabled(it) }
@@ -191,23 +225,72 @@ fun SettingsScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
+            // SOPORTE
+            item {
+                Text(
+                    text = "SOPORTE",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 1.sp
+                )
+            }
 
-            // Sección Cuenta
+            item {
+                PawCard(modifier = Modifier.fillMaxWidth()) {
+                    // Compartir PawCare
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Probá PawCare, la libreta sanitaria digital para tu mascota. https://pawcare.app"
+                                    )
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(shareIntent, "Compartir PawCare")
+                                )
+                            }
+                            .padding(PawSpace.lg),
+                        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.Share,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Compartir PawCare",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        PawCareIcon(
+                            icon = Icons.Outlined.ChevronRight,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // CUENTA
             item {
                 Text(
                     text = "CUENTA",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    letterSpacing = 1.sp
                 )
             }
 
             item {
-                PawCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                ) {
+                PawCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -216,69 +299,36 @@ fun SettingsScreen(
                                 authViewModel.logout()
                                 onNavigateToLogin()
                             }
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            .padding(PawSpace.lg),
+                        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Logout,
+                        PawCareIcon(
+                            icon = Icons.Outlined.Logout,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
+                            size = PawIconSize.medium,
+                            tint = Danger
                         )
                         Text(
                             text = "Cerrar sesión",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
+                            color = Danger
                         )
                     }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Sección App
+            // Versión
             item {
                 Text(
-                    text = "APP",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = "PawCare v1.0.0",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = PawSpace.lg)
                 )
-            }
-
-            item {
-                PawCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Versión",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                        Text(
-                            text = "1.0.0",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
             }
         }
     }
