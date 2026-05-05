@@ -372,8 +372,9 @@ private fun WeightHistoryCard(
 
             // Variación
             variacion?.let {
-                val signo = if (it >= 0) "↑" else "↓"
-                val color = if (it >= 0) Success else Danger
+                val subio = it > 0
+                val signo = if (subio) "↑" else "↓"
+                val color = if (subio) Success else Danger
 
                 Text(
                     text = "$signo ${"%.1f".format(kotlin.math.abs(it))}",

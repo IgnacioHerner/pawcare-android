@@ -317,12 +317,12 @@ fun OwnerFormScreen(
                 onClick = {
                     val nuevoOwner = Owner(
                         id = ownerId ?: 0L,
-                        nombre = nombre,
-                        apellido = apellido,
-                        telefono = telefono,
-                        email = email.ifBlank { null },
-                        ciudad = ciudad,
-                        direccion = direccion.ifBlank { null },
+                        nombre = nombre.trim(),
+                        apellido = apellido.trim(),
+                        telefono = telefono.trim(),
+                        email = email.trim().ifBlank { null },
+                        ciudad = ciudad.trim(),
+                        direccion = direccion.trim().ifBlank { null },
                         fotoUri = fotoUri.ifBlank { null }
                     )
                     if (ownerId == null) {

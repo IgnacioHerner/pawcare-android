@@ -67,6 +67,7 @@ import com.ignaherner.pawcare.presentation.vet.VetVaccineFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetWeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
+import kotlinx.coroutines.delay
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -294,7 +295,7 @@ fun PawCareNavGraph(
             )
         }
 
-
+        // WELCOME
         composable(
             route = PawCareDestinations.WELCOME,
             arguments = listOf(
@@ -306,7 +307,7 @@ fun PawCareNavGraph(
                 nombreUsuario = URLDecoder.decode(nombre, "UTF-8"),
                 onNavigateToAddPet = {
                     navController.navigate(PawCareDestinations.petForm()) {
-                        popUpTo(PawCareDestinations.WELCOME) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -319,6 +320,17 @@ fun PawCareNavGraph(
             val rol by authViewModel.rol.collectAsStateWithLifecycle()
             val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
             val vetExists by vetViewModel.vetExists.collectAsStateWithLifecycle()
+
+            // Timeout: si en 5 seg no resuelve, ir a login
+            LaunchedEffect(Unit) {
+                delay(5000)
+                if (rol == null) {
+                    authViewModel.logout()
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
 
             LaunchedEffect(rol, ownerExists, vetExists) {
                 if (rol == null) return@LaunchedEffect
@@ -704,11 +716,15 @@ fun PawCareNavGraph(
             )
         }
 
+        // Owner Detail
         composable(PawCareDestinations.OWNER_DETAIL) {
             OwnerDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = {
                     navController.navigate(PawCareDestinations.OWNER_EDIT)
+                },
+                onNavigateToPetDetail = { petId ->
+                    navController.navigate(PawCareDestinations.petDetail(petId))
                 }
             )
         }
@@ -765,12 +781,17 @@ fun PawCareNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val petId = backStackEntry.arguments?.getLong("petId") // devuelve -1L si no hay id
-                ?.takeIf { it != -1L } // Si es -1L -> devuelve null (es creacion nueva)
-                                      // Si es 5L -> devuelve 5L (es edicion
+            val petId = backStackEntry.arguments?.getLong("petId")?.takeIf { it != -1L }
             PetFormScreen(
                 petId = petId,
-                onNavigateBack = { navController.popBackStack()}
+                onNavigateBack = {
+                    val popped = navController.popBackStack()
+                    if (!popped) {
+                        navController.navigate(PawCareDestinations.LOADING) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             )
         }
 

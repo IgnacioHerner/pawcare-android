@@ -172,5 +172,37 @@ class UserRepository @Inject constructor() {
         }
     }
 
+    suspend fun guardarUsuarioCompleto(
+        rol: Rol,
+        uid: String,
+        nombre: String,
+        apellido: String,
+        telefono: String,
+        email: String,
+        ciudad: String
+    ): Result<Unit> {
+        return try {
+            val userData = hashMapOf(
+                "uid" to uid,
+                "email" to email,
+                "rol" to rol.name,
+                "nombre" to nombre,
+                "apellido" to apellido,
+                "telefono" to telefono,
+                "ciudad" to ciudad,
+                "fechaCreacion" to System.currentTimeMillis()
+            )
+
+            firestore.collection("users")
+                .document(uid)
+                .set(userData)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun vetExists(): Boolean = getVeterinario() != null
 }

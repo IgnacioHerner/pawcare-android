@@ -15,19 +15,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Vaccines
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -50,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -63,14 +59,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.R
-import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
-import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
-import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
-import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,27 +72,20 @@ fun RegisterScreen(
     onNavigateBack: () -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var nombreCompleto by remember { mutableStateOf("") }
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var ciudad by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val selectedRole by viewModel.selectedRole.collectAsStateWithLifecycle()
 
-    val rolDisplay = when (selectedRole) {
-        "VETERINARIO" -> "MODO VETERINARIO"
-        else -> "MODO DUEÑO"
-    }
-
-    val rol = when (selectedRole) {
-        "VETERINARIO" -> Rol.VETERINARIO
-        else -> Rol.DUENO
-    }
-
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            onRegisterSuccess(nombreCompleto)
+            onRegisterSuccess(nombre)
             viewModel.resetState()
         }
     }
@@ -132,13 +117,10 @@ fun RegisterScreen(
                 .padding(horizontal = PawSpace.xl)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Badge de rol
+            // Badge
             Surface(
                 shape = RoundedCornerShape(PawRadii.xl),
-                color = if (selectedRole == "VETERINARIO")
-                    VetPrimarySoft
-                else
-                    MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = PawSpace.md, vertical = PawSpace.sm),
@@ -149,25 +131,18 @@ fun RegisterScreen(
                         painter = painterResource(id = R.drawable.ic_paw),
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = if (selectedRole == "VETERINARIO")
-                            VetPrimaryInk
-                        else
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = rolDisplay,
+                        text = "MODO DUEÑO",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (selectedRole == "VETERINARIO")
-                            VetPrimaryInk
-                        else
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
 
-            // Título
             Text(
                 text = "Crear cuenta",
                 style = MaterialTheme.typography.displayMedium,
@@ -176,23 +151,43 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.sm))
 
-            // Subtítulo
             Text(
-                text = if (selectedRole == "VETERINARIO")
-                    "Registrate para gestionar el historial de tus pacientes."
-                else
-                    "Registrate para empezar a cuidar a tus mascotas.",
+                text = "Registrate para empezar a cuidar a tus mascotas.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(PawSpace.xxl))
 
-            // Nombre completo
+            // Nombre
             OutlinedTextField(
-                value = nombreCompleto,
-                onValueChange = { nombreCompleto = it },
-                placeholder = { Text("Nombre completo") },
+                value = nombre,
+                onValueChange = { nombre = it },
+                placeholder = { Text("Nombre") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.PersonOutline,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(PawSpace.md))
+
+            // Apellido
+            OutlinedTextField(
+                value = apellido,
+                onValueChange = { apellido = it },
+                placeholder = { Text("Apellido") },
                 leadingIcon = {
                     PawCareIcon(
                         icon = Icons.Outlined.PersonOutline,
@@ -236,7 +231,55 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.md))
 
-            // Password
+            // Teléfono
+            OutlinedTextField(
+                value = telefono,
+                onValueChange = { telefono = it },
+                placeholder = { Text("Teléfono") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Phone,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(PawSpace.md))
+
+            // Ciudad
+            OutlinedTextField(
+                value = ciudad,
+                onValueChange = { ciudad = it },
+                placeholder = { Text("Ciudad") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(PawSpace.md))
+
+            // Contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -292,9 +335,20 @@ fun RegisterScreen(
 
             // Botón registrar
             Button(
-                onClick = { viewModel.register(email, password, rol, nombreCompleto) },
-                enabled = nombreCompleto.isNotBlank() && email.isNotBlank() &&
-                        password.length >= 6 && authState !is AuthState.Loading,
+                onClick = {
+                    viewModel.registerOwner(
+                        email = email.trim(),
+                        password = password,
+                        nombre = nombre.trim(),
+                        apellido = apellido.trim(),
+                        telefono = telefono.trim(),
+                        ciudad = ciudad.trim()
+                    )
+                },
+                enabled = nombre.isNotBlank() && apellido.isNotBlank() &&
+                        email.isNotBlank() && telefono.isNotBlank() &&
+                        ciudad.isNotBlank() && password.length >= 6 &&
+                        authState !is AuthState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -320,7 +374,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
 
-            // Divider con "o"
+            // Divider
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -345,7 +399,7 @@ fun RegisterScreen(
 
             // Google button
             OutlinedButton(
-                onClick = { /* TODO: Google Sign In */ },
+                onClick = { /* TODO */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

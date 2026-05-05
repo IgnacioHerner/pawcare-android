@@ -312,14 +312,14 @@ fun VetFormScreen(
             Button(
                 onClick = {
                     val nuevoVet = Veterinario(
-                        nombre = nombre,
-                        apellido = apellido,
-                        matricula = matricula,
-                        especialidad = especialidad.ifBlank { null },
-                        telefono = telefono,
-                        clinica = clinica.ifBlank { null },
-                        direccion = direccion.ifBlank { null },
-                        ciudad = ciudad.ifBlank { null }
+                        nombre = nombre.trim(),
+                        apellido = apellido.trim(),
+                        matricula = matricula.trim(),
+                        especialidad = especialidad.trim().ifBlank { null },
+                        telefono = telefono.trim(),
+                        clinica = clinica.trim().ifBlank { null },
+                        direccion = direccion.trim().ifBlank { null },
+                        ciudad = ciudad.trim().ifBlank { null }
                     )
                     viewModel.guardarVeterinario(nuevoVet)
                     onNavigateBack()

@@ -170,6 +170,49 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun registerOwner(
+        email: String,
+        password: String,
+        nombre: String,
+        apellido: String,
+        telefono: String,
+        ciudad: String
+    ) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+
+            withContext(NonCancellable) {
+                val result = authRepository.register(email, password)
+
+                if (result.isSuccess) {
+                    val uid = result.getOrNull()?.uid ?: ""
+
+                    // Guardar usuario con rol + datos del owner todo junto
+                    val rolResult = userRepository.guardarUsuarioCompleto(
+                        rol = Rol.DUENO,
+                        uid = uid,
+                        nombre = nombre,
+                        apellido = apellido,
+                        telefono = telefono,
+                        email = email,
+                        ciudad = ciudad
+                    )
+
+                    if (rolResult.isSuccess) {
+                        cargarRol()
+                        _authState.value = AuthState.Success
+                    } else {
+                        _authState.value = AuthState.Error("Error al guardar el perfil")
+                    }
+                } else {
+                    _authState.value = AuthState.Error(
+                        result.exceptionOrNull()?.message ?: "Error al registrarse"
+                    )
+                }
+            }
+        }
+    }
+
     fun logout() {
         rolJob?.cancel()
         _rol.value = null

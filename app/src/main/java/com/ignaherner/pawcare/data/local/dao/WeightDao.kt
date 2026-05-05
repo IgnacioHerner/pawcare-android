@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WeightDao {
 
-    @Query("SELECT * FROM weight WHERE petId = :petId ORDER BY fecha DESC")
+    @Query("SELECT * FROM weight WHERE petId = :petId ORDER BY fecha DESC, id DESC")
     fun getWeightsByPetId(petId: Long): Flow<List<WeightEntity>>
 
     @Query("SELECT * FROM weight WHERE id = :weightId")

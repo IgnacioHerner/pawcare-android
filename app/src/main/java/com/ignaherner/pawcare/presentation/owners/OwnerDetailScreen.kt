@@ -72,7 +72,7 @@ import com.ignaherner.pawcare.utils.calcularEdad
 fun OwnerDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: () -> Unit,
-    onNavigateToPetDetail: (Long) -> Unit = {},
+    onNavigateToPetDetail: (Long) -> Unit,
     viewModel: OwnerViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {

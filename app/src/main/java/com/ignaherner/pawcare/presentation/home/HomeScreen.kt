@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Medication
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
@@ -89,7 +90,7 @@ fun HomeScreen(
 
     val nombreUsuario = when (val state = ownerState) {
         is OwnerState.Success -> state.owner.nombre
-        else -> "Usuario"
+        else -> ""  // ← vacío en vez de "Usuario"
     }
 
     val subtitulo = when (val state = uiState) {
@@ -154,17 +155,17 @@ fun HomeScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO notificaciones */ }) {
-                        PawCareIcon(
-                            icon = Icons.Outlined.Notifications,
-                            contentDescription = "Notificaciones",
-                            size = PawIconSize.medium
-                        )
-                    }
                     IconButton(onClick = onNavigateToSettings) {
                         PawCareIcon(
                             icon = Icons.Outlined.Settings,
                             contentDescription = "Configuración",
+                            size = PawIconSize.medium
+                        )
+                    }
+                    IconButton(onClick = onNavigateToOwnerDetail) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.PersonOutline,
+                            contentDescription = "Perfil",
                             size = PawIconSize.medium
                         )
                     }
@@ -220,11 +221,13 @@ fun HomeScreen(
                                 .padding(horizontal = PawSpace.lg),
                             verticalArrangement = Arrangement.spacedBy(PawSpace.xs)
                         ) {
-                            Text(
-                                text = "Hola, $nombreUsuario",
-                                style = MaterialTheme.typography.displayMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+                            if (nombreUsuario.isNotBlank()) {
+                                Text(
+                                    text = "Hola, $nombreUsuario",
+                                    style = MaterialTheme.typography.displayMedium,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                             Text(
                                 text = subtitulo,
                                 style = MaterialTheme.typography.bodyLarge,

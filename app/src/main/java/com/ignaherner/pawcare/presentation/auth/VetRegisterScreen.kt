@@ -638,7 +638,7 @@ private fun ColumnScope.VetRegisterStep2(
 
     Button(
         onClick = onRegister,
-        enabled = matricula.isNotBlank() && password.length >= 6 &&
+        enabled = matricula.trim().isNotBlank() && password.length >= 6 &&
                 authState !is AuthState.Loading,
         modifier = Modifier
             .fillMaxWidth()

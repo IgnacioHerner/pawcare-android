@@ -40,6 +40,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -358,6 +359,7 @@ fun PetFormScreen(
                 value = fechaNacimiento,
                 onValueChange = {},
                 readOnly = true,
+                enabled = false,
                 placeholder = { Text("Fecha de nacimiento") },
                 supportingText = { Text("Si no la sabés, podés omitirla") },
                 leadingIcon = {
@@ -383,7 +385,13 @@ fun PetFormScreen(
                 shape = RoundedCornerShape(PawRadii.md),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showFechaNacimientoPicker = true }
+                    .clickable { showFechaNacimientoPicker = true },
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
 
             // Castración
@@ -423,6 +431,7 @@ fun PetFormScreen(
                     value = fechaCastracion,
                     onValueChange = {},
                     readOnly = true,
+                    enabled = false,
                     placeholder = { Text("Fecha de castración") },
                     leadingIcon = {
                         PawCareIcon(
@@ -435,7 +444,13 @@ fun PetFormScreen(
                     shape = RoundedCornerShape(PawRadii.md),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showFechaCastracionPicker = true }
+                        .clickable { showFechaCastracionPicker = true },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
 
@@ -454,9 +469,9 @@ fun PetFormScreen(
                         firestoreId = firestoreId,
                         ownerId = ownerId,
                         codigo = codigo,
-                        nombre = nombre,
+                        nombre = nombre.trim(),
                         especie = especieSeleccionada,
-                        raza = raza.ifBlank { null },
+                        raza = raza.trim().ifBlank { null },
                         sexo = sexoSeleccionado,
                         fechaNacimientoTipo = fechaNacimientoTipo,
                         fechaNacimiento = fechaNacimiento.ifBlank { null },
