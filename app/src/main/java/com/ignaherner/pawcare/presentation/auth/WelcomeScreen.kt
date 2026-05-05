@@ -1,4 +1,4 @@
-package com.ignaherner.pawcare.presentation.auth
+ package com.ignaherner.pawcare.presentation.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

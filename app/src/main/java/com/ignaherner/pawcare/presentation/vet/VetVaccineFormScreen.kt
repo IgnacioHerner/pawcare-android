@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
 import com.ignaherner.pawcare.domain.model.TipoVacuna
 import com.ignaherner.pawcare.domain.model.Vaccine
@@ -61,7 +63,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetVaccineFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var tipoSeleccionado by remember { mutableStateOf<TipoVacuna?>(null) }
     var nombreComercial by remember { mutableStateOf("") }
@@ -76,6 +79,15 @@ fun VetVaccineFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()){
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(

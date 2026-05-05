@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.domain.model.ConditionEstado
 import com.ignaherner.pawcare.domain.model.Severidad
@@ -55,7 +58,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetConditionFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var fechaDiagnostico by remember { mutableStateOf(fechaHoy()) }
@@ -68,6 +72,16 @@ fun VetConditionFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -119,19 +133,30 @@ fun VetConditionFormScreen(
                 onValueChange = { nombre = it },
                 label = { Text("Nombre de la condición") },
                 placeholder = { Text("Ej: Displasia de cadera") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Fecha de diagnóstico
             OutlinedTextField(
                 value = fechaDiagnostico,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de diagnóstico") },
+                enabled = false,
+                label = { Text("Fecha de diagnostico") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Fecha")
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -144,7 +169,7 @@ fun VetConditionFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    Severidad.values().forEach { sev ->
+                    Severidad.entries.forEach { sev ->
                         FilterChip(
                             selected = severidad == sev,
                             onClick = { severidad = sev },
@@ -173,7 +198,7 @@ fun VetConditionFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    ConditionEstado.values().forEach { est ->
+                    ConditionEstado.entries.forEach { est ->
                         FilterChip(
                             selected = estado == est,
                             onClick = { estado = est },
@@ -187,6 +212,7 @@ fun VetConditionFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

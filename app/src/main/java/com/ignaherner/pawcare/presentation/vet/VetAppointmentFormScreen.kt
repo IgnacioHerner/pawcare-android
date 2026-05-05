@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.fechaHoy
@@ -44,7 +47,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetAppointmentFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var fecha by remember { mutableStateOf(fechaHoy()) }
     var motivo by remember { mutableStateOf("") }
@@ -57,6 +61,15 @@ fun VetAppointmentFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -107,12 +120,21 @@ fun VetAppointmentFormScreen(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de la visita") },
+                enabled = false,
+                label = { Text("Fecha") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Fecha")
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -123,6 +145,7 @@ fun VetAppointmentFormScreen(
                 onValueChange = { motivo = it },
                 label = { Text("Motivo de la visita") },
                 placeholder = { Text("Ej: Control anual, vacunación") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -130,6 +153,7 @@ fun VetAppointmentFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -138,6 +162,7 @@ fun VetAppointmentFormScreen(
                 onValueChange = { clinica = it },
                 label = { Text("Clínica (opcional)") },
                 placeholder = { Text("Ej: Veterinaria San Martín") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -145,6 +170,7 @@ fun VetAppointmentFormScreen(
                 value = diagnostico,
                 onValueChange = { diagnostico = it },
                 label = { Text("Diagnóstico (opcional)") },
+                singleLine = true,
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )

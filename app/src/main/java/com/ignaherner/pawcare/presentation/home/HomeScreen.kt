@@ -89,8 +89,8 @@ fun HomeScreen(
     }
 
     val nombreUsuario = when (val state = ownerState) {
-        is OwnerState.Success -> state.owner.nombre
-        else -> ""  // ← vacío en vez de "Usuario"
+        is OwnerState.Success -> state.owner.nombre.split(" ").first()
+        else -> ""
     }
 
     val subtitulo = when (val state = uiState) {

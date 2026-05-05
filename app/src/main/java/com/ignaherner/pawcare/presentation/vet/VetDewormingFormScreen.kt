@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Deworming
 import com.ignaherner.pawcare.domain.model.DewormingTipo
 import com.ignaherner.pawcare.domain.model.FrecuenciaDeworming
@@ -55,7 +58,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetDewormingFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var producto by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf(DewormingTipo.INTERNA) }
@@ -68,6 +72,16 @@ fun VetDewormingFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -119,6 +133,7 @@ fun VetDewormingFormScreen(
                 onValueChange = { producto = it },
                 label = { Text("Producto") },
                 placeholder = { Text("Ej: NexGard, Frontline") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -129,7 +144,7 @@ fun VetDewormingFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    DewormingTipo.values().forEach { t ->
+                    DewormingTipo.entries.forEach { t ->
                         FilterChip(
                             selected = tipo == t,
                             onClick = { tipo = t },
@@ -143,12 +158,21 @@ fun VetDewormingFormScreen(
                 value = fechaAplicacion,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de aplicación") },
+                enabled = false,
+                label = { Text("Fecha de aplicacion") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Fecha")
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -161,7 +185,7 @@ fun VetDewormingFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    FrecuenciaDeworming.values().forEach { freq ->
+                    FrecuenciaDeworming.entries.forEach { freq ->
                         FilterChip(
                             selected = frecuencia == freq,
                             onClick = { frecuencia = freq },
@@ -208,6 +232,7 @@ fun VetDewormingFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

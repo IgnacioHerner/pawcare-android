@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -145,6 +146,7 @@ fun DewormingFormScreen(
                 onValueChange = { producto = it },
                 label = { Text("Producto") },
                 placeholder = { Text("Ej: NexGard, Frontline") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -155,7 +157,7 @@ fun DewormingFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    DewormingTipo.values().forEach { t ->
+                    DewormingTipo.entries.forEach { t ->
                         FilterChip(
                             selected = tipo == t,
                             onClick = { tipo = t },
@@ -170,12 +172,21 @@ fun DewormingFormScreen(
                 value = fechaAplicacion,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de aplicación") },
+                enabled = false,
+                label = { Text("Fecha de aplicacion") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -188,7 +199,7 @@ fun DewormingFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    FrecuenciaDeworming.values().forEach { freq ->
+                    FrecuenciaDeworming.entries.forEach { freq ->
                         FilterChip(
                             selected = frecuencia == freq,
                             onClick = { frecuencia = freq },
@@ -237,6 +248,7 @@ fun DewormingFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

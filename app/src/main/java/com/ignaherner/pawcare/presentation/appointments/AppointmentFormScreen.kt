@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -130,12 +131,21 @@ fun AppointmentFormScreen(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de la visita") },
+                enabled = false,
+                label = { Text("Fecha") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -146,6 +156,7 @@ fun AppointmentFormScreen(
                 onValueChange = { motivo = it },
                 label = { Text("Motivo de la visita") },
                 placeholder = { Text("Ej: Control anual, vacunación") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -153,6 +164,7 @@ fun AppointmentFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -161,6 +173,7 @@ fun AppointmentFormScreen(
                 onValueChange = { clinica = it },
                 label = { Text("Clínica (opcional)") },
                 placeholder = { Text("Ej: Veterinaria San Martín") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

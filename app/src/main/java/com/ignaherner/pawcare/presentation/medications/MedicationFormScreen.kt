@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -169,7 +171,11 @@ fun MedicationFormScreen(
                 onValueChange = { nombre = it },
                 label = { Text("Nombre del medicamento") },
                 placeholder = { Text("Ej: Amoxicilina") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
             )
 
             // Dosis: cantidad + unidad
@@ -184,7 +190,9 @@ fun MedicationFormScreen(
                         onValueChange = { dosisCantidad = it },
                         label = { Text("Cantidad") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f)
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+
                     )
                     ExposedDropdownMenuBox(
                         expanded = unidadDropdownExpanded,
@@ -207,7 +215,7 @@ fun MedicationFormScreen(
                             expanded = unidadDropdownExpanded,
                             onDismissRequest = { unidadDropdownExpanded = false }
                         ) {
-                            DosisUnidad.values().forEach { unidad ->
+                            DosisUnidad.entries.forEach { unidad ->
                                 DropdownMenuItem(
                                     text = { Text(unidad.displayName) },
                                     onClick = {
@@ -231,7 +239,7 @@ fun MedicationFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    ViaAdministracion.values().forEach { via ->
+                    ViaAdministracion.entries.forEach { via ->
                         FilterChip(
                             selected = viaAdministracion == via,
                             onClick = { viaAdministracion = via },
@@ -278,6 +286,7 @@ fun MedicationFormScreen(
                         onValueChange = { duracionDias = it },
                         label = { Text("Días") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
@@ -285,6 +294,7 @@ fun MedicationFormScreen(
                         onValueChange = { intervaloHoras = it },
                         label = { Text("Cada X horas") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -295,22 +305,33 @@ fun MedicationFormScreen(
                 value = fechaInicio,
                 onValueChange = {},
                 readOnly = true,
+                enabled = false,
                 label = { Text("Fecha de inicio") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
             )
+
 
             // Recetado por
             OutlinedTextField(
                 value = recetadoPor,
                 onValueChange = { recetadoPor = it },
                 label = { Text("Recetado por (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

@@ -16,13 +16,16 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
@@ -40,7 +44,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetWeightFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var peso by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf(fechaHoy()) }
@@ -49,6 +54,17 @@ fun VetWeightFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+    var veterinario by remember { mutableStateOf("") }
+
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()){
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -95,6 +111,7 @@ fun VetWeightFormScreen(
                 onValueChange = { peso = it },
                 label = { Text("Peso (kg)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -102,13 +119,24 @@ fun VetWeightFormScreen(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
+                enabled = false,
                 label = { Text("Fecha") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Fecha")
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
-                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
             )
 
             OutlinedTextField(

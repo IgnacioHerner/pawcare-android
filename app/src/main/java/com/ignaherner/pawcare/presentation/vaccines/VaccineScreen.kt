@@ -158,55 +158,6 @@ fun VaccineScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Filtros
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PawSpace.lg, vertical = PawSpace.sm),
-                horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)
-            ) {
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado == null,
-                        onClick = { filtroSeleccionado = null },
-                        label = { Text("Todas") }
-                    )
-                }
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado is VaccineStatus.Aplicada,
-                        onClick = { filtroSeleccionado = VaccineStatus.Aplicada },
-                        label = { Text("Aplicadas") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = SuccessSoft,
-                            selectedLabelColor = Success
-                        )
-                    )
-                }
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado is VaccineStatus.Programada,
-                        onClick = { filtroSeleccionado = VaccineStatus.Programada },
-                        label = { Text("Programadas") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = InfoSoft,
-                            selectedLabelColor = Info
-                        )
-                    )
-                }
-                item {
-                    FilterChip(
-                        selected = filtroSeleccionado is VaccineStatus.Vencida,
-                        onClick = { filtroSeleccionado = VaccineStatus.Vencida },
-                        label = { Text("Vencidas") },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = DangerSoft,
-                            selectedLabelColor = Danger
-                        )
-                    )
-                }
-            }
-
             Box(modifier = Modifier.fillMaxSize()) {
                 when (val state = uiState) {
                     is VaccineUiState.Loading -> {
@@ -223,64 +174,33 @@ fun VaccineScreen(
                         )
                     }
                     is VaccineUiState.Success -> {
-                        // Filtrar
-                        val vaccinesFiltradas = when (filtroSeleccionado) {
-                            null -> state.vaccines
-                            is VaccineStatus.Aplicada -> state.vaccines.filter {
-                                it.status is VaccineStatus.Aplicada
-                            }
-                            is VaccineStatus.Programada -> state.vaccines.filter {
-                                it.status is VaccineStatus.Programada
-                            }
-                            is VaccineStatus.Vencida -> state.vaccines.filter {
-                                it.status is VaccineStatus.Vencida
-                            }
-                        }
-
-                        // Ordenar: vencidas primero, luego programadas, luego aplicadas
-                        val vaccinesOrdenadas = vaccinesFiltradas.sortedBy {
-                            when (it.status) {
-                                is VaccineStatus.Vencida -> 0
-                                is VaccineStatus.Programada -> 1
-                                is VaccineStatus.Aplicada -> 2
-                            }
-                        }
-
-                        if (vaccinesOrdenadas.isEmpty()) {
-                            EmptyState(
-                                icon = Icons.Outlined.FilterAlt,
-                                title = "Sin resultados",
-                                body = "No hay vacunas con el filtro seleccionado"
+                        LazyColumn(
+                            contentPadding = PaddingValues(
+                                top = PawSpace.sm,
+                                bottom = 96.dp
                             )
-                        } else {
-                            LazyColumn(
-                                contentPadding = PaddingValues(
-                                    top = PawSpace.sm,
-                                    bottom = 96.dp
-                                )
-                            ) {
-                                items(
-                                    items = vaccinesOrdenadas,
-                                    key = { it.id }
-                                ) { vaccine ->
-                                    if (isVeterinario) {
-                                        SwipeRevealCard(
-                                            onDelete = { vaccineToDelete = vaccine },
-                                            onEdit = { onNavigateToEdit(vaccine.id) }
-                                        ) {
-                                            VaccineCard(
-                                                vaccine = vaccine,
-                                                onClick = { onNavigateToDetail(vaccine.id) },
-                                                onDeleteClick = {}
-                                            )
-                                        }
-                                    } else {
+                        ) {
+                            items(
+                                items = state.vaccines,
+                                key = { it.id }
+                            ) { vaccine ->
+                                if (isVeterinario) {
+                                    SwipeRevealCard(
+                                        onDelete = { vaccineToDelete = vaccine },
+                                        onEdit = { onNavigateToEdit(vaccine.id) }
+                                    ) {
                                         VaccineCard(
                                             vaccine = vaccine,
                                             onClick = { onNavigateToDetail(vaccine.id) },
                                             onDeleteClick = {}
                                         )
                                     }
+                                } else {
+                                    VaccineCard(
+                                        vaccine = vaccine,
+                                        onClick = { onNavigateToDetail(vaccine.id) },
+                                        onDeleteClick = {}
+                                    )
                                 }
                             }
                         }

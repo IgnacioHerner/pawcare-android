@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.DosisUnidad
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
@@ -57,7 +60,8 @@ import com.ignaherner.pawcare.utils.toFormattedString
 fun VetMedicationFormScreen(
     petFirestoreId: String,
     onNavigateBack: () -> Unit,
-    viewModel: VetViewModel = hiltViewModel()
+    viewModel: VetViewModel = hiltViewModel(),
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var dosisCantidad by remember { mutableStateOf("1") }
@@ -69,6 +73,7 @@ fun VetMedicationFormScreen(
     var intervaloHoras by remember { mutableStateOf("") }
     var recetadoPor by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var veterinario by remember { mutableStateOf("") }
 
     var unidadDropdownExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -76,6 +81,15 @@ fun VetMedicationFormScreen(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState) {
+        if (vetState is VetState.Success && veterinario.isBlank()){
+            val vet = (vetState as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -127,6 +141,7 @@ fun VetMedicationFormScreen(
                 onValueChange = { nombre = it },
                 label = { Text("Nombre del medicamento") },
                 placeholder = { Text("Ej: Amoxicilina") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -139,6 +154,7 @@ fun VetMedicationFormScreen(
                         onValueChange = { dosisCantidad = it },
                         label = { Text("Cantidad") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                     ExposedDropdownMenuBox(
@@ -151,6 +167,7 @@ fun VetMedicationFormScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Unidad") },
+                            singleLine = true,
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = unidadDropdownExpanded)
                             },
@@ -160,7 +177,7 @@ fun VetMedicationFormScreen(
                             expanded = unidadDropdownExpanded,
                             onDismissRequest = { unidadDropdownExpanded = false }
                         ) {
-                            DosisUnidad.values().forEach { unidad ->
+                            DosisUnidad.entries.forEach { unidad ->
                                 DropdownMenuItem(
                                     text = { Text(unidad.displayName) },
                                     onClick = {
@@ -181,7 +198,7 @@ fun VetMedicationFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    ViaAdministracion.values().forEach { via ->
+                    ViaAdministracion.entries.forEach { via ->
                         FilterChip(
                             selected = viaAdministracion == via,
                             onClick = { viaAdministracion = via },
@@ -221,6 +238,7 @@ fun VetMedicationFormScreen(
                         onValueChange = { duracionDias = it },
                         label = { Text("Días") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
@@ -228,6 +246,7 @@ fun VetMedicationFormScreen(
                         onValueChange = { intervaloHoras = it },
                         label = { Text("Cada X horas") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -237,19 +256,32 @@ fun VetMedicationFormScreen(
                 value = fechaInicio,
                 onValueChange = {},
                 readOnly = true,
+                enabled = false,
                 label = { Text("Fecha de inicio") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Fecha")
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
-                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDatePicker = true }
             )
+
 
             OutlinedTextField(
                 value = recetadoPor,
                 onValueChange = { recetadoPor = it },
                 label = { Text("Recetado por (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

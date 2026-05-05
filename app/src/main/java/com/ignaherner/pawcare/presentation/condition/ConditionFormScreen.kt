@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -143,6 +144,7 @@ fun ConditionFormScreen(
                 onValueChange = { nombre = it },
                 label = { Text("Nombre de la condición") },
                 placeholder = { Text("Ej: Displasia de cadera") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -151,12 +153,21 @@ fun ConditionFormScreen(
                 value = fechaDiagnostico,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de diagnóstico") },
+                enabled = false,
+                label = { Text("Fecha de diagnostico") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -172,7 +183,7 @@ fun ConditionFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    Severidad.values().forEach { sev ->
+                    Severidad.entries.forEach { sev ->
                         FilterChip(
                             selected = severidad == sev,
                             onClick = { severidad = sev },
@@ -204,7 +215,7 @@ fun ConditionFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    ConditionEstado.values().forEach { est ->
+                    ConditionEstado.entries.forEach { est ->
                         FilterChip(
                             selected = estado == est,
                             onClick = { estado = est },
@@ -219,6 +230,7 @@ fun ConditionFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 

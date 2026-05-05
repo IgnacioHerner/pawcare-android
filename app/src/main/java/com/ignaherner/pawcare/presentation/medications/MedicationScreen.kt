@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Medication
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -44,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.presentation.components.ConfirmDeleteDialog
+import com.ignaherner.pawcare.presentation.components.EmptyState
 import com.ignaherner.pawcare.presentation.components.MedicationCard
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
@@ -138,7 +140,8 @@ fun MedicationScreen(
                     Icon(Icons.Default.Add, contentDescription = "Agregar medicamento")
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -195,25 +198,14 @@ fun MedicationScreen(
                         )
                     }
                     is MedicationUiState.Empty -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "\uD83D\uDC8A",
-                                style = MaterialTheme.typography.displayLarge
-                            )
-                            Text(
-                                text = "Todavía no tenés medicaciones para tus mascotas",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Tocá el + para agregar la primera",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        EmptyState(
+                            icon = Icons.Outlined.Medication,
+                            title = "Sin medicamentos registrados",
+                            body = if (isVeterinario)
+                                "Tocá el + para registrar un medicamento"
+                            else
+                                "El veterinario podrá registrar los medicamentos de tu mascota"
+                        )
                     }
                     is MedicationUiState.Success -> {
                         val medicationsFiltradas = when (filtroSeleccionado) {

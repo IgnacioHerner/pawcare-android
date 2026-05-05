@@ -16,7 +16,9 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -126,6 +128,7 @@ fun WeightFormScreen(
                 onValueChange = { peso = it},
                 label = { Text("Peso")},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -133,18 +136,24 @@ fun WeightFormScreen(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha del peso")},
+                enabled = false,
+                label = { Text("Fecha") },
                 trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true}) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Elegir fecha"
-                        )
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable{ showDatePicker = true}
+                    .clickable { showDatePicker = true }
             )
 
             OutlinedTextField(
