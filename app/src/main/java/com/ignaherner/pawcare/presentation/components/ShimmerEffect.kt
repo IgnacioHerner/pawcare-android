@@ -1,5 +1,6 @@
 package com.ignaherner.pawcare.presentation.components
 
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -12,10 +13,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
@@ -26,51 +29,58 @@ import com.ignaherner.pawcare.ui.theme.PawSpace
 // Se mueve de izquierda a derecha repetidamente
 // ═══════════════════════════════════════════════════════════
 @Composable
-fun shimmerBrush(targetValue: Float = 1000f): Brush {
-    val shimmerColors = listOf(
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-    )
+fun shimmerBrush(show: Boolean = true, targetValue: Float = 1000f): Brush {
+    return if (show) {
+        val shimmerColors = listOf(
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+        )
 
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val translateAnimation = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = targetValue,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmer"
-    )
+        val transition = rememberInfiniteTransition(label = "shimmer")
+        val translateAnimation = transition.animateFloat(
+            initialValue = 0f,
+            targetValue = targetValue,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 1200,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "shimmer"
+        )
 
-    return Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset.Zero,
-        end = Offset(x = translateAnimation.value, y = translateAnimation.value)
-    )
+        Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset(translateAnimation.value - 200f, 0f),
+            end = Offset(translateAnimation.value, 0f)
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(Color.Transparent, Color.Transparent),
+            start = Offset.Zero,
+            end = Offset.Zero
+        )
+    }
 }
 
-// ═══════════════════════════════════════════════════════════
-// PET CARD SKELETON
-// Esqueleto de la PetSummaryCard mientras carga
-// ═══════════════════════════════════════════════════════════
 @Composable
 fun PetCardSkeleton() {
     val brush = shimmerBrush()
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs)
-            .clip(RoundedCornerShape(PawRadii.md))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(PawSpace.lg)
+    PawCard(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = PawSpace.lg, vertical = PawSpace.xs)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(PawSpace.md)) {
-            // Header skeleton
+        Column(
+            modifier = Modifier.padding(PawSpace.lg),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.md)
+        ) {
+            // Header
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
+                horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -84,73 +94,105 @@ fun PetCardSkeleton() {
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.4f)
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .fillMaxWidth(0.5f)
+                            .height(18.dp)
+                            .clip(RoundedCornerShape(PawRadii.xs))
                             .background(brush)
                     )
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .height(12.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .fillMaxWidth(0.7f)
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(PawRadii.xs))
                             .background(brush)
                     )
                 }
             }
-            // Stats skeleton
+
+            // Divider
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+
+            // Stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .width(60.dp)
-                            .height(28.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(brush)
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(PawSpace.xs)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(20.dp)
+                                .clip(RoundedCornerShape(PawRadii.xs))
+                                .background(brush)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(56.dp)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(PawRadii.xs))
+                                .background(brush)
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// HOME SCREEN SKELETON
-// Lista de placeholders mientras carga el HomeScreen
-// ═══════════════════════════════════════════════════════════
 @Composable
 fun HomeScreenSkeleton() {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = PawSpace.md),
-        verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+    val brush = shimmerBrush()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = PawSpace.md),
+        verticalArrangement = Arrangement.spacedBy(PawSpace.md)
     ) {
-        // Saludo skeleton
-        item {
-            Column(
-                modifier = Modifier.padding(horizontal = PawSpace.lg),
-                verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(28.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(shimmerBrush())
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .height(16.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(shimmerBrush())
-                )
-            }
+        // Saludo
+        Column(
+            modifier = Modifier.padding(horizontal = PawSpace.lg),
+            verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.45f)
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(PawRadii.xs))
+                    .background(brush)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(PawRadii.xs))
+                    .background(brush)
+            )
         }
-        // Pet cards skeleton
-        items(2) {
+
+        Spacer(modifier = Modifier.height(PawSpace.sm))
+
+        // Header "Mascotas"
+        Box(
+            modifier = Modifier
+                .padding(horizontal = PawSpace.lg)
+                .fillMaxWidth(0.3f)
+                .height(22.dp)
+                .clip(RoundedCornerShape(PawRadii.xs))
+                .background(brush)
+        )
+
+        // Cards
+        repeat(2) {
             PetCardSkeleton()
         }
     }

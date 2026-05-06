@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -246,6 +247,13 @@ fun PawCareNavGraph(
         Log.d("NavDebug", "Navegando a: ${destination.route}")
     }
 
+    fun NavHostController.safeNavigate(route: String) {
+        val currentRoute = currentBackStackEntry?.destination?.route
+        if (currentRoute != route) {
+            navigate(route)
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = PawCareDestinations.SPLASH
@@ -399,7 +407,9 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateBack = {
-                    navController.popBackStack()
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
                 }
             )
         }
@@ -437,7 +447,9 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateBack = {
-                    navController.popBackStack()
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
                 }
             )
         }
@@ -457,7 +469,9 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateBack = {
-                    navController.popBackStack()
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
                 }
             )
         }
@@ -477,7 +491,11 @@ fun PawCareNavGraph(
 
         composable(PawCareDestinations.VET_PROFILE_DETAIL) {
             VetProfileDetailScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = {
                     navController.navigate(PawCareDestinations.VET_FORM)
                 }
@@ -494,7 +512,11 @@ fun PawCareNavGraph(
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
             VetPetDetailScreen(
                 firestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToHistorial = { id, tipo ->
                     navController.navigate(PawCareDestinations.vetHistorial(id, tipo))
                 },
@@ -526,10 +548,12 @@ fun PawCareNavGraph(
         composable(PawCareDestinations.VET_FORM) {
             VetFormScreen(
                 onNavigateBack = {
-                    navController.navigate(PawCareDestinations.VET_HOME) {
-                        popUpTo(PawCareDestinations.VET_FORM) { inclusive = true }
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(PawCareDestinations.VET_HOME) {
+                            popUpTo(PawCareDestinations.VET_FORM) { inclusive = true }
+                        }
                     }
-                }
+                },
             )
         }
 
@@ -545,7 +569,11 @@ fun PawCareNavGraph(
             val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 
             VaccineFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 vetProfileViewModel = vetProfileViewModel,
                 onSave = { vaccine ->
@@ -564,7 +592,11 @@ fun PawCareNavGraph(
             val ownerId = backStackEntry.arguments?.getString("ownerId") ?: return@composable
             VetOwnerDetailScreen(
                 ownerId = ownerId,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToPetDetail = { firestoreId ->
                     navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
                 }
@@ -583,7 +615,11 @@ fun PawCareNavGraph(
             val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 
             MedicationFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 vetProfileViewModel = vetProfileViewModel,
                 onSave = { medication ->
@@ -603,7 +639,11 @@ fun PawCareNavGraph(
             val vetViewModel: VetViewModel = hiltViewModel()
 
             WeightFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 onSave = { weight ->
                     vetViewModel.guardarPeso(weight, firestoreId)
@@ -622,7 +662,11 @@ fun PawCareNavGraph(
             val vetViewModel: VetViewModel = hiltViewModel()
             val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
             AppointmentFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 vetProfileViewModel = vetProfileViewModel,
                 onSave = { appointment ->
@@ -643,7 +687,11 @@ fun PawCareNavGraph(
             val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 
             ConditionFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 vetProfileViewModel = vetProfileViewModel,
                 onSave = { condition ->
@@ -664,7 +712,11 @@ fun PawCareNavGraph(
             val vetViewModel: VetViewModel = hiltViewModel()
             val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
             DewormingFormScreen(
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 isVetMode = true,
                 vetProfileViewModel = vetProfileViewModel,
                 onSave = {deworming ->
@@ -688,7 +740,11 @@ fun PawCareNavGraph(
             VetHistorialScreen(
                 firestoreId = firestoreId,
                 tipo = tipo,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToForm = {
                     val route = when (tipo) {
                         VetHistorialTipo.VACUNAS -> PawCareDestinations.vetVaccineForm(firestoreId)
@@ -750,17 +806,23 @@ fun PawCareNavGraph(
             OwnerFormScreen(
                 ownerId = null,
                 onNavigateBack = {
-                    navController.navigate(PawCareDestinations.HOME) {
-                        popUpTo(PawCareDestinations.OWNER_FORM) { inclusive = true}
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(PawCareDestinations.HOME) {
+                            popUpTo(PawCareDestinations.OWNER_FORM) {inclusive = true}
+                        }
                     }
-                }
+                },
             )
         }
 
         // Owner Detail
         composable(PawCareDestinations.OWNER_DETAIL) {
             OwnerDetailScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = {
                     navController.navigate(PawCareDestinations.OWNER_EDIT)
                 },
@@ -774,7 +836,11 @@ fun PawCareNavGraph(
         composable(PawCareDestinations.OWNER_EDIT){
             OwnerFormScreen(
                 ownerId = 1L, // Siempre hay un solo Owner
-                onNavigateBack = { navController.popBackStack()}
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
 
@@ -783,7 +849,11 @@ fun PawCareNavGraph(
             SettingsScreen(
                 viewModel = hiltViewModel(),
                 authViewModel = authViewModel,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToLogin = {
                     navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
@@ -808,7 +878,11 @@ fun PawCareNavGraph(
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             QRScreen(
                 petId = petId,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
             )
         }
 
@@ -826,13 +900,16 @@ fun PawCareNavGraph(
             PetFormScreen(
                 petId = petId,
                 onNavigateBack = {
-                    val popped = navController.popBackStack()
-                    if (!popped) {
-                        navController.navigate(PawCareDestinations.LOADING) {
-                            popUpTo(0) { inclusive = true }
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        val popped = navController.popBackStack()
+                        if (!popped) {
+                            navController.navigate(PawCareDestinations.LOADING) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
                 }
+
             )
         }
 
@@ -848,7 +925,11 @@ fun PawCareNavGraph(
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             PetDetailScreen(
                 petId = petId,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     navController.navigate(PawCareDestinations.petForm(id))
                 },
@@ -896,7 +977,11 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { vaccineId ->
                     navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
                 onNavigateToForm = {
@@ -945,7 +1030,11 @@ fun PawCareNavGraph(
             }
 
             VaccineFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 vaccineId = vaccineId,
                 especie = especie,
                 vaccineViewModel = vaccineViewModel,
@@ -976,7 +1065,11 @@ fun PawCareNavGraph(
             )
             VaccineDetailScreen(
                 vaccineId = vaccineId,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     navController.navigate(
                         PawCareDestinations.vaccineForm(petId,petName, id)
@@ -1000,7 +1093,11 @@ fun PawCareNavGraph(
             AppointmentScreen(
                 petId = petId,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { appointmentId ->
                     navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},
                 onNavigateToForm = {
@@ -1029,7 +1126,11 @@ fun PawCareNavGraph(
 
             val appointmentViewModel: AppointmentViewModel = hiltViewModel()
             AppointmentFormScreen(
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 appointmentId = appointmentId,
                 appointmentViewModel = appointmentViewModel,
                 onSave = { appointment ->
@@ -1059,7 +1160,11 @@ fun PawCareNavGraph(
             )
             AppointmentDetailScreen(
                 appointmentId = appointmentId,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     navController.navigate(
                         PawCareDestinations.appointmentForm(petId, petName, id)
@@ -1086,7 +1191,11 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { medicationId ->
                     navController.navigate(
                         PawCareDestinations.medicationForm(
@@ -1134,7 +1243,11 @@ fun PawCareNavGraph(
             val medicationViewModel: MedicationViewModel = hiltViewModel(parentEntry)
 
             MedicationFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 medicationId = medicationId,
                 medicationViewModel = medicationViewModel,
                 onSave = { medication ->
@@ -1166,7 +1279,11 @@ fun PawCareNavGraph(
             )
             MedicationDetailScreen(
                 medicationId = medicationId,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id  ->
                     navController.navigate(
                         PawCareDestinations.medicationForm(petId, petName, id)
@@ -1186,7 +1303,11 @@ fun PawCareNavGraph(
             WeightScreen(
                 petId = petId,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToForm = { navController.navigate(PawCareDestinations.weightForm(petId)) },
                 onNavigateToEdit = { weightId ->
                     navController.navigate(
@@ -1213,7 +1334,11 @@ fun PawCareNavGraph(
             val weightViewModel: WeightViewModel = hiltViewModel()
 
             WeightFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 weightId = weightId,
                 weightViewModel = weightViewModel,
                 onSave = { weight ->
@@ -1244,7 +1369,11 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.conditionForm(petId, petName))
                 },
@@ -1286,7 +1415,11 @@ fun PawCareNavGraph(
             val conditionViewModel: ConditionViewModel = hiltViewModel(parentEntry)
 
             ConditionFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 conditionId = conditionId,
                 conditionViewModel = conditionViewModel,
                 onSave = { condition ->
@@ -1310,7 +1443,11 @@ fun PawCareNavGraph(
             val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
             ConditionDetailScreen(
                 conditionId = conditionId,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     // TODO: navegar a editar condición
                 }
@@ -1334,7 +1471,11 @@ fun PawCareNavGraph(
                 petId = petId,
                 petName = petName,
                 isVeterinario = true,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToForm = {
                     navController.navigate(PawCareDestinations.dewormingForm(petId, petName))
                 },
@@ -1375,7 +1516,11 @@ fun PawCareNavGraph(
             }
             val dewormingViewModel: DewormingViewModel = hiltViewModel(parentEntry)
             DewormingFormScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 dewormingId = dewormingId,
                 dewormingViewModel = dewormingViewModel,
                 onSave = { deworming ->
@@ -1399,7 +1544,11 @@ fun PawCareNavGraph(
             val dewormingId = backStackEntry.arguments?.getLong("dewormingId") ?: return@composable
             DewormingDetailScreen(
                 dewormingId = dewormingId,
-                onNavigateBack = { navController.popBackStack()},
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     // TODO: Navegar a editar condicion
                 }
@@ -1416,7 +1565,11 @@ fun PawCareNavGraph(
             val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
             ConditionDetailScreen(
                 conditionId = conditionId,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
                 onNavigateToEdit = { id ->
                     // TODO: navegar a editar condición
                 }
