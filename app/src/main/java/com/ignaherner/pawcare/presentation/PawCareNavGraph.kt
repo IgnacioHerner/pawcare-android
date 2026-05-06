@@ -15,11 +15,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.Rol
 import com.ignaherner.pawcare.domain.model.VetHistorialTipo
 import com.ignaherner.pawcare.presentation.appointments.AppointmentDetailScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentFormScreen
 import com.ignaherner.pawcare.presentation.appointments.AppointmentScreen
+import com.ignaherner.pawcare.presentation.appointments.AppointmentViewModel
 import com.ignaherner.pawcare.presentation.auth.AuthViewModel
 import com.ignaherner.pawcare.presentation.auth.LoginScreen
 import com.ignaherner.pawcare.presentation.auth.OnboardingScreen
@@ -50,23 +52,21 @@ import com.ignaherner.pawcare.presentation.vaccines.VaccineDetailScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineFormScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineScreen
 import com.ignaherner.pawcare.presentation.vaccines.VaccineViewModel
-import com.ignaherner.pawcare.presentation.vet.VetAppointmentFormScreen
-import com.ignaherner.pawcare.presentation.vet.VetConditionFormScreen
-import com.ignaherner.pawcare.presentation.vet.VetDewormingFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetHistorialScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
 import com.ignaherner.pawcare.presentation.auth.VetLoginScreen
 import com.ignaherner.pawcare.presentation.auth.VetRegisterScreen
-import com.ignaherner.pawcare.presentation.vet.VetMedicationFormScreen
+import com.ignaherner.pawcare.presentation.pets.PetDetailState
+import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.presentation.vet.VetOwnerDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
-import com.ignaherner.pawcare.presentation.vet.VetVaccineFormScreen
-import com.ignaherner.pawcare.presentation.vet.VetWeightFormScreen
+import com.ignaherner.pawcare.presentation.vet.VetViewModel
 import com.ignaherner.pawcare.presentation.weight.WeightFormScreen
 import com.ignaherner.pawcare.presentation.weight.WeightScreen
+import com.ignaherner.pawcare.presentation.weight.WeightViewModel
 import kotlinx.coroutines.delay
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -364,7 +364,7 @@ fun PawCareNavGraph(
             LoadingScreen()
         }
 
-        // Login
+        // Login dueno
         composable(PawCareDestinations.LOGIN) {
             LoginScreen(
                 viewModel = authViewModel,
@@ -404,6 +404,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // Elegir rol DUENO - VETERINARIO
         composable(PawCareDestinations.ROLE_SELECT) {
             RoleSelectScreen(
                 onRoleSelected = { rol ->
@@ -421,6 +422,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // Login veterinario
         composable(PawCareDestinations.VET_LOGIN) {
             VetLoginScreen(
                 viewModel = authViewModel,
@@ -440,6 +442,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // Register veterinario
         composable(PawCareDestinations.VET_REGISTER) {
             VetRegisterScreen(
                 viewModel = authViewModel,
@@ -538,9 +541,16 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetVaccineFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            VaccineFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { vaccine ->
+                    vetViewModel.guardarVacuna(vaccine, firestoreId)
+                }
             )
         }
 
@@ -569,9 +579,16 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetMedicationFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            MedicationFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { medication ->
+                    vetViewModel.guardarMedicamento(medication, firestoreId)
+                }
             )
         }
 
@@ -583,9 +600,14 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetWeightFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+
+            WeightFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                isVetMode = true,
+                onSave = { weight ->
+                    vetViewModel.guardarPeso(weight, firestoreId)
+                }
             )
         }
 
@@ -597,9 +619,15 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetAppointmentFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+            AppointmentFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { appointment ->
+                    vetViewModel.guardarTurno(appointment, firestoreId)
+                }
             )
         }
 
@@ -611,9 +639,16 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetConditionFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            ConditionFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { condition ->
+                    vetViewModel.guardarCondicion(condition, firestoreId)
+                }
             )
         }
 
@@ -626,9 +661,15 @@ fun PawCareNavGraph(
             )
         ) { backStackEntry ->
             val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
-            VetDewormingFormScreen(
-                petFirestoreId = firestoreId,
-                onNavigateBack = { navController.popBackStack() }
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+            DewormingFormScreen(
+                onNavigateBack = { navController.popBackStack()},
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = {deworming ->
+                    vetViewModel.guardarDesparasitacion(deworming, firestoreId)
+                }
             )
         }
 
@@ -704,7 +745,7 @@ fun PawCareNavGraph(
             }
         }
 
-        // Formulario - sirve para crear y editar
+        // Formulario - sirve para crear y editar el dueno
         composable(PawCareDestinations.OWNER_FORM) {
             OwnerFormScreen(
                 ownerId = null,
@@ -771,7 +812,7 @@ fun PawCareNavGraph(
             )
         }
 
-        // Formulario - sirve para crear y editar
+        // Formulario - sirve para crear y editar masctoas
         composable(
             route = PawCareDestinations.PET_FORM,
             arguments = listOf(
@@ -872,8 +913,8 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.VACCINE_FORM,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType},
-                navArgument("petName") {type = NavType.StringType},
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
                 navArgument("vaccineId") {
                     type = NavType.LongType
                     defaultValue = -1L
@@ -889,13 +930,33 @@ fun PawCareNavGraph(
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(PawCareDestinations.VACCINE_LIST)
             }
-            val viewModel: VaccineViewModel = hiltViewModel(parentEntry)
+            val vaccineViewModel: VaccineViewModel = hiltViewModel(parentEntry)
+            val petViewModel: PetViewModel = hiltViewModel()
+
+            val petDetailState by petViewModel.detailState.collectAsStateWithLifecycle()
+
+            LaunchedEffect(petId) {
+                petViewModel.loadPetById(petId)
+            }
+
+            val especie = when (val state = petDetailState) {
+                is PetDetailState.Success -> state.pet.especie
+                else -> Especie.PERRO
+            }
+
             VaccineFormScreen(
-                viewModel = viewModel,
-                petId = petId,
-                petName = petName,
+                onNavigateBack = { navController.popBackStack() },
                 vaccineId = vaccineId,
-                onNavigateBack = { navController.popBackStack()}
+                especie = especie,
+                vaccineViewModel = vaccineViewModel,
+                onSave = { vaccine ->
+                    val vaccineConPetId = vaccine.copy(petId = petId)
+                    if (vaccineId == null) {
+                        vaccineViewModel.insertVaccine(vaccineConPetId, petName)
+                    } else {
+                        vaccineViewModel.updateVaccine(vaccineConPetId, petName)
+                    }
+                }
             )
         }
 
@@ -965,10 +1026,20 @@ fun PawCareNavGraph(
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             val appointmentId = backStackEntry.arguments?.getLong("appointmentId")
                 ?.takeIf { it != -1L }
+
+            val appointmentViewModel: AppointmentViewModel = hiltViewModel()
             AppointmentFormScreen(
-                petId = petId,
+                onNavigateBack = { navController.popBackStack()},
                 appointmentId = appointmentId,
-                onNavigateBack = { navController.popBackStack()}
+                appointmentViewModel = appointmentViewModel,
+                onSave = { appointment ->
+                    val appointmentConPetId = appointment.copy(petId = petId)
+                    if(appointmentId == null) {
+                        appointmentViewModel.insertAppointment(appointmentConPetId)
+                    } else {
+                        appointmentViewModel.updateAppointment(appointmentConPetId)
+                    }
+                }
             )
         }
 
@@ -1041,14 +1112,14 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.MEDICATION_FORM,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType},
-                navArgument("petName") { type = NavType.StringType},
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
                 navArgument("medicationId") {
                     type = NavType.LongType
                     defaultValue = -1L
                 }
             )
-        ){backStackEntry ->
+        ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             val petName = URLDecoder.decode(
                 backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
@@ -1056,15 +1127,24 @@ fun PawCareNavGraph(
             val medicationId = backStackEntry.arguments?.getLong("medicationId")
                 ?.takeIf { it != -1L }
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(PawCareDestinations.MEDICATION_LIST)
+                navController.getBackStackEntry(
+                    PawCareDestinations.medicationList(petId, petName)
+                )
             }
-            val viewModel: MedicationViewModel = hiltViewModel(parentEntry)
+            val medicationViewModel: MedicationViewModel = hiltViewModel(parentEntry)
+
             MedicationFormScreen(
-                viewModel = viewModel,
-                petId = petId,
-                petName = petName,
+                onNavigateBack = { navController.popBackStack() },
                 medicationId = medicationId,
-                onNavigateBack = {navController.popBackStack()},
+                medicationViewModel = medicationViewModel,
+                onSave = { medication ->
+                    val medicationConPetId = medication.copy(petId = petId)
+                    if (medicationId == null) {
+                        medicationViewModel.insertMedication(medicationConPetId, petName)
+                    } else {
+                        medicationViewModel.updateMedication(medicationConPetId, petName)
+                    }
+                }
             )
         }
 
@@ -1120,20 +1200,30 @@ fun PawCareNavGraph(
         composable(
             route = PawCareDestinations.WEIGHT_FORM,
             arguments = listOf(
-                navArgument("petId") { type = NavType.LongType},
+                navArgument("petId") { type = NavType.LongType },
                 navArgument("weightId") {
                     type = NavType.LongType
                     defaultValue = -1L
                 }
             )
-        ){backStackEntry ->
+        ) { backStackEntry ->
             val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
             val weightId = backStackEntry.arguments?.getLong("weightId")
                 ?.takeIf { it != -1L }
+            val weightViewModel: WeightViewModel = hiltViewModel()
+
             WeightFormScreen(
-                petId = petId,
+                onNavigateBack = { navController.popBackStack() },
                 weightId = weightId,
-                onNavigateBack = {navController.popBackStack()},
+                weightViewModel = weightViewModel,
+                onSave = { weight ->
+                    val weightConPetId = weight.copy(petId = petId)
+                    if (weightId == null) {
+                        weightViewModel.insertWeight(weightConPetId)
+                    } else {
+                        weightViewModel.updateWeight(weightConPetId)
+                    }
+                }
             )
         }
 
@@ -1193,13 +1283,20 @@ fun PawCareNavGraph(
                     PawCareDestinations.conditionList(petId, petName)
                 )
             }
-            val viewModel: ConditionViewModel = hiltViewModel(parentEntry)
+            val conditionViewModel: ConditionViewModel = hiltViewModel(parentEntry)
+
             ConditionFormScreen(
-                petId = petId,
-                petName = petName,
-                conditionId = conditionId,
                 onNavigateBack = { navController.popBackStack() },
-                viewModel = viewModel
+                conditionId = conditionId,
+                conditionViewModel = conditionViewModel,
+                onSave = { condition ->
+                    val conditionConPetId = condition.copy(petId = petId)
+                    if (conditionId == null) {
+                        conditionViewModel.insertCondition(conditionConPetId)
+                    } else {
+                        conditionViewModel.updateCondition(conditionConPetId)
+                    }
+                }
             )
         }
 
@@ -1276,17 +1373,23 @@ fun PawCareNavGraph(
                     PawCareDestinations.dewormingList(petId, petName)
                 )
             }
-            val viewModel: DewormingViewModel = hiltViewModel(parentEntry)
+            val dewormingViewModel: DewormingViewModel = hiltViewModel(parentEntry)
             DewormingFormScreen(
-                petId = petId,
-                petName = petName,
+                onNavigateBack = { navController.popBackStack() },
                 dewormingId = dewormingId,
-                onNavigateBack = { navController.popBackStack()},
-                viewModel = viewModel
+                dewormingViewModel = dewormingViewModel,
+                onSave = { deworming ->
+                    val dewormingConPetId = deworming.copy(petId = petId)
+                    if (dewormingId == null){
+                        dewormingViewModel.insertDeworming(dewormingConPetId)
+                    } else {
+                        dewormingViewModel.updateDeworming(dewormingConPetId)
+                    }
+                }
             )
         }
 
-        // Condition Deworming Screen
+        // Deworming Detail Screen
         composable(
             route = PawCareDestinations.DEWORMING_DETAIL,
             arguments = listOf(

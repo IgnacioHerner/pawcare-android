@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -28,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,9 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.Especie
 import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
 import com.ignaherner.pawcare.domain.model.TipoVacuna
 import com.ignaherner.pawcare.domain.model.Vaccine
@@ -56,6 +60,8 @@ import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.calcularProximaDosisConFrecuencia
@@ -63,68 +69,60 @@ import com.ignaherner.pawcare.utils.calcularProximaDosisConFrecuencia
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccineFormScreen(
-    petId: Long,
-    petName: String,
-    vaccineId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: VaccineViewModel,
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    petViewModel: PetViewModel = hiltViewModel()
+    onSave: (Vaccine) -> Unit,
+    vaccineId: Long? = null,
+    isVetMode: Boolean = false,
+    especie: Especie = Especie.PERRO,
+    vaccineViewModel: VaccineViewModel? = null,
+    vetProfileViewModel: VetProfileViewModel? = null
 ) {
-    // Estado del formulario
     var tipoSeleccionado by remember { mutableStateOf<TipoVacuna?>(null) }
     var nombreComercial by remember { mutableStateOf("") }
     var fechaAplicacion by remember { mutableStateOf(fechaHoy()) }
     var frecuencia by remember { mutableStateOf(FrecuenciaVacuna.ANUAL) }
     var veterinario by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var tipoDropdownExpanded by remember { mutableStateOf(false) }
 
-    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
-    val vaccineDetailState by viewModel.vaccineDetailState.collectAsStateWithLifecycle()
-    val petDetailState by petViewModel.detailState.collectAsStateWithLifecycle()
-
-    // Cargar pet para obtener especie
-    LaunchedEffect(petId) {
-        petViewModel.loadPetById(petId)
+    // Tipos disponibles según especie
+    val tiposDisponibles = remember(especie) {
+        TipoVacuna.porEspecie(especie)
     }
 
-    // Cargar vacuna si edita
+    // Cargar vacuna si edita (solo dueño)
+    val vaccineDetailState = vaccineViewModel?.vaccineDetailState?.collectAsStateWithLifecycle()
+
     LaunchedEffect(vaccineId) {
-        vaccineId?.let { viewModel.loadVaccineById(it) }
+        vaccineId?.let { vaccineViewModel?.loadVaccineById(it) }
     }
 
-    LaunchedEffect(vaccineDetailState) {
-        if (vaccineDetailState is VaccineDetailState.Success) {
-            val vaccine = (vaccineDetailState as VaccineDetailState.Success).vaccine
+    LaunchedEffect(vaccineDetailState?.value) {
+        if (vaccineDetailState?.value is VaccineDetailState.Success) {
+            val vaccine = (vaccineDetailState.value as VaccineDetailState.Success).vaccine
             tipoSeleccionado = vaccine.tipo
             nombreComercial = vaccine.nombreComercial ?: ""
             fechaAplicacion = vaccine.fechaAplicacion
             frecuencia = vaccine.frecuencia
             veterinario = vaccine.veterinario ?: ""
             notas = vaccine.notas ?: ""
+            firestoreId = vaccine.firestoreId
         }
     }
 
-    LaunchedEffect(nombreVeterinarioState) {
-        if (veterinario.isBlank()) {
-            veterinario = nombreVeterinarioState
+    // Auto-fill veterinario (solo vet)
+    val vetState = vetProfileViewModel?.vetState?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState?.value) {
+        if (vetState?.value is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState.value as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
         }
     }
 
-    // Especie del pet para filtrar tipos
-    val especie = when (val state = petDetailState) {
-        is PetDetailState.Success -> state.pet.especie
-        else -> null
-    }
-
-    val tiposDisponibles = remember(especie) {
-        especie?.let { TipoVacuna.porEspecie(it) } ?: TipoVacuna.values().toList()
-    }
-
-    // DatePicker
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
@@ -133,31 +131,33 @@ fun VaccineFormScreen(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val localDate = java.time.Instant
-                                .ofEpochMilli(millis)
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toLocalDate()
-                            fechaAplicacion = localDate.toFormattedString()
-                        }
-                        showDatePicker = false
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val localDate = java.time.Instant
+                            .ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                        fechaAplicacion = localDate.toFormattedString()
                     }
-                ) { Text("Aceptar") }
+                    showDatePicker = false
+                }) { Text("Aceptar") }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
             }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        ) { DatePicker(state = datePickerState) }
+    }
+
+    val titleText = when{
+        isVetMode -> "Nueva vacuna"
+        vaccineId == null -> "Nueva vacuna"
+        else -> "Editar vacuna"
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (vaccineId == null) "Nueva vacuna" else "Editar vacuna") },
+                title = { Text(titleText) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -233,6 +233,8 @@ fun VaccineFormScreen(
                 onValueChange = { nombreComercial = it },
                 label = { Text("Nombre comercial (opcional)") },
                 placeholder = { Text("Ej: Nobivac DHPPi") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -241,12 +243,21 @@ fun VaccineFormScreen(
                 value = fechaAplicacion,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Fecha de aplicación") },
+                enabled = false,
+                label = { Text("Fecha de aplicacion") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
                     }
                 },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showDatePicker = true }
@@ -263,7 +274,7 @@ fun VaccineFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
                 ) {
-                    FrecuenciaVacuna.values().forEach { freq ->
+                    FrecuenciaVacuna.entries.forEach { freq ->
                         FilterChip(
                             selected = frecuencia == freq,
                             onClick = { frecuencia = freq },
@@ -312,6 +323,8 @@ fun VaccineFormScreen(
                 value = veterinario,
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -321,6 +334,7 @@ fun VaccineFormScreen(
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -332,34 +346,31 @@ fun VaccineFormScreen(
                         calcularProximaDosisConFrecuencia(fechaAplicacion, frecuencia)
                     } else null
 
-                    val nuevaVacuna = Vaccine(
+                    val vaccine = Vaccine(
                         id = vaccineId ?: 0L,
-                        firestoreId = when (val state = vaccineDetailState) {
-                            is VaccineDetailState.Success -> state.vaccine.firestoreId
-                            else -> ""
-                        },
-                        petId = petId,
+                        firestoreId = firestoreId,
+                        petId = 0L,
                         tipo = tipo,
-                        nombreComercial = nombreComercial.ifBlank { null },
+                        nombreComercial = nombreComercial.trim().ifBlank { null },
                         fechaAplicacion = fechaAplicacion,
                         frecuencia = frecuencia,
                         proximaDosis = proximaDosis,
-                        veterinario = veterinario.ifBlank { null },
-                        notas = notas.ifBlank { null }
+                        veterinario = veterinario.trim().ifBlank { null },
+                        notas = notas.trim().ifBlank { null }
                     )
-                    if (vaccineId == null) {
-                        viewModel.insertVaccine(nuevaVacuna, petName)
-                    } else {
-                        viewModel.updateVaccine(nuevaVacuna, petName)
-                    }
+                    onSave(vaccine)
                     onNavigateBack()
                 },
                 enabled = tipoSeleccionado != null && fechaAplicacion.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md)
             ) {
-                Text(if (vaccineId == null) "Guardar" else "Actualizar")
+                Text(
+                    text = if (vaccineId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Deworming
@@ -48,6 +50,8 @@ import com.ignaherner.pawcare.domain.model.DewormingTipo
 import com.ignaherner.pawcare.domain.model.FrecuenciaDeworming
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.calcularProximaDosisDeworming
@@ -57,11 +61,12 @@ import com.ignaherner.pawcare.utils.toFormattedString
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DewormingFormScreen(
-    petId: Long,
-    petName: String,
-    dewormingId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: DewormingViewModel
+    onSave: (Deworming) -> Unit,
+    dewormingId: Long? = null,
+    isVetMode: Boolean = false,
+    dewormingViewModel: DewormingViewModel? = null,
+    vetProfileViewModel: VetProfileViewModel? = null
 ) {
     var producto by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf(DewormingTipo.INTERNA) }
@@ -69,27 +74,38 @@ fun DewormingFormScreen(
     var frecuencia by remember { mutableStateOf(FrecuenciaDeworming.TRIMESTRAL) }
     var veterinario by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val dewormingDetailState by viewModel.dewormingDetailState.collectAsStateWithLifecycle()
-
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
+    val dewormingDetailState = dewormingViewModel?.dewormingDetailState?.collectAsStateWithLifecycle()
+
+
     LaunchedEffect(dewormingId) {
-        dewormingId?.let { viewModel.loadDewormingById(it) }
+        dewormingId?.let { dewormingViewModel?.loadDewormingById(it) }
     }
 
-    LaunchedEffect(dewormingDetailState) {
-        if (dewormingDetailState is DewormingDetailState.Success) {
-            val deworming = (dewormingDetailState as DewormingDetailState.Success).deworming
+    LaunchedEffect(dewormingDetailState?.value) {
+        if (dewormingDetailState?.value is DewormingDetailState.Success) {
+            val deworming = (dewormingDetailState.value as DewormingDetailState.Success).deworming
             producto = deworming.producto
             tipo = deworming.tipo
             fechaAplicacion = deworming.fechaAplicacion
             frecuencia = deworming.frecuencia
             veterinario = deworming.veterinario ?: ""
             notas = deworming.notas ?: ""
+        }
+    }
+
+    val vetState = vetProfileViewModel?.vetState?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState?.value) {
+        if (vetState?.value is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState.value as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
         }
     }
 
@@ -114,12 +130,16 @@ fun DewormingFormScreen(
         ) { DatePicker(state = datePickerState) }
     }
 
+    val titleText = when{
+        isVetMode -> "Nueva desparasitacion"
+        dewormingId == null -> "Nueva desparasitacion"
+        else -> "Editar desparasitacion"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (dewormingId == null) "Nueva desparasitación" else "Editar desparasitación")
-                },
+                title = {Text(titleText)},
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -147,6 +167,7 @@ fun DewormingFormScreen(
                 label = { Text("Producto") },
                 placeholder = { Text("Ej: NexGard, Frontline") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -249,6 +270,7 @@ fun DewormingFormScreen(
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -258,6 +280,7 @@ fun DewormingFormScreen(
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -267,34 +290,31 @@ fun DewormingFormScreen(
                         calcularProximaDosisDeworming(fechaAplicacion, frecuencia)
                     } else null
 
-                    val nuevaDesparasitacion = Deworming(
+                    val deworming = Deworming(
                         id = dewormingId ?: 0L,
-                        firestoreId = when (val state = dewormingDetailState) {
-                            is DewormingDetailState.Success -> state.deworming.firestoreId
-                            else -> ""
-                        },
-                        petId = petId,
-                        producto = producto,
+                        firestoreId = firestoreId,
+                        petId = 0L,
+                        producto = producto.trim(),
                         tipo = tipo,
                         fechaAplicacion = fechaAplicacion,
                         frecuencia = frecuencia,
                         proximaDosis = proximaDosis,
-                        veterinario = veterinario.ifBlank { null },
-                        notas = notas.ifBlank { null }
+                        veterinario = veterinario.trim().ifBlank { null },
+                        notas = notas.trim().ifBlank { null }
                     )
-                    if (dewormingId == null) {
-                        viewModel.insertDeworming(nuevaDesparasitacion)
-                    } else {
-                        viewModel.updateDeworming(nuevaDesparasitacion)
-                    }
+                    onSave(deworming)
                     onNavigateBack()
                 },
                 enabled = producto.isNotBlank() && fechaAplicacion.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md)
             ) {
-                Text(if (dewormingId == null) "Guardar" else "Actualizar")
+                Text(
+                    text = if (dewormingId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
     }

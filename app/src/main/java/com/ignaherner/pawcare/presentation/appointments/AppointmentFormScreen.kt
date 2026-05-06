@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,10 +36,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Appointment
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
+import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.ui.theme.PawSpace
@@ -45,10 +51,12 @@ import com.ignaherner.pawcare.ui.theme.PawSpace
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentFormScreen(
-    petId: Long,
-    appointmentId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: AppointmentViewModel = hiltViewModel()
+    onSave:(Appointment) -> Unit,
+    appointmentId: Long? = null,
+    isVetMode: Boolean = false,
+    appointmentViewModel: AppointmentViewModel? = null,
+    vetProfileViewModel: VetProfileViewModel? = null
 ) {
     var fecha by remember { mutableStateOf(fechaHoy()) }
     var motivo by remember { mutableStateOf("") }
@@ -56,29 +64,40 @@ fun AppointmentFormScreen(
     var clinica by remember { mutableStateOf("") }
     var diagnostico by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val appointmentDetailState by viewModel.appointentDetailState.collectAsStateWithLifecycle()
-
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
-    )
+    val appointmentDetailState = appointmentViewModel?.appointentDetailState?.collectAsStateWithLifecycle()
 
     LaunchedEffect(appointmentId) {
-        appointmentId?.let { viewModel.loadAppointmentById(it) }
+        appointmentId?.let { appointmentViewModel?.loadAppointmentById(it) }
     }
 
-    LaunchedEffect(appointmentDetailState) {
-        if (appointmentDetailState is AppointmentDetailState.Success) {
-            val appointment = (appointmentDetailState as AppointmentDetailState.Success).appointments
+    LaunchedEffect(appointmentDetailState?.value) {
+        if (appointmentDetailState?.value is AppointmentDetailState.Success) {
+            val appointment = (appointmentDetailState.value as AppointmentDetailState.Success).appointments
             fecha = appointment.fecha
             motivo = appointment.motivo
             veterinario = appointment.veterinario ?: ""
             clinica = appointment.clinica ?: ""
             diagnostico = appointment.diagnostico ?: ""
             notas = appointment.notas ?: ""
+            firestoreId = appointment.firestoreId
         }
     }
+
+    val vetState = vetProfileViewModel?.vetState?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState?.value) {
+        if (vetState?.value is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState.value as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
+        }
+    }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -101,12 +120,16 @@ fun AppointmentFormScreen(
         ) { DatePicker(state = datePickerState) }
     }
 
+    val titleText = when{
+        isVetMode -> "Nuevo turno"
+        appointmentId == null -> "Nuevo turno"
+        else -> "Editar turno"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (appointmentId == null) "Nueva visita" else "Editar visita")
-                },
+                title = {Text(titleText)},
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -157,6 +180,7 @@ fun AppointmentFormScreen(
                 label = { Text("Motivo de la visita") },
                 placeholder = { Text("Ej: Control anual, vacunación") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -165,6 +189,7 @@ fun AppointmentFormScreen(
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -174,6 +199,7 @@ fun AppointmentFormScreen(
                 label = { Text("Clínica (opcional)") },
                 placeholder = { Text("Ej: Veterinaria San Martín") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -182,6 +208,7 @@ fun AppointmentFormScreen(
                 onValueChange = { diagnostico = it },
                 label = { Text("Diagnóstico (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -190,38 +217,36 @@ fun AppointmentFormScreen(
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = {
-                    val nuevaVisita = Appointment(
+                    val appointment = Appointment(
                         id = appointmentId ?: 0L,
-                        firestoreId = when (val state = appointmentDetailState) {
-                            is AppointmentDetailState.Success -> state.appointments.firestoreId
-                            else -> ""
-                        },
-                        petId = petId,
+                        firestoreId = firestoreId,
+                        petId = 0L,
                         fecha = fecha,
-                        motivo = motivo,
-                        veterinario = veterinario.ifBlank { null },
-                        clinica = clinica.ifBlank { null },
-                        diagnostico = diagnostico.ifBlank { null },
-                        notas = notas.ifBlank { null }
+                        motivo = motivo.trim(),
+                        veterinario = veterinario.trim().ifBlank { null },
+                        clinica = clinica.trim().ifBlank { null },
+                        diagnostico = diagnostico.trim().ifBlank { null },
+                        notas = notas.trim().ifBlank { null }
                     )
-                    if (appointmentId == null) {
-                        viewModel.insertAppointment(nuevaVisita)
-                    } else {
-                        viewModel.updateAppointment(nuevaVisita)
-                    }
+                    onSave(appointment)
                     onNavigateBack()
                 },
                 enabled = fecha.isNotBlank() && motivo.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md)
             ) {
-                Text(if (appointmentId == null) "Guardar" else "Actualizar")
+                Text(
+                    text = if (appointmentId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
     }

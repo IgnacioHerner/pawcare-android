@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -55,17 +56,20 @@ import com.ignaherner.pawcare.domain.model.ViaAdministracion
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
+import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationFormScreen(
-    petId: Long,
-    petName: String,
-    medicationId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: MedicationViewModel,
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    onSave:(Medication) -> Unit,
+    medicationId: Long? = null,
+    isVetMode: Boolean = false,
+    medicationViewModel: MedicationViewModel? = null,
+    vetProfileViewModel: VetProfileViewModel? = null
 ) {
     var nombre by remember { mutableStateOf("") }
     var dosisCantidad by remember { mutableStateOf("1") }
@@ -77,26 +81,19 @@ fun MedicationFormScreen(
     var fechaInicio by remember { mutableStateOf(fechaHoy()) }
     var recetadoPor by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
 
     var unidadDropdownExpanded by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
 
-    val nombreVeterinarioState by settingsViewModel.nombreVeterinario.collectAsStateWithLifecycle()
-    val medicationDetailState by viewModel.medicationDetailState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(nombreVeterinarioState) {
-        if (recetadoPor.isBlank()) {
-            recetadoPor = nombreVeterinarioState
-        }
-    }
+    val medicationDetailState = medicationViewModel?.medicationDetailState?.collectAsStateWithLifecycle()
 
     LaunchedEffect(medicationId) {
-        medicationId?.let { viewModel.loadMedicationById(it) }
+        medicationId?.let { medicationViewModel?.loadMedicationById(it) }
     }
 
-    LaunchedEffect(medicationDetailState) {
-        if (medicationDetailState is MedicationDetailState.Success) {
-            val medication = (medicationDetailState as MedicationDetailState.Success).medication
+    LaunchedEffect(medicationDetailState?.value) {
+        if (medicationDetailState?.value is MedicationDetailState.Success) {
+            val medication = (medicationDetailState.value as MedicationDetailState.Success).medication
             nombre = medication.nombre
             dosisCantidad = if (medication.dosisCantidad == medication.dosisCantidad.toInt().toDouble()) {
                 medication.dosisCantidad.toInt().toString()
@@ -111,12 +108,24 @@ fun MedicationFormScreen(
             recetadoPor = medication.recetadoPor ?: ""
             esUnicaDosis = medication.esUnicaDosis
             notas = medication.notas ?: ""
+            firestoreId = medication.firestoreId
+        }
+    }
+
+    val vetState = vetProfileViewModel?.vetState?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState?.value) {
+        if (vetState?.value is VetState.Success && recetadoPor.isBlank()) {
+            val vet = (vetState.value as VetState.Success).vet
+            recetadoPor = "Dr. ${vet.nombre} ${vet.apellido}"
         }
     }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
+
+    var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -139,12 +148,16 @@ fun MedicationFormScreen(
         ) { DatePicker(state = datePickerState) }
     }
 
+    val titleText = when{
+        isVetMode -> "Nueva medicacion"
+        medicationId == null -> "Nueva medicacion"
+        else -> "Editar medicacion"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (medicationId == null) "Nuevo medicamento" else "Editar medicamento")
-                },
+                title = {Text(titleText)},
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -285,7 +298,10 @@ fun MedicationFormScreen(
                         value = duracionDias,
                         onValueChange = { duracionDias = it },
                         label = { Text("Días") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
@@ -293,7 +309,10 @@ fun MedicationFormScreen(
                         value = intervaloHoras,
                         onValueChange = { intervaloHoras = it },
                         label = { Text("Cada X horas") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
@@ -332,6 +351,7 @@ fun MedicationFormScreen(
                 onValueChange = { recetadoPor = it },
                 label = { Text("Recetado por (opcional)") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -341,19 +361,17 @@ fun MedicationFormScreen(
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = {
-                    val nuevoMedicamento = Medication(
+                    val medication = Medication(
                         id = medicationId ?: 0L,
-                        firestoreId = when (val state = medicationDetailState) {
-                            is MedicationDetailState.Success -> state.medication.firestoreId
-                            else -> ""
-                        },
-                        petId = petId,
-                        nombre = nombre,
+                        firestoreId = firestoreId,
+                        petId = 0L,
+                        nombre = nombre.trim(),
                         dosisCantidad = dosisCantidad.toDoubleOrNull() ?: 1.0,
                         dosisUnidad = dosisUnidad,
                         viaAdministracion = viaAdministracion,
@@ -361,23 +379,23 @@ fun MedicationFormScreen(
                         fechaInicio = fechaInicio,
                         duracionDias = if (esUnicaDosis) 0 else duracionDias.toIntOrNull() ?: 1,
                         intervaloHoras = if (esUnicaDosis) 0 else intervaloHoras.toIntOrNull() ?: 8,
-                        recetadoPor = recetadoPor.ifBlank { null },
-                        notas = notas.ifBlank { null }
+                        recetadoPor = recetadoPor.trim().ifBlank { null },
+                        notas = notas.trim().ifBlank { null }
                     )
-                    if (medicationId == null) {
-                        viewModel.insertMedication(nuevoMedicamento, petName)
-                    } else {
-                        viewModel.updateMedication(nuevoMedicamento, petName)
-                    }
+                    onSave(medication)
                     onNavigateBack()
                 },
                 enabled = nombre.isNotBlank() && dosisCantidad.isNotBlank() &&
                         (esUnicaDosis || (duracionDias.isNotBlank() && intervaloHoras.isNotBlank())),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md)
             ) {
-                Text(if (medicationId == null) "Guardar" else "Actualizar")
+                Text(
+                    text = if (medicationId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
     }

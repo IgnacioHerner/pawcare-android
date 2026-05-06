@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -37,14 +40,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.domain.model.ConditionEstado
 import com.ignaherner.pawcare.domain.model.Severidad
+import com.ignaherner.pawcare.presentation.components.PawCareIcon
+import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
+import com.ignaherner.pawcare.presentation.vet.VetState
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
+import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -55,11 +64,12 @@ import com.ignaherner.pawcare.utils.fechaHoy
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConditionFormScreen(
-    petId: Long,
-    petName: String,
-    conditionId: Long? = null,
     onNavigateBack: () -> Unit,
-    viewModel: ConditionViewModel
+    onSave: (Condition) -> Unit,
+    conditionId: Long? = null,
+    isVetMode: Boolean = false,
+    conditionViewModel: ConditionViewModel? = null,
+    vetProfileViewModel: VetProfileViewModel? = null
 ) {
     var nombre by remember { mutableStateOf("") }
     var fechaDiagnostico by remember { mutableStateOf(fechaHoy()) }
@@ -67,27 +77,40 @@ fun ConditionFormScreen(
     var estado by remember { mutableStateOf(ConditionEstado.ACTIVA) }
     var veterinario by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
+    var firestoreId by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val conditionDetailState by viewModel.conditionDetailState.collectAsStateWithLifecycle()
-
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
+    // Cargar condición existente (solo dueño editando)
+    val conditionDetailState = conditionViewModel?.conditionDetailState?.collectAsStateWithLifecycle()
+
     LaunchedEffect(conditionId) {
-        conditionId?.let { viewModel.loadConditionById(it) }
+        conditionId?.let { conditionViewModel?.loadConditionById(it) }
     }
 
-    LaunchedEffect(conditionDetailState) {
-        if (conditionDetailState is ConditionDetailState.Success) {
-            val condition = (conditionDetailState as ConditionDetailState.Success).condition
+    LaunchedEffect(conditionDetailState?.value) {
+        if (conditionDetailState?.value is ConditionDetailState.Success) {
+            val condition = (conditionDetailState.value as ConditionDetailState.Success).condition
             nombre = condition.nombre
             fechaDiagnostico = condition.fechaDiagnostico
             severidad = condition.severidad
             estado = condition.estado
             veterinario = condition.veterinario ?: ""
             notas = condition.notas ?: ""
+            firestoreId = condition.firestoreId
+        }
+    }
+
+    // Auto-fill veterinario (solo vet)
+    val vetState = vetProfileViewModel?.vetState?.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vetState?.value) {
+        if (vetState?.value is VetState.Success && veterinario.isBlank()) {
+            val vet = (vetState.value as VetState.Success).vet
+            veterinario = "Dr. ${vet.nombre} ${vet.apellido}"
         }
     }
 
@@ -112,15 +135,23 @@ fun ConditionFormScreen(
         ) { DatePicker(state = datePickerState) }
     }
 
+    val titleText = when {
+        isVetMode -> "Nueva condición"
+        conditionId == null -> "Nueva condición"
+        else -> "Editar condición"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (conditionId == null) "Nueva condición" else "Editar condición")
-                },
+                title = { Text(titleText) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        PawCareIcon(
+                            icon = Icons.Outlined.ArrowBack,
+                            contentDescription = "Volver",
+                            size = PawIconSize.medium
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -145,6 +176,7 @@ fun ConditionFormScreen(
                 label = { Text("Nombre de la condición") },
                 placeholder = { Text("Ej: Displasia de cadera") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -154,7 +186,7 @@ fun ConditionFormScreen(
                 onValueChange = {},
                 readOnly = true,
                 enabled = false,
-                label = { Text("Fecha de diagnostico") },
+                label = { Text("Fecha de diagnóstico") },
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
@@ -231,6 +263,7 @@ fun ConditionFormScreen(
                 onValueChange = { veterinario = it },
                 label = { Text("Veterinario (opcional)") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -240,38 +273,36 @@ fun ConditionFormScreen(
                 onValueChange = { notas = it },
                 label = { Text("Notas (opcional)") },
                 minLines = 2,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = {
-                    val nuevaCondicion = Condition(
+                    val condition = Condition(
                         id = conditionId ?: 0L,
-                        firestoreId = when (val state = conditionDetailState) {
-                            is ConditionDetailState.Success -> state.condition.firestoreId
-                            else -> ""
-                        },
-                        petId = petId,
-                        nombre = nombre,
+                        firestoreId = firestoreId,
+                        petId = 0L,
+                        nombre = nombre.trim(),
                         fechaDiagnostico = fechaDiagnostico,
                         severidad = severidad,
                         estado = estado,
-                        veterinario = veterinario.ifBlank { null },
-                        notas = notas.ifBlank { null }
+                        veterinario = veterinario.trim().ifBlank { null },
+                        notas = notas.trim().ifBlank { null }
                     )
-                    if (conditionId == null) {
-                        viewModel.insertCondition(nuevaCondicion)
-                    } else {
-                        viewModel.updateCondition(nuevaCondicion)
-                    }
+                    onSave(condition)
                     onNavigateBack()
                 },
                 enabled = nombre.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(PawRadii.md)
             ) {
-                Text(if (conditionId == null) "Guardar" else "Actualizar")
+                Text(
+                    text = if (conditionId == null) "Guardar" else "Actualizar",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
         }
     }
