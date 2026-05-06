@@ -53,6 +53,8 @@ import com.ignaherner.pawcare.domain.model.DosisUnidad
 import com.ignaherner.pawcare.domain.model.Medication
 import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.domain.model.ViaAdministracion
+import com.ignaherner.pawcare.domain.model.dosisPredefinidasPorUnidad
+import com.ignaherner.pawcare.domain.model.dosisToDouble
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
@@ -191,55 +193,76 @@ fun MedicationFormScreen(
                 )
             )
 
-            // Dosis: cantidad + unidad
             Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
                 Text(
                     text = "Dosis",
                     style = MaterialTheme.typography.titleSmall
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
-                    OutlinedTextField(
-                        value = dosisCantidad,
-                        onValueChange = { dosisCantidad = it },
-                        label = { Text("Cantidad") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
 
+                // Primero elegir unidad
+                ExposedDropdownMenuBox(
+                    expanded = unidadDropdownExpanded,
+                    onExpandedChange = { unidadDropdownExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = dosisUnidad.displayName,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Unidad") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = unidadDropdownExpanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
                     )
-                    ExposedDropdownMenuBox(
+                    ExposedDropdownMenu(
                         expanded = unidadDropdownExpanded,
-                        onExpandedChange = { unidadDropdownExpanded = it },
-                        modifier = Modifier.weight(1.5f)
+                        onDismissRequest = { unidadDropdownExpanded = false }
                     ) {
-                        OutlinedTextField(
-                            value = dosisUnidad.displayName,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Unidad") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = unidadDropdownExpanded)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = unidadDropdownExpanded,
-                            onDismissRequest = { unidadDropdownExpanded = false }
-                        ) {
-                            DosisUnidad.entries.forEach { unidad ->
-                                DropdownMenuItem(
-                                    text = { Text(unidad.displayName) },
-                                    onClick = {
-                                        dosisUnidad = unidad
-                                        unidadDropdownExpanded = false
-                                    }
-                                )
-                            }
+                        DosisUnidad.entries.forEach { unidad ->
+                            DropdownMenuItem(
+                                text = { Text(unidad.displayName) },
+                                onClick = {
+                                    dosisUnidad = unidad
+                                    dosisCantidad = "" // resetear al cambiar unidad
+                                    unidadDropdownExpanded = false
+                                }
+                            )
                         }
                     }
                 }
+
+                // Chips dinámicos según unidad
+                val opcionesDosis = remember(dosisUnidad) {
+                    dosisPredefinidasPorUnidad(dosisUnidad)
+                }
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                    verticalArrangement = Arrangement.spacedBy(PawSpace.sm)
+                ) {
+                    opcionesDosis.forEach { dosis ->
+                        FilterChip(
+                            selected = dosisCantidad == dosis,
+                            onClick = { dosisCantidad = dosis },
+                            label = { Text(dosis) }
+                        )
+                    }
+                }
+
+                // Campo manual
+                OutlinedTextField(
+                    value = dosisCantidad,
+                    onValueChange = { dosisCantidad = it },
+                    label = { Text("Otra cantidad") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             // Vía de administración
@@ -372,7 +395,7 @@ fun MedicationFormScreen(
                         firestoreId = firestoreId,
                         petId = 0L,
                         nombre = nombre.trim(),
-                        dosisCantidad = dosisCantidad.toDoubleOrNull() ?: 1.0,
+                        dosisCantidad = dosisToDouble(dosisCantidad),
                         dosisUnidad = dosisUnidad,
                         viaAdministracion = viaAdministracion,
                         esUnicaDosis = esUnicaDosis,

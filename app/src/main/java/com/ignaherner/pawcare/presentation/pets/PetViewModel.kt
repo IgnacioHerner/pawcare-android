@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.ignaherner.pawcare.data.local.worker.WorkManagerHelper
 import com.ignaherner.pawcare.data.remote.firestore.PetFirestoreRepository
 import com.ignaherner.pawcare.data.repository.PetRepository
+import com.ignaherner.pawcare.data.repository.WeightRepository
 import com.ignaherner.pawcare.domain.model.Pet
+import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.presentation.BaseViewModel
+import com.ignaherner.pawcare.utils.fechaHoy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +23,7 @@ import javax.inject.Inject
 class PetViewModel @Inject constructor(
     private val repository: PetRepository,
     private val firestoreRepository: PetFirestoreRepository,
+    private val weightRepository: WeightRepository,
     private val workManagerHelper: WorkManagerHelper
 ): BaseViewModel() {
 
@@ -84,6 +88,31 @@ class PetViewModel @Inject constructor(
                 firestoreRepository.eliminarPet(pet.firestoreId)
             }
             showSnackbar("${pet.nombre} eliminado")
+        }
+    }
+
+    fun insertPetConPeso(pet: Pet, pesoInicial: Double?) {
+        safeLaunch(onError = "Error al guardar") {
+            val firestoreResult = firestoreRepository.guardarPet(pet)
+            val petToInsert = if (firestoreResult.isSuccess) {
+                val (firestoreId, codigo) = firestoreResult.getOrNull()!!
+                pet.copy(firestoreId = firestoreId, codigo = codigo)
+            } else {
+                pet
+            }
+
+            val petId = repository.insertPet(petToInsert)
+
+            // Si hay peso inicial, guardarlo
+            if (pesoInicial != null && pesoInicial > 0) {
+                val weight = Weight(
+                    petId = petId,
+                    peso = pesoInicial,
+                    fecha = fechaHoy(),
+                    notas = null
+                )
+                weightRepository.insertWeight(weight)
+            }
         }
     }
 }

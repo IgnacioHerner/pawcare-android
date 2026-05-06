@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -61,6 +62,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
@@ -94,6 +96,7 @@ fun PetFormScreen(
     var fotoUri by remember { mutableStateOf("") }
     var castrado by remember { mutableStateOf(false) }
     var fechaCastracion by remember { mutableStateOf("") }
+    var pesoInicial by remember { mutableStateOf("") }
     var firestoreId by remember { mutableStateOf("") }
     var codigo by remember { mutableStateOf("") }
     var ownerId by remember { mutableStateOf("") }
@@ -394,6 +397,29 @@ fun PetFormScreen(
                 )
             )
 
+            // Peso (opcional)
+            OutlinedTextField(
+                value = pesoInicial,
+                onValueChange = { pesoInicial = it },
+                placeholder = { Text("Peso actual (kg)") },
+                supportingText = { Text("Opcional — podés agregarlo después") },
+                leadingIcon = {
+                    PawCareIcon(
+                        icon = Icons.Outlined.Monitor,
+                        contentDescription = null,
+                        size = PawIconSize.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(PawRadii.md),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // Castración
             PawCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -479,8 +505,9 @@ fun PetFormScreen(
                         castrado = castrado,
                         fechaCastracion = if (castrado) fechaCastracion.ifBlank { null } else null
                     )
+
                     if (petId == null) {
-                        viewModel.insertPet(nuevaMascota)
+                        viewModel.insertPetConPeso(nuevaMascota, pesoInicial.trim().toDoubleOrNull())
                     } else {
                         viewModel.updatePet(nuevaMascota)
                     }

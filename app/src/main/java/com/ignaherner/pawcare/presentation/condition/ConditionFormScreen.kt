@@ -19,7 +19,10 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -43,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.domain.model.CondicionComun
 import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.domain.model.Condition
 import com.ignaherner.pawcare.domain.model.ConditionEstado
@@ -78,6 +82,8 @@ fun ConditionFormScreen(
     var veterinario by remember { mutableStateOf("") }
     var notas by remember { mutableStateOf("") }
     var firestoreId by remember { mutableStateOf("") }
+    var condicionDropdownExpanded by remember { mutableStateOf(false) }
+    var condicionSeleccionada by remember { mutableStateOf<CondicionComun?>(null) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
@@ -101,6 +107,9 @@ fun ConditionFormScreen(
             veterinario = condition.veterinario ?: ""
             notas = condition.notas ?: ""
             firestoreId = condition.firestoreId
+            condicionSeleccionada = CondicionComun.entries.find {
+                it.displayName == condition.nombre
+            } ?: CondicionComun.OTRA
         }
     }
 
@@ -169,16 +178,58 @@ fun ConditionFormScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
-            // Nombre
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre de la condición") },
-                placeholder = { Text("Ej: Displasia de cadera") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Condición predefinida
+            ExposedDropdownMenuBox(
+                expanded = condicionDropdownExpanded,
+                onExpandedChange = { condicionDropdownExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = condicionSeleccionada?.displayName ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Condición") },
+                    placeholder = { Text("Seleccioná una condición") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = condicionDropdownExpanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = condicionDropdownExpanded,
+                    onDismissRequest = { condicionDropdownExpanded = false }
+                ) {
+                    CondicionComun.entries.forEach { condicion ->
+                        DropdownMenuItem(
+                            text = { Text(condicion.displayName) },
+                            onClick = {
+                                condicionSeleccionada = condicion
+                                if (condicion == CondicionComun.OTRA) {
+                                    nombre = ""
+                                } else {
+                                    nombre = condicion.displayName
+                                    severidad = condicion.severidadDefault
+                                }
+                                condicionDropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Nombre manual — solo si eligió "Otra"
+            if (condicionSeleccionada == CondicionComun.OTRA) {
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre de la condición") },
+                    placeholder = { Text("Ej: Luxación de rótula") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             // Fecha de diagnóstico
             OutlinedTextField(

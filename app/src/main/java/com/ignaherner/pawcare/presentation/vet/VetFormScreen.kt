@@ -1,19 +1,28 @@
 package com.ignaherner.pawcare.presentation.vet
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material.icons.outlined.LocationOn
@@ -37,19 +46,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.ignaherner.pawcare.domain.model.Veterinario
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
 import com.ignaherner.pawcare.ui.theme.PawRadii
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
+import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
+import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +82,17 @@ fun VetFormScreen(
     var clinica by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var ciudad by remember { mutableStateOf("") }
+    var fotoUri by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { sourceUri ->
+            val savedUri = copyImageToInternalStorage(context, sourceUri)
+            savedUri?.let { fotoUri = it.toString() }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadVeterinario()
@@ -83,6 +111,7 @@ fun VetFormScreen(
             clinica = vet.clinica ?: ""
             direccion = vet.direccion ?: ""
             ciudad = vet.ciudad ?: ""
+            fotoUri = vet.fotoUri ?: ""
         }
     }
 
@@ -117,6 +146,44 @@ fun VetFormScreen(
             verticalArrangement = Arrangement.spacedBy(PawSpace.lg)
         ) {
             Spacer(modifier = Modifier.height(PawSpace.sm))
+
+            // Foto
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(VetPrimarySoft)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable { galleryLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                if (fotoUri.isNotBlank()) {
+                    AsyncImage(
+                        model = fotoUri,
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.CameraAlt,
+                            contentDescription = null,
+                            size = PawIconSize.large,
+                            tint = VetPrimaryInk
+                        )
+                        Text(
+                            text = "Foto",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VetPrimaryInk
+                        )
+                    }
+                }
+            }
+
 
             // Nombre
             OutlinedTextField(
@@ -319,7 +386,8 @@ fun VetFormScreen(
                         telefono = telefono.trim(),
                         clinica = clinica.trim().ifBlank { null },
                         direccion = direccion.trim().ifBlank { null },
-                        ciudad = ciudad.trim().ifBlank { null }
+                        ciudad = ciudad.trim().ifBlank { null },
+                        fotoUri = fotoUri.ifBlank { null }
                     )
                     viewModel.guardarVeterinario(nuevoVet)
                     onNavigateBack()

@@ -24,7 +24,7 @@ class PetRepository @Inject constructor(
     fun getPetById(id: Long): Flow<Pet?> =
         petDao.getPetById(id).map { it?.toDomain() }
 
-    suspend fun insertPet(pet: Pet) =
+    suspend fun insertPet(pet: Pet) : Long =
         petDao.insertPet(pet.toEntity())
 
     suspend fun updatePet(pet: Pet) =

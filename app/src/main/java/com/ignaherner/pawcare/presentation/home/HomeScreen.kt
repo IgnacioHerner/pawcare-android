@@ -155,17 +155,17 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onNavigateToOwnerDetail) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.PersonOutline,
+                            contentDescription = "Mi perfil",
+                            size = PawIconSize.medium
+                        )
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         PawCareIcon(
                             icon = Icons.Outlined.Settings,
                             contentDescription = "Configuración",
-                            size = PawIconSize.medium
-                        )
-                    }
-                    IconButton(onClick = onNavigateToOwnerDetail) {
-                        PawCareIcon(
-                            icon = Icons.Outlined.PersonOutline,
-                            contentDescription = "Perfil",
                             size = PawIconSize.medium
                         )
                     }
