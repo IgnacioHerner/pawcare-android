@@ -57,6 +57,7 @@ import com.ignaherner.pawcare.presentation.vet.VetFormScreen
 import com.ignaherner.pawcare.presentation.vet.VetHistorialScreen
 import com.ignaherner.pawcare.presentation.vet.VetHomeScreen
 import com.ignaherner.pawcare.presentation.auth.VetLoginScreen
+import com.ignaherner.pawcare.presentation.auth.VetOnboardingScreen
 import com.ignaherner.pawcare.presentation.auth.VetRegisterScreen
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
@@ -129,6 +130,8 @@ object PawCareDestinations {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val ONBOARDING = "onboarding"
+
+    const val VET_ONBOARDING = "vet_onboarding"
     const val ROLE_SELECT = "role_select"
     const val WELCOME = "welcome/{nombre}"
 
@@ -290,6 +293,7 @@ fun PawCareNavGraph(
             )
         }
 
+        // OWNER ONBOARDING
         composable(PawCareDestinations.ONBOARDING) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
 
@@ -298,6 +302,17 @@ fun PawCareNavGraph(
                     settingsViewModel.completeOnboarding()
                     navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(PawCareDestinations.ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // VET ONBOARDING
+        composable(PawCareDestinations.VET_ONBOARDING) {
+            VetOnboardingScreen(
+                onFinished = {
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.VET_ONBOARDING) { inclusive = true }
                     }
                 }
             )
@@ -393,17 +408,17 @@ fun PawCareNavGraph(
         }
 
         // Register
-        composable(PawCareDestinations.REGISTER) {
-            RegisterScreen(
+        composable(PawCareDestinations.VET_REGISTER) {
+            VetRegisterScreen(
                 viewModel = authViewModel,
-                onNavigateToLogin = {
-                    navController.navigate(PawCareDestinations.LOGIN) {
-                        popUpTo(0) { inclusive = true }
+                onNavigateToVetLogin = {
+                    navController.navigate(PawCareDestinations.VET_LOGIN) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
                     }
                 },
                 onRegisterSuccess = { nombre ->
-                    navController.navigate(PawCareDestinations.welcome(nombre)) {
-                        popUpTo(PawCareDestinations.REGISTER) { inclusive = true }
+                    navController.navigate(PawCareDestinations.VET_ONBOARDING) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
                     }
                 },
                 onNavigateBack = {
