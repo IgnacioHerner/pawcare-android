@@ -122,7 +122,7 @@ fun ConditionFormScreen(
                     datePickerState.selectedDateMillis?.let { millis ->
                         val localDate = java.time.Instant
                             .ofEpochMilli(millis)
-                            .atZone(java.time.ZoneId.systemDefault())
+                            .atZone(java.time.ZoneId.of("UTC"))
                             .toLocalDate()
                         fechaDiagnostico = localDate.toFormattedString()
                     }
