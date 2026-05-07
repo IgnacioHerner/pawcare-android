@@ -2,6 +2,7 @@ package com.ignaherner.pawcare.presentation.vet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.pawcare.data.local.SettingsDataStore
 import com.ignaherner.pawcare.data.remote.firestore.AppointmentFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.ConditionFirestoreRepository
 import com.ignaherner.pawcare.data.remote.firestore.DewormingFirestoreRepository
@@ -37,7 +38,8 @@ class VetViewModel @Inject constructor(
     private val appointmentFirestoreRepository: AppointmentFirestoreRepository,
     private val conditionFirestoreRepository: ConditionFirestoreRepository,
     private val dewormingFirestoreRepository: DewormingFirestoreRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel(){
 
     private val _searchState = MutableStateFlow<VetSearchState>(VetSearchState.Idle)
@@ -137,7 +139,11 @@ class VetViewModel @Inject constructor(
             _searchState.value = VetSearchState.Loading
             val result = vetRepository.buscarMascotaPorCodigo(codigo.uppercase())
             _searchState.value = if (result.isSuccess) {
-                VetSearchState.Success(result.getOrNull()!!)
+                val pet = result.getOrNull()!!
+                settingsDataStore.addRecentSearch(
+                    "${pet.nombre}|${pet.codigo}|${pet.especie.displayName}|${pet.firestoreId}"
+                )
+                VetSearchState.Success(pet)
             } else {
                 VetSearchState.Error(result.exceptionOrNull()?.message ?: "Mascota no encontrada")
             }

@@ -25,8 +25,8 @@ class SettingsDataStore @Inject constructor(
     companion object {
         val NOMBRE_VETERINARIO = stringPreferencesKey("nombre_veterinario")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
-
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val RECENT_SEARCHES = stringPreferencesKey("recent_searches")
 
     }
 
@@ -61,6 +61,38 @@ class SettingsDataStore @Inject constructor(
     }
     suspend fun setOnboardingCompleted() {
         context.dataStore.edit { it[ONBOARDING_COMPLETED] = true }
+    }
+
+    // Consultas recientes del vet
+    val recentSearches: Flow<List<String>> = context.dataStore.data.map { prefs ->
+        val json = prefs[RECENT_SEARCHES] ?: "[]"
+        try {
+            json.removeSurrounding("[", "]")
+                .split(",")
+                .map { it.trim().removeSurrounding("\"") }
+                .filter { it.isNotBlank() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun addRecentSearch(codigo: String) {
+        context.dataStore.edit { prefs ->
+            val current = (prefs[RECENT_SEARCHES] ?: "[]")
+                .removeSurrounding("[", "]")
+                .split(",")
+                .map { it.trim().removeSurrounding("\"") }
+                .filter { it.isNotBlank() }
+                .toMutableList()
+
+            // Sacar si ya existe y agregar al principio
+            current.remove(codigo)
+            current.add(0, codigo)
+
+            // Máximo 10 recientes
+            val limited = current.take(10)
+            prefs[RECENT_SEARCHES] = "[${limited.joinToString(",") { "\"$it\"" }}]"
+        }
     }
 
 }

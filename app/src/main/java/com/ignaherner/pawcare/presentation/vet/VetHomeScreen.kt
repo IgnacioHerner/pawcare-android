@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.LocalHospital
 import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
@@ -58,8 +59,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
+import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
 import com.ignaherner.pawcare.ui.theme.PawRadio
@@ -77,10 +80,13 @@ fun VetHomeScreen(
     onNavigateToPetDetail: (String) -> Unit,
     scannedCode: String? = null,
     viewModel: VetViewModel = hiltViewModel(),
-    vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+    vetProfileViewModel: VetProfileViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+
 ) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val vetState by vetProfileViewModel.vetState.collectAsStateWithLifecycle()
+    val recentSearches by settingsViewModel.recentSearches.collectAsStateWithLifecycle(initialValue = emptyList())
 
     LaunchedEffect(Unit) {
         vetProfileViewModel.loadVeterinario()
@@ -336,6 +342,94 @@ fun VetHomeScreen(
             }
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
+
+            // Consultas recientes
+            if (recentSearches.isNotEmpty()) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+                Text(
+                    text = "Consultas recientes",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
+                    recentSearches.take(5).forEach { entry ->
+                        val parts = entry.split("|")
+                        if (parts.size >= 4) {
+                            val nombre = parts[0]
+                            val codigo = parts[1]
+                            val especie = parts[2]
+                            val firestoreId = parts[3]
+
+                            PawCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { onNavigateToPetDetail(firestoreId) }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(PawSpace.md),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(PawSpace.md)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(RoundedCornerShape(PawRadio.sm))
+                                            .background(VetPrimarySoft),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        PawCareIcon(
+                                            icon = Icons.Outlined.Pets,
+                                            contentDescription = null,
+                                            size = PawIconSize.default,
+                                            tint = VetPrimary
+                                        )
+                                    }
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = nombre,
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Surface(
+                                                shape = RoundedCornerShape(PawRadio.xs),
+                                                color = VetPrimarySoft
+                                            ) {
+                                                Text(
+                                                    text = codigo,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = VetPrimaryInk,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    modifier = Modifier.padding(horizontal = PawSpace.sm, vertical = 2.dp)
+                                                )
+                                            }
+                                        }
+                                        Text(
+                                            text = especie,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    PawCareIcon(
+                                        icon = Icons.Outlined.ChevronRight,
+                                        contentDescription = null,
+                                        size = PawIconSize.medium,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

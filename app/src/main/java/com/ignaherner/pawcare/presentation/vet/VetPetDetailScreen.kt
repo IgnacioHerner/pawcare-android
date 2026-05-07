@@ -106,6 +106,7 @@ import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
 import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
 import com.ignaherner.pawcare.ui.theme.Warn
 import com.ignaherner.pawcare.utils.calcularEdad
+import com.ignaherner.pawcare.utils.diasHastaFecha
 import com.ignaherner.pawcare.utils.toFriendlyDate
 
 
@@ -421,10 +422,21 @@ private fun VetLibretaContent(
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         // Última visita
+                        val diasDesdeVisita = summary.ultimoTurno?.fecha?.let {
+                            diasHastaFecha(it) * -1 // invertir porque diasHastaFecha cuenta hacia adelante
+                        }
+
                         DashboardStat(
                             label = "ÚLTIMA VISITA",
-                            value = summary.ultimoTurno?.fecha?.toFriendlyDate()?.split(" ")?.firstOrNull() ?: "—",
-                            extra = summary.ultimoTurno?.fecha?.let { "hace días" },
+                            value = summary.ultimoTurno?.fecha?.toFriendlyDate()?.split(" ")?.take(2)?.joinToString(" ") ?: "—",
+                            extra = diasDesdeVisita?.let { dias ->
+                                when {
+                                    dias == 0L -> "Hoy"
+                                    dias == 1L -> "Ayer"
+                                    dias > 0 -> "Hace $dias días"
+                                    else -> null
+                                }
+                            },
                             modifier = Modifier.weight(1f)
                         )
 

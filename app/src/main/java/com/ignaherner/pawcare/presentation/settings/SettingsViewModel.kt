@@ -58,4 +58,7 @@ class SettingsViewModel @Inject constructor(
             settingsDataStore.setOnboardingCompleted()
         }
     }
+
+    val recentSearches: StateFlow<List<String>> = settingsDataStore.recentSearches
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }
