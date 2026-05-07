@@ -63,7 +63,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.home.HomeUiState
 import com.ignaherner.pawcare.presentation.home.HomeViewModel
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.calcularEdad
 

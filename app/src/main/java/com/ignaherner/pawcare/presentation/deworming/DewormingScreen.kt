@@ -58,7 +58,7 @@ import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.ui.theme.CatDeworming
 import com.ignaherner.pawcare.ui.theme.CatDewormingSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,7 +231,7 @@ private fun DewormingCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(CatDewormingSoft),
                 contentAlignment = Alignment.Center
             ) {
@@ -269,7 +269,7 @@ private fun DewormingCard(
 
             // Tipo pill
             Surface(
-                shape = RoundedCornerShape(PawRadii.xs),
+                shape = RoundedCornerShape(PawRadio.xs),
                 color = CatDewormingSoft
             ) {
                 Text(

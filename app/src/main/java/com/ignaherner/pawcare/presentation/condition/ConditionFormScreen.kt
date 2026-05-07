@@ -57,7 +57,7 @@ import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.vet.VetState
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -348,7 +348,7 @@ fun ConditionFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md)
+                shape = RoundedCornerShape(PawRadio.md)
             ) {
                 Text(
                     text = if (conditionId == null) "Guardar" else "Actualizar",

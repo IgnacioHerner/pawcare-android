@@ -52,7 +52,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.vet.VetState
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.calcularProximaDosisDeworming
 import com.ignaherner.pawcare.utils.fechaHoy
@@ -235,7 +235,7 @@ fun DewormingFormScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(PawRadii.sm)
+                    shape = RoundedCornerShape(PawRadio.sm)
                 ) {
                     Row(
                         modifier = Modifier.padding(PawSpace.md),
@@ -309,7 +309,7 @@ fun DewormingFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md)
+                shape = RoundedCornerShape(PawRadio.md)
             ) {
                 Text(
                     text = if (dewormingId == null) "Guardar" else "Actualizar",

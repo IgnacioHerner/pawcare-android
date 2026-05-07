@@ -62,7 +62,7 @@ import com.ignaherner.pawcare.domain.model.Veterinario
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
@@ -199,7 +199,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -222,7 +222,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -245,7 +245,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -268,7 +268,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -295,7 +295,7 @@ fun VetFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -318,7 +318,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -341,7 +341,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -364,7 +364,7 @@ fun VetFormScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
@@ -398,7 +398,7 @@ fun VetFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = VetPrimary,
                     contentColor = Color.White

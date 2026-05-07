@@ -34,7 +34,7 @@ import com.ignaherner.pawcare.presentation.home.EstadoMascota
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
 import com.ignaherner.pawcare.ui.theme.Info
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -166,7 +166,7 @@ fun PetSummaryCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(PawRadii.sm))
+                            .clip(RoundedCornerShape(PawRadio.sm))
                             .background(toneBg)
                             .padding(horizontal = PawSpace.md, vertical = PawSpace.sm),
                         horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),

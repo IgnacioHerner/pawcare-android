@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.R
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @Composable
@@ -55,7 +55,7 @@ fun RoleSelectScreen(
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
@@ -93,7 +93,7 @@ fun RoleSelectScreen(
                 Card(
                     onClick = { onRoleSelected("DUENO") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
@@ -108,7 +108,7 @@ fun RoleSelectScreen(
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
-                                .clip(RoundedCornerShape(PawRadii.sm))
+                                .clip(RoundedCornerShape(PawRadio.sm))
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
@@ -146,7 +146,7 @@ fun RoleSelectScreen(
                 Card(
                     onClick = { onRoleSelected("VETERINARIO") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
@@ -161,7 +161,7 @@ fun RoleSelectScreen(
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
-                                .clip(RoundedCornerShape(PawRadii.sm))
+                                .clip(RoundedCornerShape(PawRadio.sm))
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {

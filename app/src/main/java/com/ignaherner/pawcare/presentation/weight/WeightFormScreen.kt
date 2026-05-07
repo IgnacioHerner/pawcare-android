@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.domain.model.Weight
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.vet.VetState
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.utils.fechaHoy
 import com.ignaherner.pawcare.utils.toFormattedString
 
@@ -210,7 +210,7 @@ fun WeightFormScreen(
                 },
                 enabled = peso.isNotBlank() && fecha.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PawRadii.md)
+                shape = RoundedCornerShape(PawRadio.md)
             ) {
                 Text(
                     text = if (weightId == null) "Guardar" else "Actualizar",

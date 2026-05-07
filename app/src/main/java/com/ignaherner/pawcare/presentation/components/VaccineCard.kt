@@ -32,7 +32,7 @@ import com.ignaherner.pawcare.ui.theme.DangerSoft
 import com.ignaherner.pawcare.ui.theme.Info
 import com.ignaherner.pawcare.ui.theme.InfoSoft
 import com.ignaherner.pawcare.utils.toFriendlyDate
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -66,7 +66,7 @@ fun VaccineCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(toneBg),
                 contentAlignment = Alignment.Center
             ) {
@@ -104,7 +104,7 @@ fun VaccineCard(
 
             // Status pill
             Surface(
-                shape = RoundedCornerShape(PawRadii.xs),
+                shape = RoundedCornerShape(PawRadio.xs),
                 color = toneBg
             ) {
                 Text(

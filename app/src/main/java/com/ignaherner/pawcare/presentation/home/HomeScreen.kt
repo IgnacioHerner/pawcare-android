@@ -65,7 +65,7 @@ import com.ignaherner.pawcare.presentation.components.PetSummaryCard
 import com.ignaherner.pawcare.presentation.components.SwipeRevealCard
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,7 +136,7 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .clip(RoundedCornerShape(PawRadii.xs))
+                                .clip(RoundedCornerShape(PawRadio.xs))
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {

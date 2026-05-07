@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 // ═══════════════════════════════════════════════════════════
 // RADIOS — para corner radius de cards, chips, botones
 // ═══════════════════════════════════════════════════════════
-object PawRadii {
+object PawRadio {
     val xs = 6.dp
     val sm = 10.dp
     val md = 14.dp

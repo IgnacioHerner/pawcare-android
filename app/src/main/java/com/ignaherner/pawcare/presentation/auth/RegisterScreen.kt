@@ -61,7 +61,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.R
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,7 +119,7 @@ fun RegisterScreen(
         ) {
             // Badge
             Surface(
-                shape = RoundedCornerShape(PawRadii.xl),
+                shape = RoundedCornerShape(PawRadio.xl),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Row(
@@ -177,7 +177,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -201,7 +201,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -225,7 +225,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -249,7 +249,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -273,7 +273,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -314,7 +314,7 @@ fun RegisterScreen(
                     imeAction = ImeAction.Done
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -352,7 +352,7 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -403,7 +403,7 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Text(

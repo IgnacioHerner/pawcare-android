@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 // ═══════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ fun EmptyState(
         Box(
             modifier = Modifier
                 .size(88.dp)
-                .clip(RoundedCornerShape(PawRadii.lg))
+                .clip(RoundedCornerShape(PawRadio.lg))
                 .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {

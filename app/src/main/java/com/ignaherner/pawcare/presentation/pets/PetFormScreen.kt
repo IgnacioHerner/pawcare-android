@@ -76,7 +76,7 @@ import com.ignaherner.pawcare.domain.model.Sex
 import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.toFormattedString
 import java.io.File
@@ -293,7 +293,7 @@ fun PetFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -330,7 +330,7 @@ fun PetFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -385,7 +385,7 @@ fun PetFormScreen(
                         }
                     }
                 },
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showFechaNacimientoPicker = true },
@@ -416,7 +416,7 @@ fun PetFormScreen(
                     imeAction = ImeAction.Done
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -467,7 +467,7 @@ fun PetFormScreen(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showFechaCastracionPicker = true },
@@ -517,7 +517,7 @@ fun PetFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary

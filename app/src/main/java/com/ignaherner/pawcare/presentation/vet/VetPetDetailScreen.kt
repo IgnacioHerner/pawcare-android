@@ -98,7 +98,7 @@ import com.ignaherner.pawcare.ui.theme.CatVaccine
 import com.ignaherner.pawcare.ui.theme.CatVaccineSoft
 import com.ignaherner.pawcare.ui.theme.CatWeight
 import com.ignaherner.pawcare.ui.theme.CatWeightSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.VetPrimary
@@ -349,7 +349,7 @@ private fun VetLibretaContent(
                         // Código pill
                         if (summary.pet.codigo.isNotBlank()) {
                             Surface(
-                                shape = RoundedCornerShape(PawRadii.xs),
+                                shape = RoundedCornerShape(PawRadio.xs),
                                 color = VetPrimarySoft
                             ) {
                                 Row(
@@ -670,7 +670,7 @@ private fun QuickRegisterOption(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(colorSoft),
                 contentAlignment = Alignment.Center
             ) {

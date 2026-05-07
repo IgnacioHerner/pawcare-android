@@ -49,7 +49,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -157,7 +157,7 @@ private fun ConditionDetailContent(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = estadoBg
                 ) {
                     Text(
@@ -168,7 +168,7 @@ private fun ConditionDetailContent(
                     )
                 }
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = severidadBg
                 ) {
                     Text(

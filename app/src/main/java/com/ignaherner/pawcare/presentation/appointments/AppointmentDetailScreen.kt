@@ -42,7 +42,7 @@ import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.utils.toFriendlyDate
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)

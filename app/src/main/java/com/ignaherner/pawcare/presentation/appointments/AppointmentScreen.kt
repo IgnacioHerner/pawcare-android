@@ -56,7 +56,7 @@ import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
 import com.ignaherner.pawcare.ui.theme.CatAppointment
 import com.ignaherner.pawcare.ui.theme.CatAppointmentSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.utils.toFriendlyDate
 
@@ -229,7 +229,7 @@ private fun AppointmentCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(CatAppointmentSoft),
                 contentAlignment = Alignment.Center
             ) {

@@ -60,7 +60,7 @@ import com.ignaherner.pawcare.utils.toFormattedString
 import com.ignaherner.pawcare.presentation.settings.SettingsViewModel
 import com.ignaherner.pawcare.presentation.vet.VetProfileViewModel
 import com.ignaherner.pawcare.presentation.vet.VetState
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -413,7 +413,7 @@ fun MedicationFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md)
+                shape = RoundedCornerShape(PawRadio.md)
             ) {
                 Text(
                     text = if (medicationId == null) "Guardar" else "Actualizar",

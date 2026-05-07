@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 
 // ═══════════════════════════════════════════════════════════
 // PAWCARE CARD
@@ -27,7 +27,7 @@ fun PawCard(
         Card(
             onClick = onClick,
             modifier = modifier,
-            shape = RoundedCornerShape(PawRadii.md),
+            shape = RoundedCornerShape(PawRadio.md),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
@@ -41,7 +41,7 @@ fun PawCard(
     } else {
         Card(
             modifier = modifier,
-            shape = RoundedCornerShape(PawRadii.md),
+            shape = RoundedCornerShape(PawRadio.md),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),

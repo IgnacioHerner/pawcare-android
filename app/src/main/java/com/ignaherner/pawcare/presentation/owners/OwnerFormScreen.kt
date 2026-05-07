@@ -62,7 +62,7 @@ import com.ignaherner.pawcare.domain.model.Owner
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,7 +196,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -218,7 +218,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -240,7 +240,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -262,7 +262,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -284,7 +284,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -306,7 +306,7 @@ fun OwnerFormScreen(
                     imeAction = ImeAction.Done
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -337,7 +337,7 @@ fun OwnerFormScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary

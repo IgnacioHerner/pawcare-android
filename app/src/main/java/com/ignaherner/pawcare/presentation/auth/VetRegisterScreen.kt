@@ -69,7 +69,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
@@ -173,7 +173,7 @@ fun VetRegisterScreen(
 
             // Badge
             Surface(
-                shape = RoundedCornerShape(PawRadii.xl),
+                shape = RoundedCornerShape(PawRadio.xl),
                 color = VetPrimarySoft
             ) {
                 Row(
@@ -293,7 +293,7 @@ private fun ColumnScope.VetRegisterStep1(
             imeAction = ImeAction.Next
         ),
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -321,7 +321,7 @@ private fun ColumnScope.VetRegisterStep1(
             imeAction = ImeAction.Next
         ),
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -350,7 +350,7 @@ private fun ColumnScope.VetRegisterStep1(
             imeAction = ImeAction.Next
         ),
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -378,7 +378,7 @@ private fun ColumnScope.VetRegisterStep1(
             imeAction = ImeAction.Done
         ),
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -395,7 +395,7 @@ private fun ColumnScope.VetRegisterStep1(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         colors = ButtonDefaults.buttonColors(
             containerColor = VetPrimary,
             contentColor = Color.White
@@ -468,7 +468,7 @@ private fun ColumnScope.VetRegisterStep2(
             )
         },
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -493,7 +493,7 @@ private fun ColumnScope.VetRegisterStep2(
             )
         },
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -517,7 +517,7 @@ private fun ColumnScope.VetRegisterStep2(
             )
         },
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -541,7 +541,7 @@ private fun ColumnScope.VetRegisterStep2(
             )
         },
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -587,7 +587,7 @@ private fun ColumnScope.VetRegisterStep2(
             imeAction = ImeAction.Done
         ),
         singleLine = true,
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = VetPrimary,
@@ -612,7 +612,7 @@ private fun ColumnScope.VetRegisterStep2(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         color = VetPrimarySoft
     ) {
         Row(
@@ -643,7 +643,7 @@ private fun ColumnScope.VetRegisterStep2(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(PawRadii.md),
+        shape = RoundedCornerShape(PawRadio.md),
         colors = ButtonDefaults.buttonColors(
             containerColor = VetPrimary,
             contentColor = Color.White

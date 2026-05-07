@@ -45,7 +45,7 @@ import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareAvatar
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
 import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
@@ -163,7 +163,7 @@ private fun VetProfileContent(
                 horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)
             ) {
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = VetPrimarySoft
                 ) {
                     Text(
@@ -175,7 +175,7 @@ private fun VetProfileContent(
                 }
                 vet.especialidad?.let {
                     Surface(
-                        shape = RoundedCornerShape(PawRadii.xs),
+                        shape = RoundedCornerShape(PawRadio.xs),
                         color = VetPrimarySoft
                     ) {
                         Text(

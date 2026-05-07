@@ -62,7 +62,7 @@ import com.ignaherner.pawcare.presentation.medications.MedicationUiState
 import com.ignaherner.pawcare.presentation.medications.MedicationViewModel
 import com.ignaherner.pawcare.presentation.owners.OwnerState
 import com.ignaherner.pawcare.presentation.owners.OwnerViewModel
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import okhttp3.internal.notify
 
@@ -247,11 +247,11 @@ fun QRScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(200.dp)
-                                        .clip(RoundedCornerShape(PawRadii.md))
+                                        .clip(RoundedCornerShape(PawRadio.md))
                                         .border(
                                             width = 1.dp,
                                             color = MaterialTheme.colorScheme.outlineVariant,
-                                            shape = RoundedCornerShape(PawRadii.md)
+                                            shape = RoundedCornerShape(PawRadio.md)
                                         )
                                         .padding(PawSpace.md),
                                     contentAlignment = Alignment.Center
@@ -306,7 +306,7 @@ fun QRScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
-                            shape = RoundedCornerShape(PawRadii.md),
+                            shape = RoundedCornerShape(PawRadio.md),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                         ) {
                             PawCareIcon(

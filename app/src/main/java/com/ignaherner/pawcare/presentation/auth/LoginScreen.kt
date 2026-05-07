@@ -59,7 +59,7 @@ import com.ignaherner.pawcare.R
 import com.ignaherner.pawcare.presentation.components.PawCard
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
@@ -110,7 +110,7 @@ fun LoginScreen(
                     Surface(
                         onClick = { isVetMode = false },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(PawRadii.sm),
+                        shape = RoundedCornerShape(PawRadio.sm),
                         color = if (!isVetMode)
                             MaterialTheme.colorScheme.primary
                         else
@@ -146,7 +146,7 @@ fun LoginScreen(
                     Surface(
                         onClick = { isVetMode = true },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(PawRadii.sm),
+                        shape = RoundedCornerShape(PawRadio.sm),
                         color = if (isVetMode)
                             VetPrimary
                         else
@@ -220,7 +220,7 @@ fun LoginScreen(
                     imeAction = ImeAction.Next
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = if (isVetMode) OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
                     focusedLabelColor = VetPrimary,
@@ -266,7 +266,7 @@ fun LoginScreen(
                     imeAction = ImeAction.Done
                 ),
                 singleLine = true,
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = if (isVetMode) OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = VetPrimary,
                     focusedLabelColor = VetPrimary,
@@ -306,7 +306,7 @@ fun LoginScreen(
             if (isVetMode) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     color = VetPrimarySoft
                 ) {
                     Row(
@@ -340,7 +340,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isVetMode) VetPrimary else MaterialTheme.colorScheme.primary,
                     contentColor = if (isVetMode) Color.White else MaterialTheme.colorScheme.onPrimary
@@ -392,7 +392,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Text(

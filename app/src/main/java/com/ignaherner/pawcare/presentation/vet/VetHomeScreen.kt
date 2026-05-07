@@ -62,7 +62,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
@@ -106,7 +106,7 @@ fun VetHomeScreen(
                 title = {
                     // Badge MODO VETERINARIO
                     Surface(
-                        shape = RoundedCornerShape(PawRadii.xl),
+                        shape = RoundedCornerShape(PawRadio.xl),
                         color = VetPrimarySoft
                     ) {
                         Row(
@@ -178,7 +178,7 @@ fun VetHomeScreen(
             Surface(
                 onClick = { /* TODO: scanner QR */ },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 color = VetPrimary
             ) {
                 Row(
@@ -191,7 +191,7 @@ fun VetHomeScreen(
                     Box(
                         modifier = Modifier
                             .size(48.dp)
-                            .clip(RoundedCornerShape(PawRadii.sm))
+                            .clip(RoundedCornerShape(PawRadio.sm))
                             .background(Color.White.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -264,7 +264,7 @@ fun VetHomeScreen(
             if (errorState != null) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     color = DangerSoft
                 ) {
                     Row(
@@ -297,7 +297,7 @@ fun VetHomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(PawRadii.md),
+                shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = VetPrimary,
                     contentColor = Color.White
@@ -398,7 +398,7 @@ private fun CodeBox(
     Box(
         modifier = Modifier
             .size(44.dp)
-            .clip(RoundedCornerShape(PawRadii.sm))
+            .clip(RoundedCornerShape(PawRadio.sm))
             .border(
                 width = if (isFocused) 2.dp else 1.dp,
                 color = if (isFocused)
@@ -407,7 +407,7 @@ private fun CodeBox(
                     MaterialTheme.colorScheme.outline
                 else
                     MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(PawRadii.sm)
+                shape = RoundedCornerShape(PawRadio.sm)
             ),
         contentAlignment = Alignment.Center
     ) {

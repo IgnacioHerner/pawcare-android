@@ -59,7 +59,7 @@ import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.Info
 import com.ignaherner.pawcare.ui.theme.InfoSoft
 import com.ignaherner.pawcare.ui.theme.InkMuted
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.SurfaceSunk
 import com.ignaherner.pawcare.ui.theme.Warn
@@ -149,7 +149,7 @@ fun MedicationDetailContent(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Surface(
-                shape = RoundedCornerShape(PawRadii.xs),
+                shape = RoundedCornerShape(PawRadio.xs),
                 color = toneBg
             ) {
                 Text(

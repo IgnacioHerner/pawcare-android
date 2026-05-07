@@ -48,7 +48,7 @@ import com.ignaherner.pawcare.ui.theme.Danger
 import com.ignaherner.pawcare.ui.theme.DangerSoft
 import com.ignaherner.pawcare.ui.theme.Info
 import com.ignaherner.pawcare.ui.theme.InfoSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.Success
 import com.ignaherner.pawcare.ui.theme.SuccessSoft
@@ -145,7 +145,7 @@ fun VaccineDetailContent(
                 )
             }
             Surface(
-                shape = RoundedCornerShape(PawRadii.xs),
+                shape = RoundedCornerShape(PawRadio.xs),
                 color = toneBg
             ) {
                 Text(

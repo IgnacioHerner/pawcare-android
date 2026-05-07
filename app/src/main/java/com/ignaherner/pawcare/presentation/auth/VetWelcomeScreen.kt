@@ -1,4 +1,4 @@
- package com.ignaherner.pawcare.presentation.auth
+package com.ignaherner.pawcare.presentation.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.LocalHospital
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Vaccines
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,11 +38,14 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.ui.theme.VetPrimary
+import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
+import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
 
 @Composable
-fun WelcomeScreen(
-    nombreUsuario: String,
-    onNavigateToAddPet: () -> Unit
+fun VetWelcomeScreen(
+    nombreVet: String,
+    onStart: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -59,22 +64,21 @@ fun WelcomeScreen(
                 modifier = Modifier
                     .size(88.dp)
                     .clip(RoundedCornerShape(PawRadio.lg))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(VetPrimarySoft),
                 contentAlignment = Alignment.Center
             ) {
                 PawCareIcon(
-                    icon = Icons.Outlined.Check,
+                    icon = Icons.Outlined.LocalHospital,
                     contentDescription = null,
                     size = PawIconSize.xlarge,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = VetPrimary
                 )
             }
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
 
-            // Título personalizado
             Text(
-                text = "¡Listo, ${nombreUsuario.ifBlank { "usuario" }}!",
+                text = "¡Bienvenido, Dr. ${nombreVet.ifBlank { "Veterinario" }}!",
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
@@ -82,9 +86,8 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.md))
 
-            // Subtítulo
             Text(
-                text = "Tu cuenta está creada. Ahora agregá la primera mascota para empezar su libreta.",
+                text = "Tu cuenta profesional está creada. Así funciona PawCare para vos:",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -92,45 +95,47 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.xxl))
 
-            // Info rows
             Column(verticalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
-                WelcomeInfoRow(
-                    icon = Icons.Outlined.Pets,
-                    text = "Registrá cada una de tus mascotas"
-                )
-                WelcomeInfoRow(
-                    icon = Icons.Outlined.Vaccines,
-                    text = "Cargá vacunas, medicamentos y controles"
-                )
-                WelcomeInfoRow(
+                VetWelcomeRow(
                     icon = Icons.Outlined.QrCode2,
-                    text = "Compartí el QR en cualquier consulta"
+                    text = "Buscá mascotas por código QR o ID"
+                )
+                VetWelcomeRow(
+                    icon = Icons.Outlined.Vaccines,
+                    text = "Registrá vacunas, medicamentos y controles"
+                )
+                VetWelcomeRow(
+                    icon = Icons.Outlined.Shield,
+                    text = "Todo queda vinculado a tu matrícula"
+                )
+                VetWelcomeRow(
+                    icon = Icons.Outlined.People,
+                    text = "Los dueños ven tus registros en tiempo real"
                 )
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón
             Button(
-                onClick = onNavigateToAddPet,
+                onClick = onStart,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(PawRadio.md),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = VetPrimary,
+                    contentColor = Color.White
                 )
             ) {
                 PawCareIcon(
-                    icon = Icons.Outlined.Add,
+                    icon = Icons.Outlined.ArrowForward,
                     contentDescription = null,
                     size = PawIconSize.default,
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(PawSpace.sm))
                 Text(
-                    text = "Agregar mi primera mascota",
+                    text = "Empezar a trabajar",
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -141,14 +146,14 @@ fun WelcomeScreen(
 }
 
 @Composable
-private fun WelcomeInfoRow(
+private fun VetWelcomeRow(
     icon: ImageVector,
     text: String
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(PawRadio.md),
-        color = MaterialTheme.colorScheme.surface
+        color = VetPrimarySoft
     ) {
         Row(
             modifier = Modifier
@@ -161,12 +166,12 @@ private fun WelcomeInfoRow(
                 icon = icon,
                 contentDescription = null,
                 size = PawIconSize.medium,
-                tint = MaterialTheme.colorScheme.primary
+                tint = VetPrimary
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = VetPrimaryInk
             )
         }
     }

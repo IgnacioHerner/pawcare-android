@@ -20,7 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 // ═══════════════════════════════════════════════════════════
@@ -96,14 +96,14 @@ fun PetCardSkeleton() {
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .height(18.dp)
-                            .clip(RoundedCornerShape(PawRadii.xs))
+                            .clip(RoundedCornerShape(PawRadio.xs))
                             .background(brush)
                     )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(0.7f)
                             .height(14.dp)
-                            .clip(RoundedCornerShape(PawRadii.xs))
+                            .clip(RoundedCornerShape(PawRadio.xs))
                             .background(brush)
                     )
                 }
@@ -131,14 +131,14 @@ fun PetCardSkeleton() {
                             modifier = Modifier
                                 .width(40.dp)
                                 .height(20.dp)
-                                .clip(RoundedCornerShape(PawRadii.xs))
+                                .clip(RoundedCornerShape(PawRadio.xs))
                                 .background(brush)
                         )
                         Box(
                             modifier = Modifier
                                 .width(56.dp)
                                 .height(12.dp)
-                                .clip(RoundedCornerShape(PawRadii.xs))
+                                .clip(RoundedCornerShape(PawRadio.xs))
                                 .background(brush)
                         )
                     }
@@ -167,14 +167,14 @@ fun HomeScreenSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth(0.45f)
                     .height(32.dp)
-                    .clip(RoundedCornerShape(PawRadii.xs))
+                    .clip(RoundedCornerShape(PawRadio.xs))
                     .background(brush)
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.65f)
                     .height(18.dp)
-                    .clip(RoundedCornerShape(PawRadii.xs))
+                    .clip(RoundedCornerShape(PawRadio.xs))
                     .background(brush)
             )
         }
@@ -187,7 +187,7 @@ fun HomeScreenSkeleton() {
                 .padding(horizontal = PawSpace.lg)
                 .fillMaxWidth(0.3f)
                 .height(22.dp)
-                .clip(RoundedCornerShape(PawRadii.xs))
+                .clip(RoundedCornerShape(PawRadio.xs))
                 .background(brush)
         )
 

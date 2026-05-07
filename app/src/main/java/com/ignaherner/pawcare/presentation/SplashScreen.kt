@@ -25,7 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.R
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import kotlinx.coroutines.delay
 
@@ -62,7 +62,7 @@ fun SplashScreen(
             Box(
                 modifier = Modifier
                     .size(80.dp)
-                    .clip(RoundedCornerShape(PawRadii.lg))
+                    .clip(RoundedCornerShape(PawRadio.lg))
                     .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {

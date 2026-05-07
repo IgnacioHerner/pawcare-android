@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @Composable
@@ -48,19 +48,24 @@ fun OnboardingScreen(
 ) {
     val pages = listOf(
         OnboardingPage(
-            icon = Icons.Outlined.FolderOpen,
-            title = "Una libreta sanitaria\nque no se pierde",
-            body = "Todo el historial de tu mascota — vacunas, peso, medicamentos — en tu bolsillo."
+            icon = Icons.Outlined.Pets,
+            title = "La salud de tu\nmascota, organizada",
+            body = "Vacunas, medicamentos, peso, controles — todo el historial en un solo lugar, siempre accesible."
         ),
         OnboardingPage(
             icon = Icons.Outlined.QrCode2,
-            title = "Un código, acceso\ninstantáneo al vet",
-            body = "El veterinario escanea el QR y ve la libreta completa. Sin trámites, sin papeles."
+            title = "Un código único\npara cada mascota",
+            body = "Compartí el código con tu veterinario y accedé al historial completo al instante. Sin papeles, sin trámites."
+        ),
+        OnboardingPage(
+            icon = Icons.Outlined.Sync,
+            title = "Dueños y veterinarios\nconectados",
+            body = "Lo que registra el veterinario, el dueño lo ve en tiempo real. Toda la información sincronizada."
         ),
         OnboardingPage(
             icon = Icons.Outlined.NotificationsActive,
-            title = "Nunca te olvides\nde una vacuna",
-            body = "Recordatorios inteligentes para refuerzos, desparasitación y controles."
+            title = "Recordatorios\ninteligentes",
+            body = "Nunca más te olvides de una vacuna o desparasitación. PawCare te avisa cuando sea necesario."
         )
     )
 
@@ -89,7 +94,6 @@ fun OnboardingScreen(
                 )
             }
 
-            // Contenido
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -103,7 +107,7 @@ fun OnboardingScreen(
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(RoundedCornerShape(PawRadii.xl))
+                        .clip(RoundedCornerShape(PawRadio.xl))
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
@@ -174,7 +178,7 @@ fun OnboardingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    shape = RoundedCornerShape(PawRadii.md),
+                    shape = RoundedCornerShape(PawRadio.md),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary

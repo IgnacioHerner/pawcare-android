@@ -45,7 +45,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.CatDeworming
 import com.ignaherner.pawcare.ui.theme.CatDewormingSoft
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,7 +137,7 @@ private fun DewormingDetailContent(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(PawSpace.sm)) {
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = CatDewormingSoft
                 ) {
                     Text(
@@ -148,7 +148,7 @@ private fun DewormingDetailContent(
                     )
                 }
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = CatDewormingSoft
                 ) {
                     Text(

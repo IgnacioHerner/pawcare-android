@@ -43,7 +43,7 @@ fun AlertBanner(
 
     val baseModifier = modifier
         .fillMaxWidth()
-        .clip(RoundedCornerShape(PawRadii.md))
+        .clip(RoundedCornerShape(PawRadio.md))
         .background(toneBg)
 
     val finalModifier = if (onClick != null) {
@@ -61,7 +61,7 @@ fun AlertBanner(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(PawRadii.sm))
+                .clip(RoundedCornerShape(PawRadio.sm))
                 .background(toneFg.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {

@@ -34,7 +34,7 @@ import com.ignaherner.pawcare.domain.model.MedicationStatus
 import com.ignaherner.pawcare.ui.theme.Info
 import com.ignaherner.pawcare.ui.theme.InfoSoft
 import com.ignaherner.pawcare.ui.theme.InkMuted
-import com.ignaherner.pawcare.ui.theme.PawRadii
+import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.SurfaceSunk
 import com.ignaherner.pawcare.ui.theme.Warn
@@ -77,7 +77,7 @@ fun MedicationCard(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(RoundedCornerShape(PawRadii.sm))
+                        .clip(RoundedCornerShape(PawRadio.sm))
                         .background(toneBg),
                     contentAlignment = Alignment.Center
                 ) {
@@ -103,7 +103,7 @@ fun MedicationCard(
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = toneBg
                 ) {
                     Text(

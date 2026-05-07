@@ -52,7 +52,7 @@ fun CategoryRow(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(PawRadii.sm))
+                    .clip(RoundedCornerShape(PawRadio.sm))
                     .background(colorSoft),
                 contentAlignment = Alignment.Center
             ) {
@@ -80,7 +80,7 @@ fun CategoryRow(
                     )
                     if (count > 0) {
                         Surface(
-                            shape = RoundedCornerShape(PawRadii.xs),
+                            shape = RoundedCornerShape(PawRadio.xs),
                             color = colorSoft
                         ) {
                             Text(

@@ -318,7 +318,7 @@ private fun ConditionCard(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(RoundedCornerShape(PawRadii.sm))
+                        .clip(RoundedCornerShape(PawRadio.sm))
                         .background(severidadBg),
                     contentAlignment = Alignment.Center
                 ) {
@@ -345,7 +345,7 @@ private fun ConditionCard(
 
                 // Estado pill
                 Surface(
-                    shape = RoundedCornerShape(PawRadii.xs),
+                    shape = RoundedCornerShape(PawRadio.xs),
                     color = estadoBg
                 ) {
                     Text(
