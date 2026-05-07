@@ -60,6 +60,7 @@ import com.ignaherner.pawcare.presentation.auth.VetRegisterScreen
 import com.ignaherner.pawcare.presentation.auth.VetWelcomeScreen
 import com.ignaherner.pawcare.presentation.pets.PetDetailState
 import com.ignaherner.pawcare.presentation.pets.PetViewModel
+import com.ignaherner.pawcare.presentation.vet.QRScannerScreen
 import com.ignaherner.pawcare.presentation.vet.VetOwnerDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetPetDetailScreen
 import com.ignaherner.pawcare.presentation.vet.VetProfileDetailScreen
@@ -124,6 +125,8 @@ object PawCareDestinations {
     const val SPLASH = "splash"
 
     const val QR_SCREEN = "qr_screen/{petId}"
+
+    const val QR_SCANNER = "qr_scanner"
 
     // Login y Register
     const val LOGIN = "login"
@@ -476,38 +479,46 @@ fun PawCareNavGraph(
             )
         }
 
-        // Register veterinario
-//        composable(PawCareDestinations.VET_REGISTER) {
-//            VetRegisterScreen(
-//                viewModel = authViewModel,
-//                onNavigateToVetLogin = {
-//                    navController.navigate(PawCareDestinations.VET_LOGIN) {
-//                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
-//                    }
-//                },
-//                onRegisterSuccess = { nombre ->
-//                    navController.navigate(PawCareDestinations.LOADING) {
-//                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
-//                    }
-//                },
-//                onNavigateBack = {
-//                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-//                        navController.popBackStack()
-//                    }
-//                }
-//            )
-//        }
-
         // VetHome
         composable(PawCareDestinations.VET_HOME) {
+            val scannedCode = navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("scannedCode")
+
+            // Limpiar después de leer
+            LaunchedEffect(scannedCode) {
+                if (scannedCode != null) {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.remove<String>("scannedCode")
+                }
+            }
+
             VetHomeScreen(
+                scannedCode = scannedCode,
                 onNavigateToSettings = {
                     navController.navigate(PawCareDestinations.SETTINGS)
                 },
                 onNavigateToVetProfile = { navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL) },
                 onNavigateToPetDetail = { firestoreId ->
                     navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                },
+                onNavigateToQRScanner = {
+                    navController.navigate(PawCareDestinations.QR_SCANNER)
                 }
+            )
+        }
+
+        composable(PawCareDestinations.QR_SCANNER) {
+            QRScannerScreen(
+                onCodeScanned = { code ->
+                    // Guardar el código escaneado y volver
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("scannedCode", code)
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

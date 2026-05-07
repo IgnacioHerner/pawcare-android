@@ -73,7 +73,9 @@ import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
 fun VetHomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToVetProfile: () -> Unit = {},
+    onNavigateToQRScanner: () -> Unit = {},
     onNavigateToPetDetail: (String) -> Unit,
+    scannedCode: String? = null,
     viewModel: VetViewModel = hiltViewModel(),
     vetProfileViewModel: VetProfileViewModel = hiltViewModel()
 ) {
@@ -89,6 +91,22 @@ fun VetHomeScreen(
             val pet = (searchState as VetSearchState.Success).pet
             onNavigateToPetDetail(pet.firestoreId)
             viewModel.resetSearch()
+        }
+    }
+
+    LaunchedEffect(scannedCode) {
+        scannedCode?.let { code ->
+            val codigoLimpio = code.lines()
+                .find { it.contains("Codigo:", ignoreCase = true) || it.contains("Código:", ignoreCase = true) }
+                ?.substringAfter(":")
+                ?.trim()
+                ?: code.trim()
+
+            android.util.Log.d("QRDebug", "Código limpio: $codigoLimpio")
+
+            if (codigoLimpio.isNotBlank()) {
+                viewModel.buscarMascota(codigoLimpio)
+            }
         }
     }
 
@@ -176,7 +194,7 @@ fun VetHomeScreen(
 
             // Card Escanear QR
             Surface(
-                onClick = { /* TODO: scanner QR */ },
+                onClick = onNavigateToQRScanner,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(PawRadio.md),
                 color = VetPrimary

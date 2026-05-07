@@ -21,15 +21,15 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // Launcher para pedir permiso
     private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted -> }
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        // No necesitamos hacer nada especial con el resultado
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Edge-to-edge con status bar transparentes
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
@@ -38,11 +38,17 @@ class MainActivity : ComponentActivity() {
             isAppearanceLightNavigationBars = true
         }
 
-        // Pedir permiso de notificaciones en Android 13+
+        // Pedir permisos en runtime
+        val permisosNecesarios = mutableListOf<String>()
+
+        // Notificaciones — Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissionLauncher.launch(
-                android.Manifest.permission.POST_NOTIFICATIONS
-            )
+            permisosNecesarios.add(android.Manifest.permission.POST_NOTIFICATIONS)
+            permisosNecesarios.add(android.Manifest.permission.READ_MEDIA_IMAGES)
+        }
+
+        if (permisosNecesarios.isNotEmpty()) {
+            requestPermissionLauncher.launch(permisosNecesarios.toTypedArray())
         }
 
         setContent {
