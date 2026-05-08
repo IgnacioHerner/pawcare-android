@@ -28,7 +28,7 @@ import com.ignaherner.pawcare.data.local.entity.WeightEntity
         DewormingEntity::class
         ],
     version = 32,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class PawCareDatabase : RoomDatabase() {
     abstract fun petDao(): PetDao

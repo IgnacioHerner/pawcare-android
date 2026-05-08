@@ -60,7 +60,7 @@ class PetViewModel @Inject constructor(
         safeLaunch(onError = "Error al guardar") {
             val firestoreResult = firestoreRepository.guardarPet(pet)
             if (firestoreResult.isSuccess) {
-                val (firestoreId, codigo) = firestoreResult.getOrNull()!!
+                val (firestoreId, codigo) = firestoreResult.getOrElse { return@safeLaunch }
                 repository.insertPet(pet.copy(
                     firestoreId = firestoreId,
                     codigo = codigo

@@ -21,10 +21,10 @@ class NotificationHelper @Inject constructor(
     }
 
     init {
-        craateNotificationChannels()
+        createNotificationChannels()
     }
 
-    private fun craateNotificationChannels() {
+    private fun createNotificationChannels() {
         val notificationManager = context.getSystemService(
             Context.NOTIFICATION_SERVICE
         ) as NotificationManager

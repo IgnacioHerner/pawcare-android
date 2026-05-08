@@ -353,11 +353,13 @@ fun PawCareNavGraph(
             val rol by authViewModel.rol.collectAsStateWithLifecycle()
             val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
             val vetExists by vetViewModel.vetExists.collectAsStateWithLifecycle()
+            var timeoutFired by remember { mutableStateOf(false) }
 
             // Timeout: si en 5 seg no resuelve, ir a login
             LaunchedEffect(Unit) {
                 delay(5000)
-                if (rol == null) {
+                if (rol == null && !timeoutFired) {
+                    timeoutFired = true
                     authViewModel.logout()
                     navController.navigate(PawCareDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
@@ -1588,26 +1590,6 @@ fun PawCareNavGraph(
             )
         }
 
-        // Condition Detail Screen
-        composable(
-            route = PawCareDestinations.CONDITION_DETAIL,
-            arguments = listOf(
-                navArgument("conditionId") { type = NavType.LongType }
-            )
-        ) { backStackEntry ->
-            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
-            ConditionDetailScreen(
-                conditionId = conditionId,
-                onNavigateBack = {
-                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.popBackStack()
-                    }
-                },
-                onNavigateToEdit = { id ->
-                    // TODO: navegar a editar condición
-                }
-            )
-        }
     }
 }
 

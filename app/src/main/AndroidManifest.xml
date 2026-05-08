@@ -13,9 +13,6 @@
         tools:ignore="PhotoAndVideoPolicy" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-
     <application
         android:name=".PawCareApp"
         android:allowBackup="true"

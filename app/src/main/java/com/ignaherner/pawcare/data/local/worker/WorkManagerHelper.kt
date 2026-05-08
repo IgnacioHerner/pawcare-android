@@ -30,14 +30,8 @@ class WorkManagerHelper @Inject constructor(
             .putString(MedicationWorker.KEY_PET_NAME, petName)
             .putString(MedicationWorker.KEY_MEDICATION_NAME, medication.nombre)
             .putString(MedicationWorker.KEY_DOSIS, medication.dosisDisplay)
-            .putString(MedicationWorker.KEY_MEDICATION_ID, medication.id.toInt().toString())
+            .putString(MedicationWorker.KEY_MEDICATION_ID, medication.id.toString())
             .build()
-
-        // WorkManagerHelper.kt — temporal para testear
-//        val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
-//            15L,
-//            TimeUnit.MINUTES  // ← temporal
-//        )
 
         val workRequest = PeriodicWorkRequestBuilder<MedicationWorker>(
             medication.intervaloHoras.toLong(),
@@ -82,13 +76,11 @@ class WorkManagerHelper @Inject constructor(
             .putString(VaccineWorker.KEY_PET_NAME, petName)
             .putString(VaccineWorker.KEY_VACCINE_NAME, vaccine.tipo.displayName)
             .putString(VaccineWorker.KEY_FECHA, proximaDosis)
-            .putString(VaccineWorker.KEY_VACCINE_ID, vaccine.id.toInt().toString())
+            .putString(VaccineWorker.KEY_VACCINE_ID, vaccine.id.toString())
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<VaccineWorker>()
             .setInputData(inputData)
-            // Temporal para testear
-//             .setInitialDelay(1L, TimeUnit.MINUTES)
             // Producción
             .setInitialDelay(diasRestantes, TimeUnit.DAYS)
             .addTag("vaccine_${vaccine.id}")
