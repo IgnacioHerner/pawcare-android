@@ -78,6 +78,7 @@ import com.ignaherner.pawcare.presentation.components.PawCareIcon
 import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.utils.fotoExiste
 import com.ignaherner.pawcare.utils.toFormattedString
 import java.io.File
 
@@ -255,7 +256,7 @@ fun PetFormScreen(
                     .clickable { galleryLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                if (fotoUri.isNotBlank()) {
+                if (fotoUri.isNotBlank() && fotoExiste(fotoUri)) {
                     AsyncImage(
                         model = fotoUri,
                         contentDescription = "Foto de $nombre",
@@ -398,27 +399,29 @@ fun PetFormScreen(
             )
 
             // Peso (opcional)
-            OutlinedTextField(
-                value = pesoInicial,
-                onValueChange = { pesoInicial = it },
-                placeholder = { Text("Peso actual (kg)") },
-                supportingText = { Text("Opcional — podés agregarlo después") },
-                leadingIcon = {
-                    PawCareIcon(
-                        icon = Icons.Outlined.Monitor,
-                        contentDescription = null,
-                        size = PawIconSize.medium,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Done
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(PawRadio.md),
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (petId == null) {
+                OutlinedTextField(
+                    value = pesoInicial,
+                    onValueChange = { pesoInicial = it },
+                    placeholder = { Text("Peso actual (kg)") },
+                    supportingText = { Text("Opcional — podés agregarlo después") },
+                    leadingIcon = {
+                        PawCareIcon(
+                            icon = Icons.Outlined.Monitor,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    shape = RoundedCornerShape(PawRadio.md),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             // Castración
             PawCard(modifier = Modifier.fillMaxWidth()) {

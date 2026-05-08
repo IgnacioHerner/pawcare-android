@@ -64,6 +64,7 @@ import com.ignaherner.pawcare.presentation.components.PawIconSize
 import com.ignaherner.pawcare.presentation.pets.copyImageToInternalStorage
 import com.ignaherner.pawcare.ui.theme.PawRadio
 import com.ignaherner.pawcare.ui.theme.PawSpace
+import com.ignaherner.pawcare.utils.fotoExiste
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,7 +152,7 @@ fun OwnerFormScreen(
                     .clickable { galleryLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                if (fotoUri.isNotBlank()) {
+                if (fotoUri.isNotBlank() && fotoExiste(fotoUri)) {
                     AsyncImage(
                         model = fotoUri,
                         contentDescription = "Foto de perfil",

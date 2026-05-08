@@ -1,9 +1,11 @@
 package com.ignaherner.pawcare.utils
 
+import android.net.Uri
 import com.ignaherner.pawcare.domain.model.FechaNacimientoTipo
 import com.ignaherner.pawcare.domain.model.FrecuenciaDeworming
 import com.ignaherner.pawcare.domain.model.FrecuenciaVacuna
 import com.ignaherner.pawcare.domain.model.Weight
+import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -150,5 +152,14 @@ fun calcularProximaDosisDeworming(fechaAplicacion: String, frecuencia: Frecuenci
         proxima.format(formatter)
     } catch (e: Exception) {
         ""
+    }
+}
+fun fotoExiste(uri: String?): Boolean {
+    if (uri.isNullOrBlank()) return false
+    return try {
+        val file = File(Uri.parse(uri).path ?: return false)
+        file.exists()
+    } catch (e: Exception) {
+        false
     }
 }

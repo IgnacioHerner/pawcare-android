@@ -67,6 +67,7 @@ import com.ignaherner.pawcare.ui.theme.PawSpace
 import com.ignaherner.pawcare.ui.theme.VetPrimary
 import com.ignaherner.pawcare.ui.theme.VetPrimaryInk
 import com.ignaherner.pawcare.ui.theme.VetPrimarySoft
+import com.ignaherner.pawcare.utils.fotoExiste
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,7 +158,7 @@ fun VetFormScreen(
                     .clickable { galleryLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                if (fotoUri.isNotBlank()) {
+                if (fotoUri.isNotBlank() && fotoExiste(fotoUri)) {
                     AsyncImage(
                         model = fotoUri,
                         contentDescription = "Foto de perfil",
