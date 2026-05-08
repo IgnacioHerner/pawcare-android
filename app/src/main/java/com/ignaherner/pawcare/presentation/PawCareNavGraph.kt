@@ -1585,11 +1585,10 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = { id ->
-                    // TODO: Navegar a editar condicion
+
                 }
             )
         }
-
     }
 }
 

@@ -60,7 +60,7 @@ class DewormingViewModel @Inject constructor(
                     repository.updateDeworming(dewormingConId.copy(firestoreId = firestoreId))
                 }
             }
-            showSnackbar("Desparasitación guardada ✅")
+            showSnackbar("Desparasitación guardada")
         }
     }
 

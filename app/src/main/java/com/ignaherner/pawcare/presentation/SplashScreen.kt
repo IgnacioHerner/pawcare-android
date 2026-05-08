@@ -68,7 +68,7 @@ fun SplashScreen(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_paw),
-                    contentDescription = null,
+                    contentDescription = "PawCare",
                     modifier = Modifier.size(44.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )

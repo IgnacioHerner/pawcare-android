@@ -61,7 +61,7 @@ class AppointmentViewModel @Inject constructor(
                     repository.updateAppointment(appointmentConId.copy(firestoreId = firestoreId))
                 }
             }
-            showSnackbar("Turno guardado ✅")
+            showSnackbar("Turno guardado")
         }
     }
 

@@ -61,7 +61,7 @@ import com.ignaherner.pawcare.ui.theme.WarnSoft
 fun ConditionDetailScreen(
     conditionId: Long,
     onNavigateBack: () -> Unit,
-    onNavigateToEdit: (Long) -> Unit,
+    onNavigateToEdit: ((Long) -> Unit)? = null,
     viewModel: ConditionViewModel = hiltViewModel()
 ) {
     val detailState by viewModel.conditionDetailState.collectAsStateWithLifecycle()
@@ -84,12 +84,14 @@ fun ConditionDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onNavigateToEdit(conditionId) }) {
-                        PawCareIcon(
-                            icon = Icons.Outlined.Edit,
-                            contentDescription = "Editar",
-                            size = PawIconSize.medium
-                        )
+                    onNavigateToEdit?.let { edit ->
+                        IconButton(onClick = { edit(conditionId) }) {
+                            PawCareIcon(
+                                icon = Icons.Outlined.Edit,
+                                contentDescription = "Editar",
+                                size = PawIconSize.medium
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

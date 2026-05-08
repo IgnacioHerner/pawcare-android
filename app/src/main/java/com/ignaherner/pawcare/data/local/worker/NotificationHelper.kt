@@ -52,7 +52,7 @@ class NotificationHelper @Inject constructor(
     ) {
         val notification = NotificationCompat.Builder(context, MEDICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("💊 Medicamento para $petName")
+            .setContentTitle("Medicamento para $petName")
             .setContentText("Es hora de dar $medicationName — $dosis")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -73,7 +73,7 @@ class NotificationHelper @Inject constructor(
     ) {
         val notification = NotificationCompat.Builder(context, VACCINE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("💉 Vacuna próxima para $petName")
+            .setContentTitle("Vacuna próxima para $petName")
             .setContentText("$vaccineName programada para el $fecha")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)

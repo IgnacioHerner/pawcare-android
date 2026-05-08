@@ -62,7 +62,7 @@ class WeightViewModel @Inject constructor(
                     repository.updateWeight(weightConId.copy(firestoreId = firestoreId))
                 }
             }
-            showSnackbar("Peso registrado ✅")
+            showSnackbar("Peso registrado")
         }
     }
 

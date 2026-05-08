@@ -53,7 +53,7 @@ import com.ignaherner.pawcare.ui.theme.PawSpace
 fun DewormingDetailScreen(
     dewormingId: Long,
     onNavigateBack: () -> Unit,
-    onNavigateToEdit: (Long) -> Unit,
+    onNavigateToEdit: ((Long) -> Unit)? = null,
     viewModel: DewormingViewModel = hiltViewModel()
 ) {
     val detailState by viewModel.dewormingDetailState.collectAsStateWithLifecycle()
@@ -76,12 +76,14 @@ fun DewormingDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onNavigateToEdit(dewormingId) }) {
-                        PawCareIcon(
-                            icon = Icons.Outlined.Edit,
-                            contentDescription = "Editar",
-                            size = PawIconSize.medium
-                        )
+                    onNavigateToEdit?.let { edit ->
+                        IconButton(onClick = { edit(dewormingId) }) {
+                            PawCareIcon(
+                                icon = Icons.Outlined.Edit,
+                                contentDescription = "Editar",
+                                size = PawIconSize.medium
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

@@ -52,7 +52,7 @@ class OwnerViewModel @Inject constructor(
             repository.insertOwner(owner)
             _ownerExists.value = true
             _ownerState.value = OwnerState.Success(owner)
-            showSnackbar("Perfil creado ✅")
+            showSnackbar("Perfil creado")
         }
     }
 
@@ -60,7 +60,7 @@ class OwnerViewModel @Inject constructor(
         safeLaunch(onError = "Error al actualizar") {
             repository.updateOwner(owner)
             _ownerState.value = OwnerState.Success(owner)
-            showSnackbar("Perfil actualizado ✅")
+            showSnackbar("Perfil actualizado")
         }
     }
 }

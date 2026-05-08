@@ -62,7 +62,7 @@ class ConditionViewModel @Inject constructor(
                     repository.updateCondition(conditionConId.copy(firestoreId = firestoreId))
                 }
             }
-            showSnackbar("Condición guardada ✅")
+            showSnackbar("Condición guardada")
         }
     }
 
