@@ -1,3 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PawCare</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- COMMON — buttons, dialogs, shared UI                       -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Buttons -->
+    <string name="btn_guardar">Guardar</string>
+    <string name="btn_actualizar">Actualizar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_aceptar">Aceptar</string>
+    <string name="btn_compartir">Compartir</string>
+    <string name="btn_buscar">Buscar</string>
+
+    <!-- Content descriptions (shared) -->
+    <string name="cd_volver">Volver</string>
+    <string name="cd_editar">Editar</string>
+    <string name="cd_editar_perfil">Editar perfil</string>
+    <string name="cd_mi_perfil">Mi perfil</string>
+    <string name="cd_perfil">Perfil</string>
+    <string name="cd_configuracion">Configuración</string>
+    <string name="cd_compartir">Compartir</string>
+    <string name="cd_elegir_fecha">Elegir fecha</string>
+    <string name="cd_limpiar">Limpiar</string>
+    <string name="cd_agregar">Agregar</string>
+
+    <!-- Delete dialog -->
+    <string name="dialog_delete_irreversible">Esta acción no se puede deshacer.</string>
+
+    <!-- Shared form labels -->
+    <string name="form_label_veterinario_opcional">Veterinario (opcional)</string>
+    <string name="form_label_notas_opcional">Notas (opcional)</string>
+    <string name="form_label_fecha_aplicacion">Fecha de aplicacion</string>
+    <string name="form_supporting_opcional">Opcional</string>
+
+    <!-- Shared detail section headers -->
+    <string name="detail_section_informacion">INFORMACIÓN</string>
+    <string name="detail_label_veterinario">Veterinario</string>
+    <string name="detail_label_notas">Notas</string>
+    <string name="detail_label_fecha">Fecha</string>
+    <string name="detail_label_frecuencia">Frecuencia</string>
+    <string name="detail_label_tipo">Tipo</string>
+    <string name="detail_label_proxima_dosis">Próxima dosis</string>
+    <string name="detail_label_fecha_aplicacion">Fecha aplicación</string>
+
+    <!-- Shared empty state messages (owner view) -->
+    <string name="empty_vet_register_hint">El veterinario podrá registrar las %1$s de tu mascota</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HOME SCREEN                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="home_pawcare_title">PawCare</string>
+    <string name="home_empty_title">Sin mascotas todavía</string>
+    <string name="home_empty_body">Agregá tu primera mascota para empezar a llevar su salud al día</string>
+
+    <!-- Greeting subtitle (format strings) -->
+    <string name="home_saludo">Hola, %1$s</string>
+    <string name="home_subtitle_al_dia_single">%1$s está al día</string>
+    <string name="home_subtitle_al_dia_plural">Tus %1$d mascotas están al día</string>
+    <string name="home_subtitle_atencion_single">%1$s necesita atención</string>
+    <string name="home_subtitle_atencion_plural">%1$d mascotas, %2$d pendientes</string>
+
+    <!-- Alert banners -->
+    <string name="home_alert_vacuna_vencida">1 vacuna vencida</string>
+    <string name="home_alert_recordatorio_proximo">1 recordatorio próximo</string>
+    <string name="home_alert_tratamiento_en_curso">Tratamiento en curso</string>
+
+    <!-- Section headers -->
+    <string name="home_section_mascotas">Mascotas</string>
+
+    <!-- Delete pet dialog -->
+    <string name="home_delete_pet_title">¿Eliminar a %1$s?</string>
+    <string name="home_delete_pet_message">Se eliminarán también todas sus vacunas, medicamentos y registros. Esta acción no se puede deshacer.</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- PET DETAIL SCREEN                                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="pet_detail_title_label">LIBRETA SANITARIA</string>
+    <string name="pet_detail_cd_ver_qr">Ver QR</string>
+    <string name="pet_detail_section_historial">Historial Clínico</string>
+    <string name="pet_detail_section_seguimiento">Seguimiento</string>
+
+    <!-- Vital stats labels -->
+    <string name="pet_detail_label_peso_actual">PESO ACTUAL</string>
+    <string name="pet_detail_label_edad">EDAD</string>
+    <string name="pet_detail_label_codigo">CÓDIGO</string>
+    <string name="pet_detail_label_tutor">TUTOR</string>
+
+    <!-- Category row hints -->
+    <string name="hint_sin_registros">Sin registros</string>
+    <string name="hint_sin_tratamientos_activos">Sin tratamientos activos</string>
+    <string name="hint_vacuna_registrada_single">1 vacuna registrada</string>
+    <string name="hint_vacunas_registradas_plural">%1$d vacunas registradas</string>
+    <string name="hint_medicamentos_en_curso">%1$d en curso</string>
+    <string name="hint_condicion_registrada_single">1 condición registrada</string>
+    <string name="hint_condiciones_registradas_plural">%1$d condiciones registradas</string>
+    <string name="hint_aplicacion_registrada_single">1 aplicación registrada</string>
+    <string name="hint_aplicaciones_plural">%1$d aplicaciones</string>
+    <string name="hint_ultimo_peso">Último: %1$s kg</string>
+    <string name="hint_visita_registrada_single">1 visita registrada</string>
+    <string name="hint_visitas_registradas_plural">%1$d visitas registradas</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- PET FORM SCREEN                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="pet_form_title_new">Nueva mascota</string>
+    <string name="pet_form_title_edit">Editar mascota</string>
+    <string name="pet_form_add_photo">AGREGAR FOTO</string>
+    <string name="pet_form_cd_foto">Foto de %1$s</string>
+    <string name="pet_form_label_especie">ESPECIE</string>
+    <string name="pet_form_placeholder_nombre">Nombre</string>
+    <string name="pet_form_placeholder_raza">Raza</string>
+    <string name="pet_form_label_sexo">SEXO</string>
+    <string name="pet_form_placeholder_fecha_nacimiento">Fecha de nacimiento</string>
+    <string name="pet_form_hint_fecha_nacimiento">Si no la sabés, podés omitirla</string>
+    <string name="pet_form_placeholder_peso">Peso actual (kg)</string>
+    <string name="pet_form_hint_peso">Opcional — podés agregarlo después</string>
+    <string name="pet_form_castrado_label">Castrado/a</string>
+    <string name="pet_form_castrado_hint">Recomendamos la castración responsable</string>
+    <string name="pet_form_placeholder_fecha_castracion">Fecha de castración</string>
+    <string name="pet_form_btn_guardar">Guardar mascota</string>
+    <string name="pet_form_btn_actualizar">Actualizar mascota</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- QR SCREEN                                                   -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="qr_title_label">TARJETA DE IDENTIDAD</string>
+    <string name="qr_card_header">PAWCARE · LIBRETA DIGITAL</string>
+    <string name="qr_cd_qr_mascota">QR de %1$s</string>
+    <string name="qr_help_text">Mostrá este código al veterinario para acceder al historial completo de %1$s.</string>
+    <string name="qr_share_text">Libreta sanitaria de %1$s en PawCare. Código: %2$s</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VACCINES                                                    -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vaccine_screen_subtitle">Vacunas</string>
+    <string name="vaccine_cd_agregar">Agregar vacuna</string>
+    <string name="vaccine_delete_title">¿Eliminar %1$s?</string>
+    <string name="vaccine_empty_title">Sin vacunas todavía</string>
+    <string name="vaccine_empty_body_vet">Tocá el + para agregar la primera vacuna</string>
+    <string name="vaccine_empty_body_owner">El veterinario podrá registrar las vacunas de tu mascota</string>
+
+    <!-- Vaccine form -->
+    <string name="vaccine_form_title_new">Nueva vacuna</string>
+    <string name="vaccine_form_title_edit">Editar vacuna</string>
+    <string name="vaccine_form_label_tipo">Tipo de vacuna</string>
+    <string name="vaccine_form_placeholder_tipo">Seleccioná una vacuna</string>
+    <string name="vaccine_form_label_nombre_comercial">Nombre comercial (opcional)</string>
+    <string name="vaccine_form_placeholder_nombre_comercial">Ej: Nobivac DHPPi</string>
+    <string name="vaccine_form_section_frecuencia">Frecuencia</string>
+    <string name="vaccine_form_label_proxima_dosis">Próxima dosis</string>
+
+    <!-- Vaccine detail -->
+    <string name="vaccine_detail_title">Detalle vacuna</string>
+    <string name="vaccine_detail_cd_editar">Editar vacuna</string>
+    <string name="vaccine_detail_section_sobre">SOBRE ESTA VACUNA</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MEDICATIONS                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="medication_screen_subtitle">Medicamentos</string>
+    <string name="medication_cd_agregar">Agregar medicamento</string>
+    <string name="medication_delete_title">¿Eliminar a %1$s?</string>
+    <string name="medication_filter_todas">Todas</string>
+    <string name="medication_filter_en_curso">En curso</string>
+    <string name="medication_filter_finalizado">Finalizado</string>
+    <string name="medication_empty_title">Sin medicamentos registrados</string>
+    <string name="medication_empty_body_vet">Tocá el + para registrar un medicamento</string>
+    <string name="medication_empty_body_owner">El veterinario podrá registrar los medicamentos de tu mascota</string>
+
+    <!-- Medication form -->
+    <string name="medication_form_title_new">Nueva medicación</string>
+    <string name="medication_form_title_edit">Editar medicación</string>
+    <string name="medication_form_label_nombre">Nombre del medicamento</string>
+    <string name="medication_form_placeholder_nombre">Ej: Amoxicilina</string>
+    <string name="medication_form_section_dosis">Dosis</string>
+    <string name="medication_form_label_unidad">Unidad</string>
+    <string name="medication_form_label_otra_cantidad">Otra cantidad</string>
+    <string name="medication_form_section_via">Vía de administración</string>
+    <string name="medication_form_label_unica_dosis">¿Es de única dosis?</string>
+    <string name="medication_form_hint_unica_dosis">Se administra una sola vez</string>
+    <string name="medication_form_label_dias">Días</string>
+    <string name="medication_form_label_intervalo">Cada X horas</string>
+    <string name="medication_form_label_fecha_inicio">Fecha de inicio</string>
+    <string name="medication_form_label_recetado">Recetado por (opcional)</string>
+
+    <!-- Medication detail -->
+    <string name="medication_detail_title">Detalle medicamento</string>
+    <string name="medication_detail_label_progreso">Progreso del tratamiento</string>
+    <string name="medication_detail_dia_format">Día %1$d de %2$d</string>
+    <string name="medication_detail_label_dosis">Dosis</string>
+    <string name="medication_detail_label_via">Vía</string>
+    <string name="medication_detail_label_frecuencia_valor">Cada %1$dh</string>
+    <string name="medication_detail_label_inicio">Inicio</string>
+    <string name="medication_detail_label_fin">Fin estimado</string>
+    <string name="medication_detail_unica_dosis_valor">Única dosis</string>
+    <string name="medication_detail_label_recetado_por">Recetado por</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- APPOINTMENTS                                                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="appointment_screen_subtitle">Visitas</string>
+    <string name="appointment_cd_agregar">Agregar visita</string>
+    <string name="appointment_delete_title">¿Eliminar visita?</string>
+    <string name="appointment_delete_message">Se eliminará el registro de %1$s. Esta acción no se puede deshacer.</string>
+    <string name="appointment_empty_title">Sin visitas registradas</string>
+    <string name="appointment_empty_body_vet">Tocá el + para registrar una visita</string>
+    <string name="appointment_empty_body_owner">El veterinario podrá registrar las visitas de tu mascota</string>
+
+    <!-- Appointment form -->
+    <string name="appointment_form_title_new">Nuevo turno</string>
+    <string name="appointment_form_title_edit">Editar turno</string>
+    <string name="appointment_form_label_motivo">Motivo de la visita</string>
+    <string name="appointment_form_placeholder_motivo">Ej: Control anual, vacunación</string>
+    <string name="appointment_form_label_clinica">Clínica (opcional)</string>
+    <string name="appointment_form_placeholder_clinica">Ej: Veterinaria San Martín</string>
+    <string name="appointment_form_label_diagnostico">Diagnóstico (opcional)</string>
+
+    <!-- Appointment detail -->
+    <string name="appointment_detail_title">Detalle de visita</string>
+    <string name="appointment_detail_label_motivo">Motivo</string>
+    <string name="appointment_detail_label_clinica">Clínica</string>
+    <string name="appointment_detail_label_diagnostico">Diagnóstico</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- WEIGHT                                                      -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="weight_screen_subtitle">Peso</string>
+    <string name="weight_cd_agregar">Agregar peso</string>
+    <string name="weight_delete_title">¿Eliminar registro del %1$s?</string>
+    <string name="weight_empty_title">Sin registros de peso</string>
+    <string name="weight_empty_body_vet">Tocá el + para registrar el primer peso</string>
+    <string name="weight_empty_body_owner">El veterinario podrá registrar el peso de tu mascota</string>
+    <string name="weight_label_peso_actual">PESO ACTUAL</string>
+
+    <!-- Weight form -->
+    <string name="weight_form_title_new">Nuevo peso</string>
+    <string name="weight_form_title_edit">Editar peso</string>
+    <string name="weight_form_label_peso">Peso</string>
+    <string name="weight_form_label_notas">Notas</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- DEWORMING                                                   -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="deworming_screen_subtitle">Desparasitación</string>
+    <string name="deworming_cd_agregar">Agregar desparasitación</string>
+    <string name="deworming_delete_title">¿Eliminar %1$s?</string>
+    <string name="deworming_empty_title">Sin desparasitaciones registradas</string>
+    <string name="deworming_empty_body_vet">Tocá el + para registrar una desparasitación</string>
+    <string name="deworming_empty_body_owner">El veterinario podrá registrar las desparasitaciones de tu mascota</string>
+    <string name="deworming_label_proxima">Próxima: %1$s</string>
+
+    <!-- Deworming form -->
+    <string name="deworming_form_title_new">Nueva desparasitación</string>
+    <string name="deworming_form_title_edit">Editar desparasitación</string>
+    <string name="deworming_form_label_producto">Producto</string>
+    <string name="deworming_form_placeholder_producto">Ej: NexGard, Frontline</string>
+    <string name="deworming_form_section_tipo">Tipo</string>
+    <string name="deworming_form_section_frecuencia">Frecuencia</string>
+    <string name="deworming_form_label_proxima_dosis">Próxima dosis</string>
+
+    <!-- Deworming detail -->
+    <string name="deworming_detail_title">Detalle desparasitación</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CONDITIONS                                                  -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="condition_screen_subtitle">Condiciones</string>
+    <string name="condition_cd_agregar">Agregar condición</string>
+    <string name="condition_delete_title">¿Eliminar %1$s?</string>
+    <string name="condition_filter_todas">Todas</string>
+    <string name="condition_filter_activas">Activas</string>
+    <string name="condition_filter_en_tratamiento">En tratamiento</string>
+    <string name="condition_filter_resueltas">Resueltas</string>
+    <string name="condition_empty_title">Sin condiciones registradas</string>
+    <string name="condition_empty_body_vet">Tocá el + para registrar una condición</string>
+    <string name="condition_empty_body_owner">El veterinario podrá registrar condiciones de tu mascota</string>
+    <string name="condition_empty_filter_title">Sin resultados</string>
+    <string name="condition_empty_filter_body">No hay condiciones con el filtro seleccionado</string>
+    <string name="condition_severidad_format">Severidad: %1$s</string>
+
+    <!-- Condition form -->
+    <string name="condition_form_title_new">Nueva condición</string>
+    <string name="condition_form_title_edit">Editar condición</string>
+    <string name="condition_form_label_condicion">Condición</string>
+    <string name="condition_form_placeholder_condicion">Seleccioná una condición</string>
+    <string name="condition_form_label_nombre">Nombre de la condición</string>
+    <string name="condition_form_placeholder_nombre">Ej: Luxación de rótula</string>
+    <string name="condition_form_label_fecha">Fecha de diagnóstico</string>
+    <string name="condition_form_section_severidad">Severidad</string>
+    <string name="condition_form_section_estado">Estado</string>
+
+    <!-- Condition detail -->
+    <string name="condition_detail_title">Detalle condición</string>
+    <string name="condition_detail_label_fecha_diagnostico">Fecha diagnóstico</string>
+    <string name="condition_detail_label_severidad">Severidad</string>
+    <string name="condition_detail_label_estado">Estado</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- OWNER                                                       -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Owner detail -->
+    <string name="owner_detail_title_label">TUTOR</string>
+    <string name="owner_detail_sin_mascotas">Sin mascotas registradas</string>
+    <string name="owner_detail_dueno_1">Dueño de 1 mascota</string>
+    <string name="owner_detail_dueno_plural">Dueño de %1$d mascotas</string>
+    <string name="owner_detail_label_telefono">Teléfono</string>
+    <string name="owner_detail_label_ubicacion">Ubicación</string>
+    <string name="owner_detail_label_email">Email</string>
+    <string name="owner_detail_section_mascotas">MASCOTAS</string>
+
+    <!-- Owner form -->
+    <string name="owner_form_title_create">Completá tu perfil</string>
+    <string name="owner_form_title_edit">Editar perfil</string>
+    <string name="owner_form_add_photo">Foto</string>
+    <string name="owner_form_cd_foto_perfil">Foto de perfil</string>
+    <string name="owner_form_placeholder_nombre">Nombre</string>
+    <string name="owner_form_placeholder_apellido">Apellido</string>
+    <string name="owner_form_placeholder_telefono">Teléfono</string>
+    <string name="owner_form_placeholder_email">Email (opcional)</string>
+    <string name="owner_form_placeholder_ciudad">Ciudad</string>
+    <string name="owner_form_placeholder_direccion">Dirección (opcional)</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SETTINGS SCREEN                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="settings_title">Configuración</string>
+    <string name="settings_role_vet">Veterinario</string>
+    <string name="settings_role_owner">Dueño</string>
+    <string name="settings_owner_1_mascota">Dueño · 1 mascota</string>
+    <string name="settings_owner_mascotas_plural">Dueño · %1$d mascotas</string>
+    <string name="settings_section_general">GENERAL</string>
+    <string name="settings_item_notifications">Notificaciones</string>
+    <string name="settings_section_soporte">SOPORTE</string>
+    <string name="settings_share_text">Probá PawCare, la libreta sanitaria digital para tu mascota. https://pawcare.app</string>
+    <string name="settings_share_chooser_title">Compartir PawCare</string>
+    <string name="settings_item_share">Compartir PawCare</string>
+    <string name="settings_section_cuenta">CUENTA</string>
+    <string name="settings_item_logout">Cerrar sesión</string>
+    <string name="settings_version">PawCare v1.0.0</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- BOTTOM NAVIGATION                                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="bottom_nav_inicio">Inicio</string>
+    <string name="bottom_nav_configuracion">Configuración</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ONBOARDING                                                  -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="onboarding_btn_saltar">Saltar</string>
+    <string name="onboarding_btn_siguiente">Siguiente</string>
+    <string name="onboarding_btn_empezar">Empezar</string>
+    <string name="onboarding_page1_title">La salud de tu\nmascota, organizada</string>
+    <string name="onboarding_page1_body">Vacunas, medicamentos, peso, controles — todo el historial en un solo lugar, siempre accesible.</string>
+    <string name="onboarding_page2_title">Un código único\npara cada mascota</string>
+    <string name="onboarding_page2_body">Compartí el código con tu veterinario y accedé al historial completo al instante. Sin papeles, sin trámites.</string>
+    <string name="onboarding_page3_title">Dueños y veterinarios\nconectados</string>
+    <string name="onboarding_page3_body">Lo que registra el veterinario, el dueño lo ve en tiempo real. Toda la información sincronizada.</string>
+    <string name="onboarding_page4_title">Recordatorios\ninteligentes</string>
+    <string name="onboarding_page4_body">Nunca más te olvides de una vacuna o desparasitación. PawCare te avisa cuando sea necesario.</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ROLE SELECT SCREEN                                          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="role_select_title">¿Cómo vas a\nusar PawCare?</string>
+    <string name="role_select_subtitle">Elegí tu rol para personalizar la experiencia. Podés cambiarlo después en Configuración.</string>
+    <string name="role_select_owner_title">Soy dueño</string>
+    <string name="role_select_owner_subtitle">Quiero llevar el control de salud de mis mascotas</string>
+    <string name="role_select_vet_title">Soy veterinario</string>
+    <string name="role_select_vet_subtitle">Atiendo mascotas y necesito registrar historial clínico</string>
+    <string name="role_select_terms_prefix">Al continuar aceptás los </string>
+    <string name="role_select_terms_link">Términos</string>
+    <string name="role_select_terms_middle"> y la </string>
+    <string name="role_select_privacy_link">Política de Privacidad</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- WELCOME SCREEN (post-register)                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="welcome_title">¡Listo, %1$s!</string>
+    <string name="welcome_subtitle">Tu cuenta está creada. Ahora agregá la primera mascota para empezar su libreta.</string>
+    <string name="welcome_info_mascotas">Registrá cada una de tus mascotas</string>
+    <string name="welcome_info_vacunas">Cargá vacunas, medicamentos y controles</string>
+    <string name="welcome_info_qr">Compartí el QR en cualquier consulta</string>
+    <string name="welcome_btn_add_pet">Agregar mi primera mascota</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET HOME SCREEN                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_mode_badge">MODO VETERINARIO</string>
+    <string name="vet_home_title">Buscar mascota</string>
+    <string name="vet_home_subtitle">Escaneá el QR o ingresá el código manualmente.</string>
+    <string name="vet_home_scan_qr_title">Escanear QR</string>
+    <string name="vet_home_scan_qr_hint">Apuntá al código del dueño</string>
+    <string name="vet_home_code_divider">O INGRESAR CÓDIGO</string>
+    <string name="vet_home_recent_title">Consultas recientes</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET HISTORIAL SCREEN                                        -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_historial_tipo_vacunas">Vacunas</string>
+    <string name="vet_historial_tipo_medicamentos">Medicamentos</string>
+    <string name="vet_historial_tipo_pesos">Pesos</string>
+    <string name="vet_historial_tipo_turnos">Turnos</string>
+    <string name="vet_historial_tipo_condiciones">Condiciones</string>
+    <string name="vet_historial_tipo_desparasitaciones">Desparasitaciones</string>
+    <string name="vet_historial_empty_title">Sin registros de %1$s</string>
+    <string name="vet_historial_empty_body">Tocá el + para agregar</string>
+    <string name="vet_historial_label_aplicacion">Aplicación: %1$s</string>
+    <string name="vet_historial_label_proxima">Próxima: %1$s</string>
+    <string name="vet_historial_label_inicio">Inicio: %1$s</string>
+    <string name="vet_historial_label_intervalo">Cada %1$dh · %2$d días</string>
+    <string name="vet_historial_label_diagnostico">Diagnóstico: %1$s</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET OWNER DETAIL SCREEN                                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_owner_detail_title">Perfil del dueño</string>
+    <string name="vet_owner_detail_mascotas_header">Mascotas (%1$d)</string>
+    <string name="vet_owner_detail_sin_raza">Sin raza</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- AUTH — shared across login / register screens              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="auth_placeholder_email">Email</string>
+    <string name="auth_placeholder_email_pro">Email profesional</string>
+    <string name="auth_placeholder_contrasena">Contraseña</string>
+    <string name="auth_cd_ver_contrasena">Ver contraseña</string>
+    <string name="auth_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="auth_divider_o">o</string>
+    <string name="auth_btn_continuar_google">Continuar con Google</string>
+    <string name="auth_ya_cuenta">¿Ya tenés cuenta? </string>
+    <string name="auth_primera_vez">¿Primera vez? </string>
+    <string name="auth_btn_ingresar_link">Ingresá</string>
+    <string name="auth_btn_ingresar_pro">Ingresar como profesional</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- LOGIN SCREEN                                                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="login_tab_dueno">Dueño</string>
+    <string name="login_tab_vet">Veterinario</string>
+    <string name="login_title_owner">Bienvenido de vuelta</string>
+    <string name="login_title_vet">Acceso profesional</string>
+    <string name="login_subtitle_owner">Ingresá para ver la libreta de tus mascotas.</string>
+    <string name="login_subtitle_vet">Ingresá con tus credenciales para acceder a los historiales clínicos.</string>
+    <string name="login_banner_vet">Al ingresar como profesional, los datos que modifiques quedarán registrados con tu identidad y matrícula.</string>
+    <string name="login_btn_ingresar">Ingresar</string>
+    <string name="login_no_cuenta">¿No tenés cuenta? </string>
+    <string name="login_btn_registrarse">Registrate</string>
+    <string name="login_btn_registrarme_vet">Registrarme como vet</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- REGISTER SCREEN (owner)                                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="register_badge_dueno">MODO DUEÑO</string>
+    <string name="register_title">Crear cuenta</string>
+    <string name="register_subtitle">Registrate para empezar a cuidar a tus mascotas.</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET LOGIN SCREEN                                            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_login_subtitle">Ingresá con tu matrícula y credenciales para acceder a los historiales clínicos.</string>
+    <string name="vet_login_disclaimer">Al ingresar como profesional, confirmás que los datos que modifiques quedarán registrados con tu identidad y matrícula.</string>
+    <string name="vet_login_btn_registrarme">Registrarme como veterinario</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET REGISTER SCREEN                                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_register_badge">REGISTRO PROFESIONAL</string>
+    <string name="vet_register_step1_title">Datos personales</string>
+    <string name="vet_register_step1_subtitle">Tu nombre aparecerá en los registros que cargues.</string>
+    <string name="vet_register_email_supporting">Usá tu email de trabajo si es posible</string>
+    <string name="vet_register_btn_continuar">Continuar</string>
+    <string name="vet_register_step2_title">Credenciales profesionales</string>
+    <string name="vet_register_step2_subtitle">Necesitamos validar tu matrícula antes de darte acceso a los historiales.</string>
+    <string name="vet_register_placeholder_matricula_mn">Matrícula profesional (M.N.)</string>
+    <string name="vet_register_matricula_supporting">Número de matrícula nacional del COLVEMA</string>
+    <string name="vet_register_placeholder_clinica">Clínica o centro</string>
+    <string name="vet_register_password_supporting">Mínimo 8 caracteres, con número y símbolo</string>
+    <string name="vet_register_verification_notice">Verificaremos tu matrícula en 24-48hs. Mientras tanto podrás usar la app con funciones limitadas.</string>
+    <string name="vet_register_btn_crear">Crear cuenta profesional</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET WELCOME SCREEN                                          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_welcome_title">¡Bienvenido, Dr. %1$s!</string>
+    <string name="vet_welcome_subtitle">Tu cuenta profesional está creada. Así funciona PawCare para vos:</string>
+    <string name="vet_welcome_row_qr">Buscá mascotas por código QR o ID</string>
+    <string name="vet_welcome_row_registros">Registrá vacunas, medicamentos y controles</string>
+    <string name="vet_welcome_row_matricula">Todo queda vinculado a tu matrícula</string>
+    <string name="vet_welcome_row_sync">Los dueños ven tus registros en tiempo real</string>
+    <string name="vet_welcome_btn">Empezar a trabajar</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET FORM SCREEN                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_form_placeholder_matricula">Matrícula profesional</string>
+    <string name="vet_form_placeholder_especialidad">Especialidad (opcional)</string>
+    <string name="vet_form_placeholder_clinica">Clínica / Consultorio (opcional)</string>
+    <string name="vet_form_placeholder_ciudad_opcional">Ciudad (opcional)</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET PROFILE DETAIL SCREEN                                   -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_profile_title">PERFIL PROFESIONAL</string>
+    <string name="vet_profile_empty_title">Sin perfil profesional</string>
+    <string name="vet_profile_empty_body">Completá tu perfil para que los dueños vean tu información</string>
+    <string name="vet_profile_dr_nombre">Dr. %1$s %2$s</string>
+    <string name="vet_profile_label_clinica">Clínica / Consultorio</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VET PET DETAIL SCREEN                                       -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="vet_pet_detail_quick_register_title">Registro rápido</string>
+    <string name="vet_pet_detail_quick_subtitle">¿Qué querés registrar?</string>
+    <string name="vet_pet_detail_section_dashboard">DASHBOARD</string>
+    <string name="vet_pet_detail_stat_peso">PESO</string>
+    <string name="vet_pet_detail_unit_kg">kg</string>
+    <string name="vet_pet_detail_stat_ultima_visita">ÚLTIMA VISITA</string>
+    <string name="vet_pet_detail_visita_hoy">Hoy</string>
+    <string name="vet_pet_detail_visita_ayer">Ayer</string>
+    <string name="vet_pet_detail_visita_hace_dias">Hace %1$d días</string>
+    <string name="vet_pet_detail_stat_alertas">ALERTAS</string>
+    <string name="vet_pet_detail_alertas_atencion">Atención</string>
+    <string name="vet_pet_detail_cd_llamar">Llamar</string>
+    <string name="vet_pet_detail_historial_title">Historial clínico</string>
+    <string name="vet_pet_detail_hint_registradas_n">%1$d registradas</string>
+    <string name="vet_pet_detail_hint_med_activo">%1$s en curso</string>
+    <string name="vet_pet_detail_hint_desparasitaciones_n">%1$d aplicaciones</string>
+    <string name="vet_pet_detail_hint_ultima_visita">Última: %1$s</string>
+    <string name="vet_pet_detail_edad_desconocida">Edad desconocida</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- QR SCANNER SCREEN                                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="qr_scanner_hint_overlay">Apuntá al código QR de la mascota</string>
+    <string name="qr_scanner_permission_required">Se necesita permiso de cámara</string>
+    <string name="qr_scanner_btn_dar_permiso">Dar permiso</string>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- NOTIFICATIONS                                               -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <string name="notification_channel_medication_name">Recordatorios de medicamentos</string>
+    <string name="notification_channel_vaccine_name">Recordatorios de vacunas</string>
+    <string name="notification_medication_title">Medicamento para %1$s</string>
+    <string name="notification_medication_body">Es hora de dar %1$s — %2$s</string>
+    <string name="notification_vaccine_title">Vacuna próxima para %1$s</string>
+    <string name="notification_vaccine_body">%1$s programada para el %2$s</string>
+
 </resources>
