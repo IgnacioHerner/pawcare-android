@@ -1,0 +1,43 @@
+package com.ignaherner.mispatitas.domain.model
+
+data class Pet(
+    val id: Long = 0,
+    val firestoreId: String = "",
+    val codigo: String = "",
+    val ownerId: String = "",
+    val nombre: String,
+    val especie: Especie,
+    val raza: String?,
+    val sexo: Sex?,
+    val fechaNacimiento: String?,
+    val fechaNacimientoTipo: FechaNacimientoTipo = FechaNacimientoTipo.DESCONOCIDA,
+    val fotoUri: String?,
+    val castrado: Boolean = false,
+    val fechaCastracion: String? = null,
+    val fechaUltimaDesparasitacion : String? = null,
+    val proximaDesparasitacion : String? = null
+)
+
+enum class FechaNacimientoTipo {
+    EXACTA,
+    APROXIMADA,
+    DESCONOCIDA
+}
+
+enum class Especie(val displayName: String) {
+    PERRO("Perro"),
+    GATO("Gato"),
+    CONEJO("Conejo"),
+    AVE("Ave"),
+    PEZ("Pez"),
+    OTRO("Otro");
+
+    fun emoji(): String = when (this) {
+        PERRO -> "🐶"
+        GATO -> "🐱"
+        CONEJO -> "🐰"
+        AVE -> "🐦"
+        PEZ -> "🐟"
+        OTRO -> "🐾"
+    }
+}

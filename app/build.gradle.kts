@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.ignaherner.pawcare"
+    namespace = "com.ignaherner.mispatitas"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.ignaherner.pawcare"
+        applicationId = "com.ignaherner.mispatitas"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

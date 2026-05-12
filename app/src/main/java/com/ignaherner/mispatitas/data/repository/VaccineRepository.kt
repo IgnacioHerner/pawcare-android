@@ -1,0 +1,34 @@
+package com.ignaherner.mispatitas.data.repository
+
+import com.ignaherner.mispatitas.data.local.dao.VaccineDao
+import com.ignaherner.mispatitas.data.local.mapper.toDomain
+import com.ignaherner.mispatitas.data.local.mapper.toEntity
+import com.ignaherner.mispatitas.domain.model.Vaccine
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class VaccineRepository @Inject constructor(
+    private val vaccineDao: VaccineDao
+){
+
+    fun getVaccinesByPetId(petId: Long): Flow<List<Vaccine>> =
+        vaccineDao.getVaccinesByPetId(petId)
+            .map { entities ->
+                entities.map { it.toDomain() }
+            }
+
+    suspend fun getVaccineById(id: Long): Vaccine? =
+        vaccineDao.getVaccineById(id)?.toDomain()
+
+    suspend fun insertVaccine(vaccine: Vaccine) : Long =
+        vaccineDao.insertVaccine(vaccine.toEntity())
+
+    suspend fun updateVaccine(vaccine: Vaccine) =
+        vaccineDao.updateVaccine(vaccine.toEntity())
+
+    suspend fun deleteVaccine(vaccine: Vaccine) =
+        vaccineDao.deleteVaccine(vaccine.toEntity())
+}

@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.ignaherner.pawcare" />
-                  <option name="mobileSdkAppId" value="1:292196346724:android:af540c965e609910a2e871" />
+                  <option name="appId" value="com.ignaherner.mispatitas" />
+                  <option name="mobileSdkAppId" value="1:292196346724:android:4ab70c687f5e0a71a2e871" />
                   <option name="projectId" value="pawcare-215f9" />
                   <option name="projectNumber" value="292196346724" />
                 </ConnectionSetting>

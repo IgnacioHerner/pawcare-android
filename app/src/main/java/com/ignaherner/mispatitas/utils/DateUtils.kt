@@ -1,0 +1,165 @@
+package com.ignaherner.mispatitas.utils
+
+import android.net.Uri
+import com.ignaherner.mispatitas.domain.model.FechaNacimientoTipo
+import com.ignaherner.mispatitas.domain.model.FrecuenciaDeworming
+import com.ignaherner.mispatitas.domain.model.FrecuenciaVacuna
+import com.ignaherner.mispatitas.domain.model.Weight
+import java.io.File
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+
+val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+private val dateFormatterAlt: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+fun LocalDate.toFormattedString(): String = format(dateFormatter)
+
+fun String.toLocalDate(): LocalDate = try {
+    LocalDate.parse(this, dateFormatter)
+} catch (e: Exception) {
+    try {
+        LocalDate.parse(this, dateFormatterAlt)
+    } catch (e2: Exception) {
+        LocalDate.now() // fallback — si falla todo, usá hoy
+    }
+}
+// Funcion para calcular la proxima dosis + un año
+fun calcularProximaDosis(fecha: String) : String =
+    fecha.toLocalDate().plusYears(1).toFormattedString()
+
+// Funcion para la fecha de hoy
+fun fechaHoy(): String = LocalDate.now().toFormattedString()
+
+// Funcion para hacer mas linda la fecha
+fun String.toFriendlyDate(): String {
+    return try {
+        val date = this.toLocalDate()
+        val formatter = DateTimeFormatter.ofPattern(
+            "dd MMM yyyy",
+            Locale("es", "AR")
+        )
+        date.format(formatter)
+    } catch (e: Exception) {
+        this // si falla, devuelve el string original
+    }
+}
+
+// fechaInicio + duracionDias
+fun calcularFechaFin(fechaInicio: String, duracionDias: Int): String =
+    fechaInicio.toLocalDate().plusDays(duracionDias.toLong()).toFormattedString()
+
+// Funcion para calcular el dia actual de la dosis
+fun calcularDiaActual(fechaInicio: String, duracionDias: Int): String {
+    val inicio = fechaInicio.toLocalDate()
+    val hoy = LocalDate.now()
+    val diasPasados = ChronoUnit.DAYS.between(inicio, hoy).toInt() + 1
+    val diaActual = diasPasados.coerceIn(1, duracionDias)
+    return "Dia $diaActual de $duracionDias"
+}
+
+// Funcion para la WeightMetrics
+data class WeightMetrics(
+    val ultimoPeso: Double,
+    val cambio30Dias: Double?, // null si no hay datos de hace 30 días
+    val promedio: Double,
+    val tendencia: String // "📈 En aumento", "📉 En descenso", etc.
+)
+
+// Funcion para calcular metricas y sacar promedio, la tendencia etc
+fun calcularMetricas (registros: List<Weight>): WeightMetrics? {
+    if (registros.isEmpty()) return null
+
+    val ultimoPeso = registros.first().peso
+
+    val hoy = LocalDate.now()
+    val hace30Dias = hoy.minusDays(30)
+    val pesoHace30Dias = registros
+        .filter { it.fecha.toLocalDate().isBefore(hace30Dias) }
+        .firstOrNull()?.peso
+    val cambio = pesoHace30Dias?.let { ultimoPeso - it }
+
+    val promedio = registros.map {it.peso}.average()
+
+    val tendencia = when {
+        cambio == null -> "➡️ Sin datos suficientes"
+        cambio > 0.5 -> "📈 En aumento"
+        cambio < -0.5 -> "📉 En descenso"
+        else -> "➡️ Peso estable"
+    }
+
+    return WeightMetrics(ultimoPeso, cambio, promedio, tendencia)
+}
+
+// Calcualar cuántos días faltan desde hoy hasta "15/03/2027" ejmplo
+fun diasHastaFecha(fecha: String): Long {
+    val fechaDate = fecha.toLocalDate()
+    val hoy = LocalDate.now()
+    return ChronoUnit.DAYS.between(hoy, fechaDate)
+}
+
+
+// Devuelve el numero del dia actual del tratamiento
+fun calcularDiaNumero(fechaInicio: String, duracionDias: Int): Int {
+    val inicio = fechaInicio.toLocalDate()
+    val hoy = LocalDate.now()
+    val diasPasados = ChronoUnit.DAYS.between(inicio, hoy).toInt() + 1
+    return diasPasados.coerceIn(1, duracionDias)
+}
+
+fun calcularEdad(fechaNacimiento: String?, tipo: FechaNacimientoTipo): String {
+    return when (tipo) {
+        FechaNacimientoTipo.DESCONOCIDA -> "Edad desconocida"
+        FechaNacimientoTipo.EXACTA, FechaNacimientoTipo.APROXIMADA -> {
+            if (fechaNacimiento.isNullOrBlank()) return "Edad desconocida"
+            try {
+                val nacimiento = fechaNacimiento.toLocalDate()
+                val hoy = LocalDate.now()
+                val años = ChronoUnit.YEARS.between(nacimiento, hoy)
+                val meses = ChronoUnit.MONTHS.between(nacimiento, hoy)
+                val prefijo = if (tipo == FechaNacimientoTipo.APROXIMADA) "~ " else ""
+                when {
+                    años >= 1 -> "$prefijo$años ${if (años == 1L) "año" else "años"}"
+                    meses >= 1 -> "$prefijo$meses ${if (meses == 1L) "mes" else "meses"}"
+                    else -> "${prefijo}Menos de 1 mes"
+                }
+            } catch (e: Exception) {
+                "Edad desconocida"
+            }
+        }
+    }
+}
+
+fun calcularProximaDosisConFrecuencia(fechaAplicacion: String, frecuencia: FrecuenciaVacuna): String {
+    if (frecuencia.meses == null) return ""
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val fecha = LocalDate.parse(fechaAplicacion, formatter)
+        val proxima = fecha.plusMonths(frecuencia.meses.toLong())
+        proxima.format(formatter)
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun calcularProximaDosisDeworming(fechaAplicacion: String, frecuencia: FrecuenciaDeworming): String {
+    if (frecuencia.meses == null) return ""
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val fecha = LocalDate.parse(fechaAplicacion, formatter)
+        val proxima = fecha.plusMonths(frecuencia.meses.toLong())
+        proxima.format(formatter)
+    } catch (e: Exception) {
+        ""
+    }
+}
+fun fotoExiste(uri: String?): Boolean {
+    if (uri.isNullOrBlank()) return false
+    return try {
+        val file = File(Uri.parse(uri).path ?: return false)
+        file.exists()
+    } catch (e: Exception) {
+        false
+    }
+}

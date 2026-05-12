@@ -1,0 +1,1594 @@
+package com.ignaherner.mispatitas.presentation
+
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.ignaherner.mispatitas.domain.model.Especie
+import com.ignaherner.mispatitas.domain.model.Rol
+import com.ignaherner.mispatitas.domain.model.VetHistorialTipo
+import com.ignaherner.mispatitas.presentation.appointments.AppointmentDetailScreen
+import com.ignaherner.mispatitas.presentation.appointments.AppointmentFormScreen
+import com.ignaherner.mispatitas.presentation.appointments.AppointmentScreen
+import com.ignaherner.mispatitas.presentation.appointments.AppointmentViewModel
+import com.ignaherner.mispatitas.presentation.auth.AuthViewModel
+import com.ignaherner.mispatitas.presentation.auth.LoginScreen
+import com.ignaherner.mispatitas.presentation.auth.OnboardingScreen
+import com.ignaherner.mispatitas.presentation.auth.RoleSelectScreen
+import com.ignaherner.mispatitas.presentation.auth.WelcomeScreen
+import com.ignaherner.mispatitas.presentation.condition.ConditionDetailScreen
+import com.ignaherner.mispatitas.presentation.condition.ConditionFormScreen
+import com.ignaherner.mispatitas.presentation.condition.ConditionScreen
+import com.ignaherner.mispatitas.presentation.condition.ConditionViewModel
+import com.ignaherner.mispatitas.presentation.deworming.DewormingDetailScreen
+import com.ignaherner.mispatitas.presentation.deworming.DewormingFormScreen
+import com.ignaherner.mispatitas.presentation.deworming.DewormingScreen
+import com.ignaherner.mispatitas.presentation.deworming.DewormingViewModel
+import com.ignaherner.mispatitas.presentation.medications.MedicationDetailScreen
+import com.ignaherner.mispatitas.presentation.medications.MedicationFormScreen
+import com.ignaherner.mispatitas.presentation.medications.MedicationScreen
+import com.ignaherner.mispatitas.presentation.medications.MedicationViewModel
+import com.ignaherner.mispatitas.presentation.owners.OwnerDetailScreen
+import com.ignaherner.mispatitas.presentation.owners.OwnerFormScreen
+import com.ignaherner.mispatitas.presentation.owners.OwnerViewModel
+import com.ignaherner.mispatitas.presentation.pets.PetDetailScreen
+import com.ignaherner.mispatitas.presentation.pets.PetFormScreen
+import com.ignaherner.mispatitas.presentation.pets.QRScreen
+import com.ignaherner.mispatitas.presentation.settings.SettingsScreen
+import com.ignaherner.mispatitas.presentation.settings.SettingsViewModel
+import com.ignaherner.mispatitas.presentation.vaccines.VaccineDetailScreen
+import com.ignaherner.mispatitas.presentation.vaccines.VaccineFormScreen
+import com.ignaherner.mispatitas.presentation.vaccines.VaccineScreen
+import com.ignaherner.mispatitas.presentation.vaccines.VaccineViewModel
+import com.ignaherner.mispatitas.presentation.vet.VetFormScreen
+import com.ignaherner.mispatitas.presentation.vet.VetHistorialScreen
+import com.ignaherner.mispatitas.presentation.vet.VetHomeScreen
+import com.ignaherner.mispatitas.presentation.auth.VetLoginScreen
+import com.ignaherner.mispatitas.presentation.auth.VetRegisterScreen
+import com.ignaherner.mispatitas.presentation.auth.VetWelcomeScreen
+import com.ignaherner.mispatitas.presentation.pets.PetDetailState
+import com.ignaherner.mispatitas.presentation.pets.PetViewModel
+import com.ignaherner.mispatitas.presentation.vet.QRScannerScreen
+import com.ignaherner.mispatitas.presentation.vet.VetOwnerDetailScreen
+import com.ignaherner.mispatitas.presentation.vet.VetPetDetailScreen
+import com.ignaherner.mispatitas.presentation.vet.VetProfileDetailScreen
+import com.ignaherner.mispatitas.presentation.vet.VetProfileViewModel
+import com.ignaherner.mispatitas.presentation.vet.VetViewModel
+import com.ignaherner.mispatitas.presentation.weight.WeightFormScreen
+import com.ignaherner.mispatitas.presentation.weight.WeightScreen
+import com.ignaherner.mispatitas.presentation.weight.WeightViewModel
+import kotlinx.coroutines.delay
+import java.net.URLDecoder
+import java.net.URLEncoder
+
+object PawCareDestinations {
+
+    // Home
+    const val HOME = "home"
+
+    // Pets
+    const val PET_DETAIL = "pet_detail/{petId}"
+    const val PET_FORM = "pet_form?petId={petId}"
+
+    // Vaccines
+    const val VACCINE_LIST = "vaccine_list/{petId}/{petName}"
+    const val VACCINE_FORM = "vaccine_form/{petId}/{petName}?vaccineId={vaccineId}"
+    const val VACCINE_DETAIL = "vaccine_detail/{vaccineId}/{petId}/{petName}"
+
+    // Appointments
+    const val APPOINTMENT_LIST = "appointment_list/{petId}/{petName}"
+    const val APPOINTMENT_FORM = "appointment_form/{petId}/{petName}?appointmentId={appointmentId}"
+    const val APPOINTMENT_DETAIL = "appointment_detail/{appointmentId}/{petId}/{petName}"
+
+    // Medications
+    const val MEDICATION_LIST = "medication_list/{petId}/{petName}"
+    const val MEDICATION_FORM = "medication_form/{petId}/{petName}?medicationId={medicationId}"
+    const val MEDICATION_DETAIL = "medication_detail/{medicationId}/{petId}/{petName}"
+
+    // Weights
+    const val WEIGHT_LIST = "weight_list/{petId}"
+    const val WEIGHT_FORM = "weight_form/{petId}?weightId={weightId}"
+
+    // Settings
+    const val SETTINGS = "settings"
+
+    // Owner
+    const val OWNER_FORM = "owner_form"
+    const val OWNER_EDIT = "owner_edit"
+    const val OWNER_DETAIL = "owner_detail"
+
+
+    // Condition
+    const val CONDITION_LIST = "condition_list/{petId}/{petName}"
+    const val CONDITION_FORM = "condition_form/{petId}/{petName}?conditionId={conditionId}"
+    const val CONDITION_DETAIL = "condition_detail/{conditionId}"
+
+    // Desparasitacion
+    const val DEWORMING_LIST = "deworming_list/{petId}/{petName}"
+    const val DEWORMING_FORM = "deworming_form/{petId}/{petName}?dewormingId={dewormingId}"
+
+    const val DEWORMING_DETAIL = "deworming_detail/{dewormingId}"
+
+    // Splash
+    const val SPLASH = "splash"
+
+    const val QR_SCREEN = "qr_screen/{petId}"
+
+    const val QR_SCANNER = "qr_scanner"
+
+    // Login y Register
+    const val LOGIN = "login"
+    const val REGISTER = "register"
+    const val ONBOARDING = "onboarding"
+    const val ROLE_SELECT = "role_select"
+    const val WELCOME = "welcome/{nombre}"
+    const val VET_WELCOME = "vet_welcome/{nombre}"
+    const val VET_LOGIN = "vet_login"
+    const val VET_REGISTER = "vet_register"
+
+
+    // VETERINARIO
+    const val VET_HOME = "vet_home"
+    const val VET_PET_DETAIL = "vet_pet_detail/{firestoreId}"
+    const val VET_FORM = "vet_form"
+    const val VET_HISTORIAL = "vet_historial/{firestoreId}/{tipo}"
+    const val VET_OWNER_DETAIL = "vet_owner_detail/{ownerId}"
+
+    const val VET_PROFILE_DETAIL = "vet_profile_detail"
+    const val VET_VACCINE_FORM = "vet_vaccine_form/{firestoreId}"
+    const val VET_MEDICATION_FORM = "vet_medication_form/{firestoreId}"
+    const val VET_WEIGHT_FORM = "vet_weight_form/{firestoreId}"
+    const val VET_APPOINTMENT_FORM = "vet_appointment_form/{firestoreId}"
+    const val VET_CONDITION_FORM = "vet_condition_form/{firestoreId}"
+    const val VET_DEWORMING_FORM = "vet_deworming_form/{firestoreId}"
+
+    const val LOADING = "loading"
+
+
+
+    // Funciones para construir rutas con argumentos
+    fun petDetail(petId: Long) = "pet_detail/$petId"
+    fun petForm(petId: Long? = null) = if (petId != null) "pet_form?petId=$petId" else "pet_form"
+
+    // Funciones para vaccines
+    fun vaccineList(petId: Long, petName: String) = "vaccine_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun vaccineForm(petId: Long, petName: String, vaccineId: Long? = null) =
+        if (vaccineId != null)
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?vaccineId=$vaccineId"
+        else
+            "vaccine_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun vaccineDetail(vaccineId: Long, petId: Long, petName: String) =
+        "vaccine_detail/$vaccineId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    // Funciones para appoinments
+    fun appointmentList(petId: Long, petName: String) = "appointment_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun appointmentForm(petId: Long, petName: String, appointmentId: Long? = null) =
+        if (appointmentId != null)
+            "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?appointmentId=$appointmentId"
+        else
+            "appointment_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun appointmentDetail(appointmentId: Long, petId: Long, petName: String) =
+        "appointment_detail/$appointmentId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    // Funciones para medications
+    fun medicationList(petId: Long, petName: String) = "medication_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+    fun medicationForm(petId: Long, petName: String, medicationId: Long? = null) =
+        if(medicationId != null)
+            "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?medicationId=$medicationId"
+        else
+            "medication_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun medicationDetail(medicationId: Long, petId: Long, petName: String) =
+        "medication_detail/$medicationId/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    // Funciones para weights
+    fun weightList(petId: Long) = "weight_list/$petId"
+    fun weightForm(petId: Long, weightId: Long? = null) =
+        if(weightId != null) "weight_form/$petId?weightId=$weightId" else "weight_form/$petId"
+    // Funciones para conditions
+    fun conditionList(petId: Long, petName: String) =
+        "condition_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun conditionForm(petId: Long, petName: String, conditionId: Long? = null) =
+        if (conditionId != null)
+            "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?conditionId=$conditionId"
+        else
+            "condition_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun conditionDetail(conditionId: Long) = "condition_detail/$conditionId"
+
+    fun dewormingList(petId: Long, petName: String) =
+        "deworming_list/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun dewormingForm(petId: Long, petName: String, dewormingId: Long? = null) =
+        if (dewormingId != null)
+            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}?dewormingId=$dewormingId"
+        else
+            "deworming_form/$petId/${URLEncoder.encode(petName, "UTF-8")}"
+
+    fun dewormingDetail(dewormingId: Long) = "deworming_detail/$dewormingId"
+
+    fun qrScreen(petId: Long) = "qr_screen/$petId"
+
+    fun vetPetDetail(firestoreId: String) = "vet_pet_detail/$firestoreId"
+
+    fun vetHistorial(firestoreId: String, tipo: VetHistorialTipo) = "vet_historial/$firestoreId/${tipo.name}"
+
+    fun vetOwnerDetail(ownerId: String) = "vet_owner_detail/$ownerId"
+    fun vetVaccineForm(firestoreId: String) = "vet_vaccine_form/$firestoreId"
+    fun vetMedicationForm(firestoreId: String) = "vet_medication_form/$firestoreId"
+    fun vetWeightForm(firestoreId: String) = "vet_weight_form/$firestoreId"
+    fun vetAppointmentForm(firestoreId: String) = "vet_appointment_form/$firestoreId"
+    fun vetConditionForm(firestoreId: String) = "vet_condition_form/$firestoreId"
+    fun vetDewormingForm(firestoreId: String) = "vet_deworming_form/$firestoreId"
+
+    fun welcome(nombre: String) = "welcome/${URLEncoder.encode(nombre, "UTF-8")}"
+
+    fun vetWelcome(nombre: String) = "vet_welcome/${URLEncoder.encode(nombre, "UTF-8")}"
+
+
+}
+
+@Composable
+fun PawCareNavGraph(
+    navController: NavHostController = rememberNavController()
+) {
+
+    val authViewModel: AuthViewModel = hiltViewModel()
+
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        Log.d("NavDebug", "Navegando a: ${destination.route}")
+    }
+
+    fun NavHostController.safeNavigate(route: String) {
+        val currentRoute = currentBackStackEntry?.destination?.route
+        if (currentRoute != route) {
+            navigate(route)
+        }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = PawCareDestinations.SPLASH
+    ) {
+        composable(PawCareDestinations.SPLASH) {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val onboardingCompleted by settingsViewModel.onboardingCompleted.collectAsStateWithLifecycle(
+                initialValue = null
+            )
+
+            SplashScreen(
+                onSplashFinished = {
+                    when {
+                        // Ya logueado → cargar app
+                        authViewModel.isLoggedIn -> {
+                            navController.navigate(PawCareDestinations.LOADING) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
+                        }
+                        // Primera vez → onboarding
+                        onboardingCompleted == false -> {
+                            navController.navigate(PawCareDestinations.ONBOARDING) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
+                        }
+                        // Ya vio onboarding → login
+                        else -> {
+                            navController.navigate(PawCareDestinations.LOGIN) {
+                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
+        // OWNER ONBOARDING
+        composable(PawCareDestinations.ONBOARDING) {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+
+            OnboardingScreen(
+                onFinished = {
+                    settingsViewModel.completeOnboarding()
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(PawCareDestinations.ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // WELCOME
+        composable(
+            route = PawCareDestinations.WELCOME,
+            arguments = listOf(
+                navArgument("nombre") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
+            WelcomeScreen(
+                nombreUsuario = URLDecoder.decode(nombre, "UTF-8"),
+                onNavigateToAddPet = {
+                    navController.navigate(PawCareDestinations.petForm()) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = PawCareDestinations.VET_WELCOME,
+            arguments = listOf(
+                navArgument("nombre") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val nombre = URLDecoder.decode(
+                backStackEntry.arguments?.getString("nombre") ?: "", "UTF-8"
+            )
+            VetWelcomeScreen(
+                nombreVet = nombre,
+                onStart = {
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+
+        composable(PawCareDestinations.LOADING) {
+            val ownerViewModel: OwnerViewModel = hiltViewModel()
+            val vetViewModel: VetProfileViewModel = hiltViewModel()
+            val rol by authViewModel.rol.collectAsStateWithLifecycle()
+            val ownerExists by ownerViewModel.ownerExists.collectAsStateWithLifecycle()
+            val vetExists by vetViewModel.vetExists.collectAsStateWithLifecycle()
+            var timeoutFired by remember { mutableStateOf(false) }
+
+            // Timeout: si en 5 seg no resuelve, ir a login
+            LaunchedEffect(Unit) {
+                delay(5000)
+                if (rol == null && !timeoutFired) {
+                    timeoutFired = true
+                    authViewModel.logout()
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+
+            LaunchedEffect(rol, ownerExists, vetExists) {
+                if (rol == null) return@LaunchedEffect
+
+                when {
+                    rol == Rol.VETERINARIO && vetExists == null -> return@LaunchedEffect
+                    rol == Rol.VETERINARIO && vetExists == false -> {
+                        navController.navigate(PawCareDestinations.VET_FORM) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    rol == Rol.VETERINARIO && vetExists == true -> {
+                        navController.navigate(PawCareDestinations.VET_HOME) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    ownerExists == null -> return@LaunchedEffect
+                    ownerExists == false -> {
+                        navController.navigate(PawCareDestinations.OWNER_FORM) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                    else -> {
+                        navController.navigate(PawCareDestinations.HOME) {
+                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        }
+                    }
+                }
+            }
+
+            LoadingScreen()
+        }
+
+        // Login dueno
+        composable(PawCareDestinations.LOGIN) {
+            LoginScreen(
+                viewModel = authViewModel,
+                onNavigateToRegister = {
+                    authViewModel.setSelectedRole("DUENO")
+                    navController.navigate(PawCareDestinations.REGISTER)
+                },
+                onNavigateToVetRegister = {
+                    authViewModel.setSelectedRole("VETERINARIO")
+                    navController.navigate(PawCareDestinations.VET_REGISTER)
+                },
+                onLoginSuccess = {
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Register VET
+        composable(PawCareDestinations.VET_REGISTER) {
+            VetRegisterScreen(
+                viewModel = authViewModel,
+                onNavigateToVetLogin = {
+                    navController.navigate(PawCareDestinations.VET_LOGIN) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    }
+                },
+                onRegisterSuccess = { nombre ->
+                    navController.navigate(PawCareDestinations.vetWelcome(nombre)) {
+                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
+        // Elegir rol DUENO - VETERINARIO
+        composable(PawCareDestinations.ROLE_SELECT) {
+            RoleSelectScreen(
+                onRoleSelected = { rol ->
+                    authViewModel.setSelectedRole(rol)
+                    if (rol == "VETERINARIO") {
+                        navController.navigate(PawCareDestinations.VET_LOGIN) {
+                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(PawCareDestinations.REGISTER) {
+                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
+
+        // Login veterinario
+        composable(PawCareDestinations.VET_LOGIN) {
+            VetLoginScreen(
+                viewModel = authViewModel,
+                onNavigateToVetRegister = {
+                    navController.navigate(PawCareDestinations.VET_REGISTER) {
+                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    }
+                },
+                onLoginSuccess = {
+                    navController.navigate(PawCareDestinations.LOADING) {
+                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
+        // VetHome
+        composable(PawCareDestinations.VET_HOME) {
+            val scannedCode = navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("scannedCode")
+
+            // Limpiar después de leer
+            LaunchedEffect(scannedCode) {
+                if (scannedCode != null) {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.remove<String>("scannedCode")
+                }
+            }
+
+            VetHomeScreen(
+                scannedCode = scannedCode,
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS)
+                },
+                onNavigateToVetProfile = { navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL) },
+                onNavigateToPetDetail = { firestoreId ->
+                    navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                },
+                onNavigateToQRScanner = {
+                    navController.navigate(PawCareDestinations.QR_SCANNER)
+                }
+            )
+        }
+
+        composable(PawCareDestinations.QR_SCANNER) {
+            QRScannerScreen(
+                onCodeScanned = { code ->
+                    // Guardar el código escaneado y volver
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("scannedCode", code)
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(PawCareDestinations.VET_PROFILE_DETAIL) {
+            VetProfileDetailScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = {
+                    navController.navigate(PawCareDestinations.VET_FORM)
+                }
+            )
+        }
+
+        // VetPetDetail
+        composable(
+            route = PawCareDestinations.VET_PET_DETAIL,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            VetPetDetailScreen(
+                firestoreId = firestoreId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToHistorial = { id, tipo ->
+                    navController.navigate(PawCareDestinations.vetHistorial(id, tipo))
+                },
+                onNavigateToOwnerDetail = { ownerId ->
+                    navController.navigate(PawCareDestinations.vetOwnerDetail(ownerId))
+                },
+                onNavigateToVetVaccineForm = { id ->
+                    navController.navigate(PawCareDestinations.vetVaccineForm(id))
+                },
+                onNavigateToVetMedicationForm = { id ->
+                    navController.navigate(PawCareDestinations.vetMedicationForm(id))
+                },
+                onNavigateToVetConditionForm = { id ->
+                    navController.navigate(PawCareDestinations.vetConditionForm(id))
+                },
+                onNavigateToVetDewormingForm = { id ->
+                    navController.navigate(PawCareDestinations.vetDewormingForm(id))
+                },
+                onNavigateToVetAppointmentForm = { id ->
+                    navController.navigate(PawCareDestinations.vetAppointmentForm(id))
+                },
+                onNavigateToVetWeightForm = { id ->
+                    navController.navigate(PawCareDestinations.vetWeightForm(id))
+                }
+            )
+        }
+
+        // VetForm
+        composable(PawCareDestinations.VET_FORM) {
+            VetFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(PawCareDestinations.VET_HOME) {
+                            popUpTo(PawCareDestinations.VET_FORM) { inclusive = true }
+                        }
+                    }
+                },
+            )
+        }
+
+        // VetVaccineForm
+        composable(
+            route = PawCareDestinations.VET_VACCINE_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            VaccineFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { vaccine ->
+                    vetViewModel.guardarVacuna(vaccine, firestoreId)
+                }
+            )
+        }
+
+        // VetOwnerDetail
+        composable(
+            route = PawCareDestinations.VET_OWNER_DETAIL,
+            arguments = listOf(
+                navArgument("ownerId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val ownerId = backStackEntry.arguments?.getString("ownerId") ?: return@composable
+            VetOwnerDetailScreen(
+                ownerId = ownerId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToPetDetail = { firestoreId ->
+                    navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                }
+            )
+        }
+
+        // VetMedicationForm
+        composable(
+            route = PawCareDestinations.VET_MEDICATION_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            MedicationFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { medication ->
+                    vetViewModel.guardarMedicamento(medication, firestoreId)
+                }
+            )
+        }
+
+        // VetWeightForm
+        composable(
+            route = PawCareDestinations.VET_WEIGHT_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+
+            WeightFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                onSave = { weight ->
+                    vetViewModel.guardarPeso(weight, firestoreId)
+                }
+            )
+        }
+
+        // VetAppointmentForm
+        composable(
+            route = PawCareDestinations.VET_APPOINTMENT_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+            AppointmentFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { appointment ->
+                    vetViewModel.guardarTurno(appointment, firestoreId)
+                }
+            )
+        }
+
+        // VetConditionForm
+        composable(
+            route = PawCareDestinations.VET_CONDITION_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+
+            ConditionFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = { condition ->
+                    vetViewModel.guardarCondicion(condition, firestoreId)
+                }
+            )
+        }
+
+
+        // VetDewormingForm
+        composable(
+            route = PawCareDestinations.VET_DEWORMING_FORM,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val vetViewModel: VetViewModel = hiltViewModel()
+            val vetProfileViewModel: VetProfileViewModel = hiltViewModel()
+            DewormingFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                isVetMode = true,
+                vetProfileViewModel = vetProfileViewModel,
+                onSave = {deworming ->
+                    vetViewModel.guardarDesparasitacion(deworming, firestoreId)
+                }
+            )
+        }
+
+        // VetHistorial
+        composable(
+            route = PawCareDestinations.VET_HISTORIAL,
+            arguments = listOf(
+                navArgument("firestoreId") { type = NavType.StringType },
+                navArgument("tipo") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val firestoreId = backStackEntry.arguments?.getString("firestoreId") ?: return@composable
+            val tipo = VetHistorialTipo.valueOf(
+                backStackEntry.arguments?.getString("tipo") ?: return@composable
+            )
+            VetHistorialScreen(
+                firestoreId = firestoreId,
+                tipo = tipo,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToForm = {
+                    val route = when (tipo) {
+                        VetHistorialTipo.VACUNAS -> PawCareDestinations.vetVaccineForm(firestoreId)
+                        VetHistorialTipo.MEDICAMENTOS -> PawCareDestinations.vetMedicationForm(firestoreId)
+                        VetHistorialTipo.PESOS -> PawCareDestinations.vetWeightForm(firestoreId)
+                        VetHistorialTipo.TURNOS -> PawCareDestinations.vetAppointmentForm(firestoreId)
+                        VetHistorialTipo.CONDICIONES -> PawCareDestinations.vetConditionForm(firestoreId)
+                        VetHistorialTipo.DESPARASITACIONES -> PawCareDestinations.vetDewormingForm(firestoreId)
+                    }
+                    navController.navigate(route)
+                }
+            )
+        }
+
+        // Home
+        composable(PawCareDestinations.HOME) {
+            var isNavigating by remember { mutableStateOf(false) }
+
+            MainScreen(
+                navController = navController,
+                onNavigateToPetDetail = { petId ->
+                    navController.navigate(PawCareDestinations.petDetail(petId)) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToAddPet = {
+                    navController.navigate(PawCareDestinations.petForm()) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToEdit = { petId ->
+                    navController.navigate(PawCareDestinations.petForm(petId)) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(PawCareDestinations.SETTINGS) {
+                        launchSingleTop = true
+                    }
+                },
+                authViewModel = authViewModel
+            )
+
+            // Resetear cuando volvemos a HOME
+            LaunchedEffect(navController.currentDestination?.route) {
+                if (navController.currentDestination?.route == PawCareDestinations.HOME) {
+                    isNavigating = false
+                }
+            }
+        }
+
+        // Formulario - sirve para crear y editar el dueno
+        composable(PawCareDestinations.OWNER_FORM) {
+            OwnerFormScreen(
+                ownerId = null,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(PawCareDestinations.HOME) {
+                            popUpTo(PawCareDestinations.OWNER_FORM) {inclusive = true}
+                        }
+                    }
+                },
+            )
+        }
+
+        // Owner Detail
+        composable(PawCareDestinations.OWNER_DETAIL) {
+            OwnerDetailScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = {
+                    navController.navigate(PawCareDestinations.OWNER_EDIT)
+                },
+                onNavigateToPetDetail = { petId ->
+                    navController.navigate(PawCareDestinations.petDetail(petId))
+                }
+            )
+        }
+
+        // Editar dueño
+        composable(PawCareDestinations.OWNER_EDIT){
+            OwnerFormScreen(
+                ownerId = 1L, // Siempre hay un solo Owner
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
+        // Settings DataStore
+        composable(PawCareDestinations.SETTINGS) {
+            SettingsScreen(
+                viewModel = hiltViewModel(),
+                authViewModel = authViewModel,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(PawCareDestinations.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                },
+                onNavigateToVetForm = {
+                    navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL)
+                }
+            )
+        }
+
+        // QR
+        composable(
+            route = PawCareDestinations.QR_SCREEN,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType}
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            QRScreen(
+                petId = petId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+            )
+        }
+
+        // Formulario - sirve para crear y editar masctoas
+        composable(
+            route = PawCareDestinations.PET_FORM,
+            arguments = listOf(
+                navArgument("petId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId")?.takeIf { it != -1L }
+            PetFormScreen(
+                petId = petId,
+                onNavigateBack = {
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        val popped = navController.popBackStack()
+                        if (!popped) {
+                            navController.navigate(PawCareDestinations.LOADING) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+
+            )
+        }
+
+        // PET DETAIL
+        composable(
+            route = PawCareDestinations.PET_DETAIL,
+            arguments = listOf(
+                navArgument("petId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            PetDetailScreen(
+                petId = petId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id ->
+                    navController.navigate(PawCareDestinations.petForm(id))
+                },
+                onNavigateToVaccines = { id, nombre ->
+                    navController.navigate(PawCareDestinations.vaccineList(id, nombre))
+                },
+                onNavigateToAppointments = { id, nombre ->
+                    navController.navigate(PawCareDestinations.appointmentList(id, nombre))
+                },
+                onNavigateToWeight = { id ->
+                    navController.navigate(PawCareDestinations.weightList(id))
+                },
+                onNavigateToMedication = { id, nombre ->
+                    navController.navigate(PawCareDestinations.medicationList(id, nombre))
+                },
+                onNavigateToOwnerDetail = {
+                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                },
+                onNavigateToConditions = { id, nombre ->
+                    navController.navigate(PawCareDestinations.conditionList(id, nombre))
+                },
+                onNavigateToQR = { petId ->
+                    navController.navigate(PawCareDestinations.qrScreen(petId))
+                },
+                onNavigateToDeworming = { id, nombre ->
+                    navController.navigate(PawCareDestinations.dewormingList(id, nombre))
+                }
+            )
+        }
+
+        // Lista de vacunas
+        composable(
+            route = PawCareDestinations.VACCINE_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: VaccineViewModel = hiltViewModel()
+            VaccineScreen(
+                petId = petId,
+                petName = petName,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { vaccineId ->
+                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
+                },
+                onNavigateToDetail = { vaccineId ->
+                    navController.navigate(
+                        PawCareDestinations.vaccineDetail(vaccineId, petId, petName)
+                    )}
+            )
+        }
+
+        // Formulario de vacunas
+        composable(
+            route = PawCareDestinations.VACCINE_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
+                navArgument("vaccineId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(PawCareDestinations.VACCINE_LIST)
+            }
+            val vaccineViewModel: VaccineViewModel = hiltViewModel(parentEntry)
+            val petViewModel: PetViewModel = hiltViewModel()
+
+            val petDetailState by petViewModel.detailState.collectAsStateWithLifecycle()
+
+            LaunchedEffect(petId) {
+                petViewModel.loadPetById(petId)
+            }
+
+            val especie = when (val state = petDetailState) {
+                is PetDetailState.Success -> state.pet.especie
+                else -> Especie.PERRO
+            }
+
+            VaccineFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                vaccineId = vaccineId,
+                especie = especie,
+                vaccineViewModel = vaccineViewModel,
+                onSave = { vaccine ->
+                    val vaccineConPetId = vaccine.copy(petId = petId)
+                    if (vaccineId == null) {
+                        vaccineViewModel.insertVaccine(vaccineConPetId, petName)
+                    } else {
+                        vaccineViewModel.updateVaccine(vaccineConPetId, petName)
+                    }
+                }
+            )
+        }
+
+        // Vacunas detalle
+        composable(
+            route = PawCareDestinations.VACCINE_DETAIL,
+            arguments = listOf(
+                navArgument("vaccineId") {type = NavType.LongType},
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val vaccineId = backStackEntry.arguments?.getLong("vaccineId") ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            VaccineDetailScreen(
+                vaccineId = vaccineId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id ->
+                    navController.navigate(
+                        PawCareDestinations.vaccineForm(petId,petName, id)
+                    )
+                }
+            )
+        }
+
+        // Lista de turnos
+        composable(
+            route = PawCareDestinations.APPOINTMENT_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("petName") { type = NavType.StringType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            AppointmentScreen(
+                petId = petId,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { appointmentId ->
+                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName))
+                },
+                onNavigateToDetail = { appointmentId ->
+                    navController.navigate(PawCareDestinations.appointmentDetail(appointmentId, petId, petName))
+                }
+            )
+        }
+
+        // Formulario de turnos
+        composable(
+            route = PawCareDestinations.APPOINTMENT_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType},
+                navArgument("appointmentId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val appointmentId = backStackEntry.arguments?.getLong("appointmentId")
+                ?.takeIf { it != -1L }
+
+            val appointmentViewModel: AppointmentViewModel = hiltViewModel()
+            AppointmentFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                appointmentId = appointmentId,
+                appointmentViewModel = appointmentViewModel,
+                onSave = { appointment ->
+                    val appointmentConPetId = appointment.copy(petId = petId)
+                    if(appointmentId == null) {
+                        appointmentViewModel.insertAppointment(appointmentConPetId)
+                    } else {
+                        appointmentViewModel.updateAppointment(appointmentConPetId)
+                    }
+                }
+            )
+        }
+
+        // Turnos detalle
+        composable(
+            route = PawCareDestinations.APPOINTMENT_DETAIL,
+            arguments = listOf(
+                navArgument("appointmentId") {type = NavType.LongType},
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ) { backStackEntry ->
+            val appointmentId = backStackEntry.arguments?.getLong("appointmentId") ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            AppointmentDetailScreen(
+                appointmentId = appointmentId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id ->
+                    navController.navigate(
+                        PawCareDestinations.appointmentForm(petId, petName, id)
+                    )
+                }
+            )
+        }
+
+        // Lista de medicamentos
+        composable(
+            route = PawCareDestinations.MEDICATION_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: MedicationViewModel = hiltViewModel()
+            MedicationScreen(
+                viewModel = viewModel,
+                petId = petId,
+                petName = petName,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { medicationId ->
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(
+                            petId,
+                            petName,
+                            medicationId
+                        )
+                    )
+                },
+                onNavigateToForm = {
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(petId, petName)
+                    )
+                },
+                onNavigateToDetail = { medicationId ->
+                    navController.navigate(
+                        PawCareDestinations.medicationDetail(medicationId, petId, petName)
+                    )
+                }
+            )
+        }
+        // Formulario de medicamentos
+        composable(
+            route = PawCareDestinations.MEDICATION_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
+                navArgument("medicationId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val medicationId = backStackEntry.arguments?.getLong("medicationId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(
+                    PawCareDestinations.medicationList(petId, petName)
+                )
+            }
+            val medicationViewModel: MedicationViewModel = hiltViewModel(parentEntry)
+
+            MedicationFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                medicationId = medicationId,
+                medicationViewModel = medicationViewModel,
+                onSave = { medication ->
+                    val medicationConPetId = medication.copy(petId = petId)
+                    if (medicationId == null) {
+                        medicationViewModel.insertMedication(medicationConPetId, petName)
+                    } else {
+                        medicationViewModel.updateMedication(medicationConPetId, petName)
+                    }
+                }
+            )
+        }
+
+        // Detalle de Medicacion
+        composable(
+            route = PawCareDestinations.MEDICATION_DETAIL,
+            arguments = listOf(
+                navArgument("medicationId") { type = NavType.LongType },
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val medicationId = backStackEntry.arguments?.getLong("medicationId")
+                ?: return@composable
+            val petId = backStackEntry.arguments?.getLong("petId")
+                ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            MedicationDetailScreen(
+                medicationId = medicationId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id  ->
+                    navController.navigate(
+                        PawCareDestinations.medicationForm(petId, petName, id)
+                    )
+                }
+            )
+        }
+
+        // Lista de weighst
+        composable(
+            route = PawCareDestinations.WEIGHT_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType}
+            )
+        ) {backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            WeightScreen(
+                petId = petId,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToForm = { navController.navigate(PawCareDestinations.weightForm(petId)) },
+                onNavigateToEdit = { weightId ->
+                    navController.navigate(
+                        PawCareDestinations.weightForm(petId, weightId)
+                    )
+                }
+            )
+        }
+
+        // Formulario de weights
+        composable(
+            route = PawCareDestinations.WEIGHT_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("weightId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val weightId = backStackEntry.arguments?.getLong("weightId")
+                ?.takeIf { it != -1L }
+            val weightViewModel: WeightViewModel = hiltViewModel()
+
+            WeightFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                weightId = weightId,
+                weightViewModel = weightViewModel,
+                onSave = { weight ->
+                    val weightConPetId = weight.copy(petId = petId)
+                    if (weightId == null) {
+                        weightViewModel.insertWeight(weightConPetId)
+                    } else {
+                        weightViewModel.updateWeight(weightConPetId)
+                    }
+                }
+            )
+        }
+
+        // Lista de condiciones
+        composable(
+            route = PawCareDestinations.CONDITION_LIST,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: ConditionViewModel = hiltViewModel()
+            ConditionScreen(
+                petId = petId,
+                petName = petName,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.conditionForm(petId, petName))
+                },
+                onNavigateToEdit = { conditionId ->
+                    navController.navigate(
+                        PawCareDestinations.conditionForm(petId, petName, conditionId)
+                    )},
+                onNavigateToDetail = { conditionId ->
+                    navController.navigate(
+                        PawCareDestinations.conditionDetail(conditionId)
+                    )
+                }
+            )
+        }
+
+        // Formulario de condiciones
+        composable(
+            route = PawCareDestinations.CONDITION_FORM,
+            arguments = listOf(
+                navArgument("petId") { type = NavType.LongType },
+                navArgument("petName") { type = NavType.StringType },
+                navArgument("conditionId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val conditionId = backStackEntry.arguments?.getLong("conditionId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(
+                    PawCareDestinations.conditionList(petId, petName)
+                )
+            }
+            val conditionViewModel: ConditionViewModel = hiltViewModel(parentEntry)
+
+            ConditionFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                conditionId = conditionId,
+                conditionViewModel = conditionViewModel,
+                onSave = { condition ->
+                    val conditionConPetId = condition.copy(petId = petId)
+                    if (conditionId == null) {
+                        conditionViewModel.insertCondition(conditionConPetId)
+                    } else {
+                        conditionViewModel.updateCondition(conditionConPetId)
+                    }
+                }
+            )
+        }
+
+        // Condition Detail Screen
+        composable(
+            route = PawCareDestinations.CONDITION_DETAIL,
+            arguments = listOf(
+                navArgument("conditionId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val conditionId = backStackEntry.arguments?.getLong("conditionId") ?: return@composable
+            ConditionDetailScreen(
+                conditionId = conditionId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id ->
+                    // TODO: navegar a editar condición
+                }
+            )
+        }
+
+        // Lista desparasitacion
+        composable(
+            route = PawCareDestinations.DEWORMING_LIST,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType}
+            )
+        ){ backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8"
+            )
+            val viewModel: DewormingViewModel = hiltViewModel()
+            DewormingScreen(
+                petId = petId,
+                petName = petName,
+                isVeterinario = true,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToForm = {
+                    navController.navigate(PawCareDestinations.dewormingForm(petId, petName))
+                },
+                onNavigateToEdit = { dewormingId ->
+                    navController.navigate(
+                        PawCareDestinations.dewormingForm(petId, petName, dewormingId)
+                    )
+                },
+                onNavigateToDetail = { dewormingId ->
+                    navController.navigate(
+                        PawCareDestinations.dewormingDetail(dewormingId)
+                    )
+                }
+            )
+        }
+
+        // Formulario desparasitacion
+        composable(
+            route = PawCareDestinations.DEWORMING_FORM,
+            arguments = listOf(
+                navArgument("petId") {type = NavType.LongType},
+                navArgument("petName") {type = NavType.StringType},
+                navArgument("dewormingId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val petId = backStackEntry.arguments?.getLong("petId") ?: return@composable
+            val petName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("petName") ?: "", "UTF-8")
+            val dewormingId = backStackEntry.arguments?.getLong("dewormingId")
+                ?.takeIf { it != -1L }
+            val parentEntry = remember (backStackEntry) {
+                navController.getBackStackEntry(
+                    PawCareDestinations.dewormingList(petId, petName)
+                )
+            }
+            val dewormingViewModel: DewormingViewModel = hiltViewModel(parentEntry)
+            DewormingFormScreen(
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                dewormingId = dewormingId,
+                dewormingViewModel = dewormingViewModel,
+                onSave = { deworming ->
+                    val dewormingConPetId = deworming.copy(petId = petId)
+                    if (dewormingId == null){
+                        dewormingViewModel.insertDeworming(dewormingConPetId)
+                    } else {
+                        dewormingViewModel.updateDeworming(dewormingConPetId)
+                    }
+                }
+            )
+        }
+
+        // Deworming Detail Screen
+        composable(
+            route = PawCareDestinations.DEWORMING_DETAIL,
+            arguments = listOf(
+                navArgument("dewormingId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val dewormingId = backStackEntry.arguments?.getLong("dewormingId") ?: return@composable
+            DewormingDetailScreen(
+                dewormingId = dewormingId,
+                onNavigateBack = {
+                    if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                },
+                onNavigateToEdit = { id ->
+
+                }
+            )
+        }
+    }
+}
+
