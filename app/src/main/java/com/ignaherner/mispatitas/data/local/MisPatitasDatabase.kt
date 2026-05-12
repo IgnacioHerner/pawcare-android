@@ -30,7 +30,7 @@ import com.ignaherner.mispatitas.data.local.entity.WeightEntity
     version = 32,
     exportSchema = true
 )
-abstract class PawCareDatabase : RoomDatabase() {
+abstract class MisPatitasDatabase : RoomDatabase() {
     abstract fun petDao(): PetDao
     abstract fun vaccineDao(): VaccineDao
     abstract fun appointmentDao(): AppointmentDao

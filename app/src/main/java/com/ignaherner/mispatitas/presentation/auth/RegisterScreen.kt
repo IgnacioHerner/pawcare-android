@@ -1,6 +1,7 @@
 package com.ignaherner.mispatitas.presentation.auth
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -127,11 +128,10 @@ fun RegisterScreen(
                     horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_paw),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                        contentDescription = "MisPatitas logo",
+                        modifier = Modifier.size(16.dp)
                     )
                     Text(
                         text = "MODO DUEÑO",
@@ -397,21 +397,21 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
 
-            // Google button
-            OutlinedButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(PawRadio.md),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Text(
-                    text = "Continuar con Google",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+//            // Google button
+//            OutlinedButton(
+//                onClick = { /* TODO */ },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(56.dp),
+//                shape = RoundedCornerShape(PawRadio.md),
+//                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+//            ) {
+//                Text(
+//                    text = "Continuar con Google",
+//                    style = MaterialTheme.typography.titleSmall,
+//                    color = MaterialTheme.colorScheme.onSurface
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(PawSpace.lg))
 
@@ -440,3 +440,4 @@ fun RegisterScreen(
         }
     }
 }
+

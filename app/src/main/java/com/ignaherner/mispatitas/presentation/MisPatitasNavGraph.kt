@@ -73,7 +73,7 @@ import kotlinx.coroutines.delay
 import java.net.URLDecoder
 import java.net.URLEncoder
 
-object PawCareDestinations {
+object MisPatitasDestinations {
 
     // Home
     const val HOME = "home"
@@ -242,7 +242,7 @@ object PawCareDestinations {
 }
 
 @Composable
-fun PawCareNavGraph(
+fun MisPatitasNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
 
@@ -261,9 +261,9 @@ fun PawCareNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = PawCareDestinations.SPLASH
+        startDestination = MisPatitasDestinations.SPLASH
     ) {
-        composable(PawCareDestinations.SPLASH) {
+        composable(MisPatitasDestinations.SPLASH) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val onboardingCompleted by settingsViewModel.onboardingCompleted.collectAsStateWithLifecycle(
                 initialValue = null
@@ -274,20 +274,20 @@ fun PawCareNavGraph(
                     when {
                         // Ya logueado → cargar app
                         authViewModel.isLoggedIn -> {
-                            navController.navigate(PawCareDestinations.LOADING) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            navController.navigate(MisPatitasDestinations.LOADING) {
+                                popUpTo(MisPatitasDestinations.SPLASH) { inclusive = true }
                             }
                         }
                         // Primera vez → onboarding
                         onboardingCompleted == false -> {
-                            navController.navigate(PawCareDestinations.ONBOARDING) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            navController.navigate(MisPatitasDestinations.ONBOARDING) {
+                                popUpTo(MisPatitasDestinations.SPLASH) { inclusive = true }
                             }
                         }
                         // Ya vio onboarding → login
                         else -> {
-                            navController.navigate(PawCareDestinations.LOGIN) {
-                                popUpTo(PawCareDestinations.SPLASH) { inclusive = true }
+                            navController.navigate(MisPatitasDestinations.LOGIN) {
+                                popUpTo(MisPatitasDestinations.SPLASH) { inclusive = true }
                             }
                         }
                     }
@@ -296,14 +296,14 @@ fun PawCareNavGraph(
         }
 
         // OWNER ONBOARDING
-        composable(PawCareDestinations.ONBOARDING) {
+        composable(MisPatitasDestinations.ONBOARDING) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
 
             OnboardingScreen(
                 onFinished = {
                     settingsViewModel.completeOnboarding()
-                    navController.navigate(PawCareDestinations.LOGIN) {
-                        popUpTo(PawCareDestinations.ONBOARDING) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.LOGIN) {
+                        popUpTo(MisPatitasDestinations.ONBOARDING) { inclusive = true }
                     }
                 }
             )
@@ -311,7 +311,7 @@ fun PawCareNavGraph(
 
         // WELCOME
         composable(
-            route = PawCareDestinations.WELCOME,
+            route = MisPatitasDestinations.WELCOME,
             arguments = listOf(
                 navArgument("nombre") { type = NavType.StringType }
             )
@@ -320,15 +320,16 @@ fun PawCareNavGraph(
             WelcomeScreen(
                 nombreUsuario = URLDecoder.decode(nombre, "UTF-8"),
                 onNavigateToAddPet = {
-                    navController.navigate(PawCareDestinations.petForm()) {
+                    navController.navigate(MisPatitasDestinations.petForm()) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
 
+        // BIENVENIDA VETERINARIO
         composable(
-            route = PawCareDestinations.VET_WELCOME,
+            route = MisPatitasDestinations.VET_WELCOME,
             arguments = listOf(
                 navArgument("nombre") { type = NavType.StringType }
             )
@@ -339,7 +340,7 @@ fun PawCareNavGraph(
             VetWelcomeScreen(
                 nombreVet = nombre,
                 onStart = {
-                    navController.navigate(PawCareDestinations.LOADING) {
+                    navController.navigate(MisPatitasDestinations.LOADING) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
@@ -347,7 +348,7 @@ fun PawCareNavGraph(
         }
 
 
-        composable(PawCareDestinations.LOADING) {
+        composable(MisPatitasDestinations.LOADING) {
             val ownerViewModel: OwnerViewModel = hiltViewModel()
             val vetViewModel: VetProfileViewModel = hiltViewModel()
             val rol by authViewModel.rol.collectAsStateWithLifecycle()
@@ -361,7 +362,7 @@ fun PawCareNavGraph(
                 if (rol == null && !timeoutFired) {
                     timeoutFired = true
                     authViewModel.logout()
-                    navController.navigate(PawCareDestinations.LOGIN) {
+                    navController.navigate(MisPatitasDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
@@ -373,24 +374,24 @@ fun PawCareNavGraph(
                 when {
                     rol == Rol.VETERINARIO && vetExists == null -> return@LaunchedEffect
                     rol == Rol.VETERINARIO && vetExists == false -> {
-                        navController.navigate(PawCareDestinations.VET_FORM) {
-                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.VET_FORM) {
+                            popUpTo(MisPatitasDestinations.LOADING) { inclusive = true }
                         }
                     }
                     rol == Rol.VETERINARIO && vetExists == true -> {
-                        navController.navigate(PawCareDestinations.VET_HOME) {
-                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.VET_HOME) {
+                            popUpTo(MisPatitasDestinations.LOADING) { inclusive = true }
                         }
                     }
                     ownerExists == null -> return@LaunchedEffect
                     ownerExists == false -> {
-                        navController.navigate(PawCareDestinations.OWNER_FORM) {
-                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.OWNER_FORM) {
+                            popUpTo(MisPatitasDestinations.LOADING) { inclusive = true }
                         }
                     }
                     else -> {
-                        navController.navigate(PawCareDestinations.HOME) {
-                            popUpTo(PawCareDestinations.LOADING) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.HOME) {
+                            popUpTo(MisPatitasDestinations.LOADING) { inclusive = true }
                         }
                     }
                 }
@@ -400,37 +401,37 @@ fun PawCareNavGraph(
         }
 
         // Login dueno
-        composable(PawCareDestinations.LOGIN) {
+        composable(MisPatitasDestinations.LOGIN) {
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToRegister = {
                     authViewModel.setSelectedRole("DUENO")
-                    navController.navigate(PawCareDestinations.REGISTER)
+                    navController.navigate(MisPatitasDestinations.REGISTER)
                 },
                 onNavigateToVetRegister = {
                     authViewModel.setSelectedRole("VETERINARIO")
-                    navController.navigate(PawCareDestinations.VET_REGISTER)
+                    navController.navigate(MisPatitasDestinations.VET_REGISTER)
                 },
                 onLoginSuccess = {
-                    navController.navigate(PawCareDestinations.LOADING) {
-                        popUpTo(PawCareDestinations.LOGIN) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.LOADING) {
+                        popUpTo(MisPatitasDestinations.LOGIN) { inclusive = true }
                     }
                 }
             )
         }
 
         // Register VET
-        composable(PawCareDestinations.VET_REGISTER) {
+        composable(MisPatitasDestinations.VET_REGISTER) {
             VetRegisterScreen(
                 viewModel = authViewModel,
                 onNavigateToVetLogin = {
-                    navController.navigate(PawCareDestinations.VET_LOGIN) {
-                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.VET_LOGIN) {
+                        popUpTo(MisPatitasDestinations.VET_REGISTER) { inclusive = true }
                     }
                 },
                 onRegisterSuccess = { nombre ->
-                    navController.navigate(PawCareDestinations.vetWelcome(nombre)) {
-                        popUpTo(PawCareDestinations.VET_REGISTER) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.vetWelcome(nombre)) {
+                        popUpTo(MisPatitasDestinations.VET_REGISTER) { inclusive = true }
                     }
                 },
                 onNavigateBack = {
@@ -442,17 +443,17 @@ fun PawCareNavGraph(
         }
 
         // Elegir rol DUENO - VETERINARIO
-        composable(PawCareDestinations.ROLE_SELECT) {
+        composable(MisPatitasDestinations.ROLE_SELECT) {
             RoleSelectScreen(
                 onRoleSelected = { rol ->
                     authViewModel.setSelectedRole(rol)
                     if (rol == "VETERINARIO") {
-                        navController.navigate(PawCareDestinations.VET_LOGIN) {
-                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.VET_LOGIN) {
+                            popUpTo(MisPatitasDestinations.ROLE_SELECT) { inclusive = true }
                         }
                     } else {
-                        navController.navigate(PawCareDestinations.REGISTER) {
-                            popUpTo(PawCareDestinations.ROLE_SELECT) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.REGISTER) {
+                            popUpTo(MisPatitasDestinations.ROLE_SELECT) { inclusive = true }
                         }
                     }
                 }
@@ -460,17 +461,17 @@ fun PawCareNavGraph(
         }
 
         // Login veterinario
-        composable(PawCareDestinations.VET_LOGIN) {
+        composable(MisPatitasDestinations.VET_LOGIN) {
             VetLoginScreen(
                 viewModel = authViewModel,
                 onNavigateToVetRegister = {
-                    navController.navigate(PawCareDestinations.VET_REGISTER) {
-                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.VET_REGISTER) {
+                        popUpTo(MisPatitasDestinations.VET_LOGIN) { inclusive = true }
                     }
                 },
                 onLoginSuccess = {
-                    navController.navigate(PawCareDestinations.LOADING) {
-                        popUpTo(PawCareDestinations.VET_LOGIN) { inclusive = true }
+                    navController.navigate(MisPatitasDestinations.LOADING) {
+                        popUpTo(MisPatitasDestinations.VET_LOGIN) { inclusive = true }
                     }
                 },
                 onNavigateBack = {
@@ -482,7 +483,7 @@ fun PawCareNavGraph(
         }
 
         // VetHome
-        composable(PawCareDestinations.VET_HOME) {
+        composable(MisPatitasDestinations.VET_HOME) {
             val scannedCode = navController.currentBackStackEntry
                 ?.savedStateHandle
                 ?.get<String>("scannedCode")
@@ -499,19 +500,20 @@ fun PawCareNavGraph(
             VetHomeScreen(
                 scannedCode = scannedCode,
                 onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS)
+                    navController.navigate(MisPatitasDestinations.SETTINGS)
                 },
-                onNavigateToVetProfile = { navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL) },
+                onNavigateToVetProfile = { navController.navigate(MisPatitasDestinations.VET_PROFILE_DETAIL) },
                 onNavigateToPetDetail = { firestoreId ->
-                    navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                    navController.navigate(MisPatitasDestinations.vetPetDetail(firestoreId))
                 },
                 onNavigateToQRScanner = {
-                    navController.navigate(PawCareDestinations.QR_SCANNER)
+                    navController.navigate(MisPatitasDestinations.QR_SCANNER)
                 }
             )
         }
 
-        composable(PawCareDestinations.QR_SCANNER) {
+        // QR SCREEN
+        composable(MisPatitasDestinations.QR_SCANNER) {
             QRScannerScreen(
                 onCodeScanned = { code ->
                     // Guardar el código escaneado y volver
@@ -524,7 +526,8 @@ fun PawCareNavGraph(
             )
         }
 
-        composable(PawCareDestinations.VET_PROFILE_DETAIL) {
+        // DETALLE DEL PERFIL VETERINARIO
+        composable(MisPatitasDestinations.VET_PROFILE_DETAIL) {
             VetProfileDetailScreen(
                 onNavigateBack = {
                     if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
@@ -532,14 +535,14 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = {
-                    navController.navigate(PawCareDestinations.VET_FORM)
+                    navController.navigate(MisPatitasDestinations.VET_FORM)
                 }
             )
         }
 
         // VetPetDetail
         composable(
-            route = PawCareDestinations.VET_PET_DETAIL,
+            route = MisPatitasDestinations.VET_PET_DETAIL,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -553,39 +556,39 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToHistorial = { id, tipo ->
-                    navController.navigate(PawCareDestinations.vetHistorial(id, tipo))
+                    navController.navigate(MisPatitasDestinations.vetHistorial(id, tipo))
                 },
                 onNavigateToOwnerDetail = { ownerId ->
-                    navController.navigate(PawCareDestinations.vetOwnerDetail(ownerId))
+                    navController.navigate(MisPatitasDestinations.vetOwnerDetail(ownerId))
                 },
                 onNavigateToVetVaccineForm = { id ->
-                    navController.navigate(PawCareDestinations.vetVaccineForm(id))
+                    navController.navigate(MisPatitasDestinations.vetVaccineForm(id))
                 },
                 onNavigateToVetMedicationForm = { id ->
-                    navController.navigate(PawCareDestinations.vetMedicationForm(id))
+                    navController.navigate(MisPatitasDestinations.vetMedicationForm(id))
                 },
                 onNavigateToVetConditionForm = { id ->
-                    navController.navigate(PawCareDestinations.vetConditionForm(id))
+                    navController.navigate(MisPatitasDestinations.vetConditionForm(id))
                 },
                 onNavigateToVetDewormingForm = { id ->
-                    navController.navigate(PawCareDestinations.vetDewormingForm(id))
+                    navController.navigate(MisPatitasDestinations.vetDewormingForm(id))
                 },
                 onNavigateToVetAppointmentForm = { id ->
-                    navController.navigate(PawCareDestinations.vetAppointmentForm(id))
+                    navController.navigate(MisPatitasDestinations.vetAppointmentForm(id))
                 },
                 onNavigateToVetWeightForm = { id ->
-                    navController.navigate(PawCareDestinations.vetWeightForm(id))
+                    navController.navigate(MisPatitasDestinations.vetWeightForm(id))
                 }
             )
         }
 
         // VetForm
-        composable(PawCareDestinations.VET_FORM) {
+        composable(MisPatitasDestinations.VET_FORM) {
             VetFormScreen(
                 onNavigateBack = {
                     if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.navigate(PawCareDestinations.VET_HOME) {
-                            popUpTo(PawCareDestinations.VET_FORM) { inclusive = true }
+                        navController.navigate(MisPatitasDestinations.VET_HOME) {
+                            popUpTo(MisPatitasDestinations.VET_FORM) { inclusive = true }
                         }
                     }
                 },
@@ -594,7 +597,7 @@ fun PawCareNavGraph(
 
         // VetVaccineForm
         composable(
-            route = PawCareDestinations.VET_VACCINE_FORM,
+            route = MisPatitasDestinations.VET_VACCINE_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -619,7 +622,7 @@ fun PawCareNavGraph(
 
         // VetOwnerDetail
         composable(
-            route = PawCareDestinations.VET_OWNER_DETAIL,
+            route = MisPatitasDestinations.VET_OWNER_DETAIL,
             arguments = listOf(
                 navArgument("ownerId") { type = NavType.StringType }
             )
@@ -633,14 +636,14 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToPetDetail = { firestoreId ->
-                    navController.navigate(PawCareDestinations.vetPetDetail(firestoreId))
+                    navController.navigate(MisPatitasDestinations.vetPetDetail(firestoreId))
                 }
             )
         }
 
         // VetMedicationForm
         composable(
-            route = PawCareDestinations.VET_MEDICATION_FORM,
+            route = MisPatitasDestinations.VET_MEDICATION_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -665,7 +668,7 @@ fun PawCareNavGraph(
 
         // VetWeightForm
         composable(
-            route = PawCareDestinations.VET_WEIGHT_FORM,
+            route = MisPatitasDestinations.VET_WEIGHT_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -688,7 +691,7 @@ fun PawCareNavGraph(
 
         // VetAppointmentForm
         composable(
-            route = PawCareDestinations.VET_APPOINTMENT_FORM,
+            route = MisPatitasDestinations.VET_APPOINTMENT_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -712,7 +715,7 @@ fun PawCareNavGraph(
 
         // VetConditionForm
         composable(
-            route = PawCareDestinations.VET_CONDITION_FORM,
+            route = MisPatitasDestinations.VET_CONDITION_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -738,7 +741,7 @@ fun PawCareNavGraph(
 
         // VetDewormingForm
         composable(
-            route = PawCareDestinations.VET_DEWORMING_FORM,
+            route = MisPatitasDestinations.VET_DEWORMING_FORM,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType }
             )
@@ -762,7 +765,7 @@ fun PawCareNavGraph(
 
         // VetHistorial
         composable(
-            route = PawCareDestinations.VET_HISTORIAL,
+            route = MisPatitasDestinations.VET_HISTORIAL,
             arguments = listOf(
                 navArgument("firestoreId") { type = NavType.StringType },
                 navArgument("tipo") { type = NavType.StringType }
@@ -782,12 +785,12 @@ fun PawCareNavGraph(
                 },
                 onNavigateToForm = {
                     val route = when (tipo) {
-                        VetHistorialTipo.VACUNAS -> PawCareDestinations.vetVaccineForm(firestoreId)
-                        VetHistorialTipo.MEDICAMENTOS -> PawCareDestinations.vetMedicationForm(firestoreId)
-                        VetHistorialTipo.PESOS -> PawCareDestinations.vetWeightForm(firestoreId)
-                        VetHistorialTipo.TURNOS -> PawCareDestinations.vetAppointmentForm(firestoreId)
-                        VetHistorialTipo.CONDICIONES -> PawCareDestinations.vetConditionForm(firestoreId)
-                        VetHistorialTipo.DESPARASITACIONES -> PawCareDestinations.vetDewormingForm(firestoreId)
+                        VetHistorialTipo.VACUNAS -> MisPatitasDestinations.vetVaccineForm(firestoreId)
+                        VetHistorialTipo.MEDICAMENTOS -> MisPatitasDestinations.vetMedicationForm(firestoreId)
+                        VetHistorialTipo.PESOS -> MisPatitasDestinations.vetWeightForm(firestoreId)
+                        VetHistorialTipo.TURNOS -> MisPatitasDestinations.vetAppointmentForm(firestoreId)
+                        VetHistorialTipo.CONDICIONES -> MisPatitasDestinations.vetConditionForm(firestoreId)
+                        VetHistorialTipo.DESPARASITACIONES -> MisPatitasDestinations.vetDewormingForm(firestoreId)
                     }
                     navController.navigate(route)
                 }
@@ -795,33 +798,33 @@ fun PawCareNavGraph(
         }
 
         // Home
-        composable(PawCareDestinations.HOME) {
+        composable(MisPatitasDestinations.HOME) {
             var isNavigating by remember { mutableStateOf(false) }
 
             MainScreen(
                 navController = navController,
                 onNavigateToPetDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId)) {
+                    navController.navigate(MisPatitasDestinations.petDetail(petId)) {
                         launchSingleTop = true
                     }
                 },
                 onNavigateToAddPet = {
-                    navController.navigate(PawCareDestinations.petForm()) {
+                    navController.navigate(MisPatitasDestinations.petForm()) {
                         launchSingleTop = true
                     }
                 },
                 onNavigateToEdit = { petId ->
-                    navController.navigate(PawCareDestinations.petForm(petId)) {
+                    navController.navigate(MisPatitasDestinations.petForm(petId)) {
                         launchSingleTop = true
                     }
                 },
                 onNavigateToOwnerDetail = {
-                    navController.navigate(PawCareDestinations.OWNER_DETAIL) {
+                    navController.navigate(MisPatitasDestinations.OWNER_DETAIL) {
                         launchSingleTop = true
                     }
                 },
                 onNavigateToSettings = {
-                    navController.navigate(PawCareDestinations.SETTINGS) {
+                    navController.navigate(MisPatitasDestinations.SETTINGS) {
                         launchSingleTop = true
                     }
                 },
@@ -830,20 +833,20 @@ fun PawCareNavGraph(
 
             // Resetear cuando volvemos a HOME
             LaunchedEffect(navController.currentDestination?.route) {
-                if (navController.currentDestination?.route == PawCareDestinations.HOME) {
+                if (navController.currentDestination?.route == MisPatitasDestinations.HOME) {
                     isNavigating = false
                 }
             }
         }
 
         // Formulario - sirve para crear y editar el dueno
-        composable(PawCareDestinations.OWNER_FORM) {
+        composable(MisPatitasDestinations.OWNER_FORM) {
             OwnerFormScreen(
                 ownerId = null,
                 onNavigateBack = {
                     if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.navigate(PawCareDestinations.HOME) {
-                            popUpTo(PawCareDestinations.OWNER_FORM) {inclusive = true}
+                        navController.navigate(MisPatitasDestinations.HOME) {
+                            popUpTo(MisPatitasDestinations.OWNER_FORM) {inclusive = true}
                         }
                     }
                 },
@@ -851,7 +854,7 @@ fun PawCareNavGraph(
         }
 
         // Owner Detail
-        composable(PawCareDestinations.OWNER_DETAIL) {
+        composable(MisPatitasDestinations.OWNER_DETAIL) {
             OwnerDetailScreen(
                 onNavigateBack = {
                     if(navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
@@ -859,16 +862,16 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = {
-                    navController.navigate(PawCareDestinations.OWNER_EDIT)
+                    navController.navigate(MisPatitasDestinations.OWNER_EDIT)
                 },
                 onNavigateToPetDetail = { petId ->
-                    navController.navigate(PawCareDestinations.petDetail(petId))
+                    navController.navigate(MisPatitasDestinations.petDetail(petId))
                 }
             )
         }
 
         // Editar dueño
-        composable(PawCareDestinations.OWNER_EDIT){
+        composable(MisPatitasDestinations.OWNER_EDIT){
             OwnerFormScreen(
                 ownerId = 1L, // Siempre hay un solo Owner
                 onNavigateBack = {
@@ -880,7 +883,7 @@ fun PawCareNavGraph(
         }
 
         // Settings DataStore
-        composable(PawCareDestinations.SETTINGS) {
+        composable(MisPatitasDestinations.SETTINGS) {
             SettingsScreen(
                 viewModel = hiltViewModel(),
                 authViewModel = authViewModel,
@@ -890,22 +893,22 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToLogin = {
-                    navController.navigate(PawCareDestinations.LOGIN) {
+                    navController.navigate(MisPatitasDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToOwnerDetail = {
-                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                    navController.navigate(MisPatitasDestinations.OWNER_DETAIL)
                 },
                 onNavigateToVetForm = {
-                    navController.navigate(PawCareDestinations.VET_PROFILE_DETAIL)
+                    navController.navigate(MisPatitasDestinations.VET_PROFILE_DETAIL)
                 }
             )
         }
 
         // QR
         composable(
-            route = PawCareDestinations.QR_SCREEN,
+            route = MisPatitasDestinations.QR_SCREEN,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType}
             )
@@ -923,7 +926,7 @@ fun PawCareNavGraph(
 
         // Formulario - sirve para crear y editar masctoas
         composable(
-            route = PawCareDestinations.PET_FORM,
+            route = MisPatitasDestinations.PET_FORM,
             arguments = listOf(
                 navArgument("petId") {
                     type = NavType.LongType
@@ -938,7 +941,7 @@ fun PawCareNavGraph(
                     if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
                         val popped = navController.popBackStack()
                         if (!popped) {
-                            navController.navigate(PawCareDestinations.LOADING) {
+                            navController.navigate(MisPatitasDestinations.LOADING) {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -950,7 +953,7 @@ fun PawCareNavGraph(
 
         // PET DETAIL
         composable(
-            route = PawCareDestinations.PET_DETAIL,
+            route = MisPatitasDestinations.PET_DETAIL,
             arguments = listOf(
                 navArgument("petId") {
                     type = NavType.LongType
@@ -966,38 +969,38 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = { id ->
-                    navController.navigate(PawCareDestinations.petForm(id))
+                    navController.navigate(MisPatitasDestinations.petForm(id))
                 },
                 onNavigateToVaccines = { id, nombre ->
-                    navController.navigate(PawCareDestinations.vaccineList(id, nombre))
+                    navController.navigate(MisPatitasDestinations.vaccineList(id, nombre))
                 },
                 onNavigateToAppointments = { id, nombre ->
-                    navController.navigate(PawCareDestinations.appointmentList(id, nombre))
+                    navController.navigate(MisPatitasDestinations.appointmentList(id, nombre))
                 },
                 onNavigateToWeight = { id ->
-                    navController.navigate(PawCareDestinations.weightList(id))
+                    navController.navigate(MisPatitasDestinations.weightList(id))
                 },
                 onNavigateToMedication = { id, nombre ->
-                    navController.navigate(PawCareDestinations.medicationList(id, nombre))
+                    navController.navigate(MisPatitasDestinations.medicationList(id, nombre))
                 },
                 onNavigateToOwnerDetail = {
-                    navController.navigate(PawCareDestinations.OWNER_DETAIL)
+                    navController.navigate(MisPatitasDestinations.OWNER_DETAIL)
                 },
                 onNavigateToConditions = { id, nombre ->
-                    navController.navigate(PawCareDestinations.conditionList(id, nombre))
+                    navController.navigate(MisPatitasDestinations.conditionList(id, nombre))
                 },
                 onNavigateToQR = { petId ->
-                    navController.navigate(PawCareDestinations.qrScreen(petId))
+                    navController.navigate(MisPatitasDestinations.qrScreen(petId))
                 },
                 onNavigateToDeworming = { id, nombre ->
-                    navController.navigate(PawCareDestinations.dewormingList(id, nombre))
+                    navController.navigate(MisPatitasDestinations.dewormingList(id, nombre))
                 }
             )
         }
 
         // Lista de vacunas
         composable(
-            route = PawCareDestinations.VACCINE_LIST,
+            route = MisPatitasDestinations.VACCINE_LIST,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("petName") { type = NavType.StringType}
@@ -1018,20 +1021,20 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = { vaccineId ->
-                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName, vaccineId))},
+                    navController.navigate(MisPatitasDestinations.vaccineForm(petId, petName, vaccineId))},
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.vaccineForm(petId, petName))
+                    navController.navigate(MisPatitasDestinations.vaccineForm(petId, petName))
                 },
                 onNavigateToDetail = { vaccineId ->
                     navController.navigate(
-                        PawCareDestinations.vaccineDetail(vaccineId, petId, petName)
+                        MisPatitasDestinations.vaccineDetail(vaccineId, petId, petName)
                     )}
             )
         }
 
         // Formulario de vacunas
         composable(
-            route = PawCareDestinations.VACCINE_FORM,
+            route = MisPatitasDestinations.VACCINE_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("petName") { type = NavType.StringType },
@@ -1048,7 +1051,7 @@ fun PawCareNavGraph(
             val vaccineId = backStackEntry.arguments?.getLong("vaccineId")
                 ?.takeIf { it != -1L }
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(PawCareDestinations.VACCINE_LIST)
+                navController.getBackStackEntry(MisPatitasDestinations.VACCINE_LIST)
             }
             val vaccineViewModel: VaccineViewModel = hiltViewModel(parentEntry)
             val petViewModel: PetViewModel = hiltViewModel()
@@ -1086,7 +1089,7 @@ fun PawCareNavGraph(
 
         // Vacunas detalle
         composable(
-            route = PawCareDestinations.VACCINE_DETAIL,
+            route = MisPatitasDestinations.VACCINE_DETAIL,
             arguments = listOf(
                 navArgument("vaccineId") {type = NavType.LongType},
                 navArgument("petId") {type = NavType.LongType},
@@ -1107,7 +1110,7 @@ fun PawCareNavGraph(
                 },
                 onNavigateToEdit = { id ->
                     navController.navigate(
-                        PawCareDestinations.vaccineForm(petId,petName, id)
+                        MisPatitasDestinations.vaccineForm(petId,petName, id)
                     )
                 }
             )
@@ -1115,7 +1118,7 @@ fun PawCareNavGraph(
 
         // Lista de turnos
         composable(
-            route = PawCareDestinations.APPOINTMENT_LIST,
+            route = MisPatitasDestinations.APPOINTMENT_LIST,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType},
                 navArgument("petName") { type = NavType.StringType}
@@ -1134,19 +1137,19 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToEdit = { appointmentId ->
-                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName, appointmentId))},
+                    navController.navigate(MisPatitasDestinations.appointmentForm(petId, petName, appointmentId))},
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.appointmentForm(petId, petName))
+                    navController.navigate(MisPatitasDestinations.appointmentForm(petId, petName))
                 },
                 onNavigateToDetail = { appointmentId ->
-                    navController.navigate(PawCareDestinations.appointmentDetail(appointmentId, petId, petName))
+                    navController.navigate(MisPatitasDestinations.appointmentDetail(appointmentId, petId, petName))
                 }
             )
         }
 
         // Formulario de turnos
         composable(
-            route = PawCareDestinations.APPOINTMENT_FORM,
+            route = MisPatitasDestinations.APPOINTMENT_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType},
                 navArgument("appointmentId") {
@@ -1181,7 +1184,7 @@ fun PawCareNavGraph(
 
         // Turnos detalle
         composable(
-            route = PawCareDestinations.APPOINTMENT_DETAIL,
+            route = MisPatitasDestinations.APPOINTMENT_DETAIL,
             arguments = listOf(
                 navArgument("appointmentId") {type = NavType.LongType},
                 navArgument("petId") {type = NavType.LongType},
@@ -1202,7 +1205,7 @@ fun PawCareNavGraph(
                 },
                 onNavigateToEdit = { id ->
                     navController.navigate(
-                        PawCareDestinations.appointmentForm(petId, petName, id)
+                        MisPatitasDestinations.appointmentForm(petId, petName, id)
                     )
                 }
             )
@@ -1210,7 +1213,7 @@ fun PawCareNavGraph(
 
         // Lista de medicamentos
         composable(
-            route = PawCareDestinations.MEDICATION_LIST,
+            route = MisPatitasDestinations.MEDICATION_LIST,
             arguments = listOf(
                 navArgument("petId") {type = NavType.LongType},
                 navArgument("petName") {type = NavType.StringType}
@@ -1233,7 +1236,7 @@ fun PawCareNavGraph(
                 },
                 onNavigateToEdit = { medicationId ->
                     navController.navigate(
-                        PawCareDestinations.medicationForm(
+                        MisPatitasDestinations.medicationForm(
                             petId,
                             petName,
                             medicationId
@@ -1242,19 +1245,19 @@ fun PawCareNavGraph(
                 },
                 onNavigateToForm = {
                     navController.navigate(
-                        PawCareDestinations.medicationForm(petId, petName)
+                        MisPatitasDestinations.medicationForm(petId, petName)
                     )
                 },
                 onNavigateToDetail = { medicationId ->
                     navController.navigate(
-                        PawCareDestinations.medicationDetail(medicationId, petId, petName)
+                        MisPatitasDestinations.medicationDetail(medicationId, petId, petName)
                     )
                 }
             )
         }
         // Formulario de medicamentos
         composable(
-            route = PawCareDestinations.MEDICATION_FORM,
+            route = MisPatitasDestinations.MEDICATION_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("petName") { type = NavType.StringType },
@@ -1272,7 +1275,7 @@ fun PawCareNavGraph(
                 ?.takeIf { it != -1L }
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(
-                    PawCareDestinations.medicationList(petId, petName)
+                    MisPatitasDestinations.medicationList(petId, petName)
                 )
             }
             val medicationViewModel: MedicationViewModel = hiltViewModel(parentEntry)
@@ -1298,7 +1301,7 @@ fun PawCareNavGraph(
 
         // Detalle de Medicacion
         composable(
-            route = PawCareDestinations.MEDICATION_DETAIL,
+            route = MisPatitasDestinations.MEDICATION_DETAIL,
             arguments = listOf(
                 navArgument("medicationId") { type = NavType.LongType },
                 navArgument("petId") { type = NavType.LongType },
@@ -1321,7 +1324,7 @@ fun PawCareNavGraph(
                 },
                 onNavigateToEdit = { id  ->
                     navController.navigate(
-                        PawCareDestinations.medicationForm(petId, petName, id)
+                        MisPatitasDestinations.medicationForm(petId, petName, id)
                     )
                 }
             )
@@ -1329,7 +1332,7 @@ fun PawCareNavGraph(
 
         // Lista de weighst
         composable(
-            route = PawCareDestinations.WEIGHT_LIST,
+            route = MisPatitasDestinations.WEIGHT_LIST,
             arguments = listOf(
                 navArgument("petId") {type = NavType.LongType}
             )
@@ -1343,10 +1346,10 @@ fun PawCareNavGraph(
                         navController.popBackStack()
                     }
                 },
-                onNavigateToForm = { navController.navigate(PawCareDestinations.weightForm(petId)) },
+                onNavigateToForm = { navController.navigate(MisPatitasDestinations.weightForm(petId)) },
                 onNavigateToEdit = { weightId ->
                     navController.navigate(
-                        PawCareDestinations.weightForm(petId, weightId)
+                        MisPatitasDestinations.weightForm(petId, weightId)
                     )
                 }
             )
@@ -1354,7 +1357,7 @@ fun PawCareNavGraph(
 
         // Formulario de weights
         composable(
-            route = PawCareDestinations.WEIGHT_FORM,
+            route = MisPatitasDestinations.WEIGHT_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("weightId") {
@@ -1389,7 +1392,7 @@ fun PawCareNavGraph(
 
         // Lista de condiciones
         composable(
-            route = PawCareDestinations.CONDITION_LIST,
+            route = MisPatitasDestinations.CONDITION_LIST,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("petName") { type = NavType.StringType }
@@ -1410,15 +1413,15 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.conditionForm(petId, petName))
+                    navController.navigate(MisPatitasDestinations.conditionForm(petId, petName))
                 },
                 onNavigateToEdit = { conditionId ->
                     navController.navigate(
-                        PawCareDestinations.conditionForm(petId, petName, conditionId)
+                        MisPatitasDestinations.conditionForm(petId, petName, conditionId)
                     )},
                 onNavigateToDetail = { conditionId ->
                     navController.navigate(
-                        PawCareDestinations.conditionDetail(conditionId)
+                        MisPatitasDestinations.conditionDetail(conditionId)
                     )
                 }
             )
@@ -1426,7 +1429,7 @@ fun PawCareNavGraph(
 
         // Formulario de condiciones
         composable(
-            route = PawCareDestinations.CONDITION_FORM,
+            route = MisPatitasDestinations.CONDITION_FORM,
             arguments = listOf(
                 navArgument("petId") { type = NavType.LongType },
                 navArgument("petName") { type = NavType.StringType },
@@ -1444,7 +1447,7 @@ fun PawCareNavGraph(
                 ?.takeIf { it != -1L }
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(
-                    PawCareDestinations.conditionList(petId, petName)
+                    MisPatitasDestinations.conditionList(petId, petName)
                 )
             }
             val conditionViewModel: ConditionViewModel = hiltViewModel(parentEntry)
@@ -1470,7 +1473,7 @@ fun PawCareNavGraph(
 
         // Condition Detail Screen
         composable(
-            route = PawCareDestinations.CONDITION_DETAIL,
+            route = MisPatitasDestinations.CONDITION_DETAIL,
             arguments = listOf(
                 navArgument("conditionId") { type = NavType.LongType }
             )
@@ -1491,7 +1494,7 @@ fun PawCareNavGraph(
 
         // Lista desparasitacion
         composable(
-            route = PawCareDestinations.DEWORMING_LIST,
+            route = MisPatitasDestinations.DEWORMING_LIST,
             arguments = listOf(
                 navArgument("petId") {type = NavType.LongType},
                 navArgument("petName") {type = NavType.StringType}
@@ -1512,16 +1515,16 @@ fun PawCareNavGraph(
                     }
                 },
                 onNavigateToForm = {
-                    navController.navigate(PawCareDestinations.dewormingForm(petId, petName))
+                    navController.navigate(MisPatitasDestinations.dewormingForm(petId, petName))
                 },
                 onNavigateToEdit = { dewormingId ->
                     navController.navigate(
-                        PawCareDestinations.dewormingForm(petId, petName, dewormingId)
+                        MisPatitasDestinations.dewormingForm(petId, petName, dewormingId)
                     )
                 },
                 onNavigateToDetail = { dewormingId ->
                     navController.navigate(
-                        PawCareDestinations.dewormingDetail(dewormingId)
+                        MisPatitasDestinations.dewormingDetail(dewormingId)
                     )
                 }
             )
@@ -1529,7 +1532,7 @@ fun PawCareNavGraph(
 
         // Formulario desparasitacion
         composable(
-            route = PawCareDestinations.DEWORMING_FORM,
+            route = MisPatitasDestinations.DEWORMING_FORM,
             arguments = listOf(
                 navArgument("petId") {type = NavType.LongType},
                 navArgument("petName") {type = NavType.StringType},
@@ -1546,7 +1549,7 @@ fun PawCareNavGraph(
                 ?.takeIf { it != -1L }
             val parentEntry = remember (backStackEntry) {
                 navController.getBackStackEntry(
-                    PawCareDestinations.dewormingList(petId, petName)
+                    MisPatitasDestinations.dewormingList(petId, petName)
                 )
             }
             val dewormingViewModel: DewormingViewModel = hiltViewModel(parentEntry)
@@ -1571,7 +1574,7 @@ fun PawCareNavGraph(
 
         // Deworming Detail Screen
         composable(
-            route = PawCareDestinations.DEWORMING_DETAIL,
+            route = MisPatitasDestinations.DEWORMING_DETAIL,
             arguments = listOf(
                 navArgument("dewormingId") { type = NavType.LongType }
             )

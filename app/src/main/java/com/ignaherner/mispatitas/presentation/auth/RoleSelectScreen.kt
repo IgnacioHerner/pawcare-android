@@ -1,5 +1,6 @@
 package com.ignaherner.mispatitas.presentation.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,11 +60,10 @@ fun RoleSelectScreen(
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_paw),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                Image(
+                    painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                    contentDescription = "MisPatitas logo",
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
@@ -112,12 +112,10 @@ fun RoleSelectScreen(
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_paw),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                                contentDescription = "MisPatitas logo",
+                                modifier = Modifier.size(24.dp))
                         }
 
                         Column(modifier = Modifier.weight(1f)) {
@@ -231,3 +229,4 @@ fun RoleSelectScreen(
         }
     }
 }
+

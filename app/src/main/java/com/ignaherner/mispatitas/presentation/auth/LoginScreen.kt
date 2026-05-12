@@ -1,6 +1,7 @@
 package com.ignaherner.mispatitas.presentation.auth
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,14 +122,10 @@ fun LoginScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_paw),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = if (!isVetMode)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                                contentDescription = "MisPatitas logo",
+                                modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(PawSpace.sm))
                             Text(
@@ -276,18 +273,18 @@ fun LoginScreen(
             )
 
             // Olvidaste contraseña
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = { /* TODO */ }) {
-                    Text(
-                        text = "¿Olvidaste tu contraseña?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.End
+//            ) {
+//                TextButton(onClick = { /* TODO */ }) {
+//                    Text(
+//                        text = "¿Olvidaste tu contraseña?",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//            }
 
             // Error
             val errorState = authState as? AuthState.Error
@@ -434,3 +431,4 @@ fun LoginScreen(
         }
     }
 }
+

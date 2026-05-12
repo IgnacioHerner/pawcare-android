@@ -1,0 +1,676 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 32,
+    "identityHash": "0d1053d6547b67b723caa90bbe3df4f7",
+    "entities": [
+      {
+        "tableName": "pets",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `codigo` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `nombre` TEXT NOT NULL, `especie` TEXT NOT NULL, `raza` TEXT, `sexo` TEXT, `fechaNacimiento` TEXT, `fechaNacimientoTipo` TEXT NOT NULL, `fotoUri` TEXT, `castrado` INTEGER NOT NULL, `fechaCastracion` TEXT, `fechaUltimaDesparasitacion` TEXT, `proximaDesparasitacion` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "codigo",
+            "columnName": "codigo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "especie",
+            "columnName": "especie",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raza",
+            "columnName": "raza",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sexo",
+            "columnName": "sexo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaNacimiento",
+            "columnName": "fechaNacimiento",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaNacimientoTipo",
+            "columnName": "fechaNacimientoTipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fotoUri",
+            "columnName": "fotoUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "castrado",
+            "columnName": "castrado",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCastracion",
+            "columnName": "fechaCastracion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaUltimaDesparasitacion",
+            "columnName": "fechaUltimaDesparasitacion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "proximaDesparasitacion",
+            "columnName": "proximaDesparasitacion",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "vaccines",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `nombreComercial` TEXT, `fechaAplicacion` TEXT NOT NULL, `frecuencia` TEXT NOT NULL, `proximaDosis` TEXT, `veterinario` TEXT, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreComercial",
+            "columnName": "nombreComercial",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaAplicacion",
+            "columnName": "fechaAplicacion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frecuencia",
+            "columnName": "frecuencia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proximaDosis",
+            "columnName": "proximaDosis",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "veterinario",
+            "columnName": "veterinario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_vaccines_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_vaccines_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "appointments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `motivo` TEXT NOT NULL, `veterinario` TEXT, `clinica` TEXT, `diagnostico` TEXT, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "motivo",
+            "columnName": "motivo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "veterinario",
+            "columnName": "veterinario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clinica",
+            "columnName": "clinica",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "diagnostico",
+            "columnName": "diagnostico",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_appointments_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_appointments_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "medications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `dosisCantidad` REAL NOT NULL, `dosisUnidad` TEXT NOT NULL, `viaAdministracion` TEXT NOT NULL, `esUnicaDosis` INTEGER NOT NULL, `fechaInicio` TEXT NOT NULL, `duracionDias` INTEGER NOT NULL, `intervaloHoras` INTEGER NOT NULL, `recetadoPor` TEXT, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dosisCantidad",
+            "columnName": "dosisCantidad",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dosisUnidad",
+            "columnName": "dosisUnidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "viaAdministracion",
+            "columnName": "viaAdministracion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "esUnicaDosis",
+            "columnName": "esUnicaDosis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaInicio",
+            "columnName": "fechaInicio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duracionDias",
+            "columnName": "duracionDias",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intervaloHoras",
+            "columnName": "intervaloHoras",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recetadoPor",
+            "columnName": "recetadoPor",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_medications_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_medications_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "weight",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `peso` REAL NOT NULL, `fecha` TEXT NOT NULL, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "peso",
+            "columnName": "peso",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_weight_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_weight_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "conditions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `fechaDiagnostico` TEXT NOT NULL, `severidad` TEXT NOT NULL, `estado` TEXT NOT NULL, `veterinario` TEXT, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaDiagnostico",
+            "columnName": "fechaDiagnostico",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severidad",
+            "columnName": "severidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "veterinario",
+            "columnName": "veterinario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_conditions_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_conditions_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dewormings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `firestoreId` TEXT NOT NULL, `petId` INTEGER NOT NULL, `producto` TEXT NOT NULL, `tipo` TEXT NOT NULL, `fechaAplicacion` TEXT NOT NULL, `frecuencia` TEXT NOT NULL, `proximaDosis` TEXT, `veterinario` TEXT, `notas` TEXT, FOREIGN KEY(`petId`) REFERENCES `pets`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firestoreId",
+            "columnName": "firestoreId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "petId",
+            "columnName": "petId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "producto",
+            "columnName": "producto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaAplicacion",
+            "columnName": "fechaAplicacion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frecuencia",
+            "columnName": "frecuencia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proximaDosis",
+            "columnName": "proximaDosis",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "veterinario",
+            "columnName": "veterinario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dewormings_petId",
+            "unique": false,
+            "columnNames": [
+              "petId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dewormings_petId` ON `${TABLE_NAME}` (`petId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pets",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "petId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d1053d6547b67b723caa90bbe3df4f7')"
+    ]
+  }
+}

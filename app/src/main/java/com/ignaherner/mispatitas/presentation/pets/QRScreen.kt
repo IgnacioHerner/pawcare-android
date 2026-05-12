@@ -18,14 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,7 +41,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,7 +49,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.mispatitas.R
 import com.ignaherner.mispatitas.data.local.QRGenerator
 import com.ignaherner.mispatitas.domain.model.MedicationStatus
-import com.ignaherner.mispatitas.presentation.components.InfoRow
 import com.ignaherner.mispatitas.presentation.components.PawCard
 import com.ignaherner.mispatitas.presentation.components.PawCareAvatar
 import com.ignaherner.mispatitas.presentation.components.PawCareIcon
@@ -64,7 +59,6 @@ import com.ignaherner.mispatitas.presentation.owners.OwnerState
 import com.ignaherner.mispatitas.presentation.owners.OwnerViewModel
 import com.ignaherner.mispatitas.ui.theme.PawRadio
 import com.ignaherner.mispatitas.ui.theme.PawSpace
-import okhttp3.internal.notify
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,7 +106,7 @@ fun QRScreen(
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "Libreta sanitaria de ${pet.nombre} en PawCare. Código: ${pet.codigo}"
+                                "Libreta sanitaria de ${pet.nombre} en MisPatitas. Código: ${pet.codigo}"
                             )
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "Compartir"))
@@ -190,14 +184,13 @@ fun QRScreen(
                                             horizontalArrangement = Arrangement.spacedBy(PawSpace.sm),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.ic_paw),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onPrimary
+                                            Image(
+                                                painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                                                contentDescription = "MisPatitas logo",
+                                                modifier = Modifier.size(16.dp)
                                             )
                                             Text(
-                                                text = "PAWCARE · LIBRETA DIGITAL",
+                                                text = "MISPATITAS · LIBRETA DIGITAL",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onPrimary,
                                                 letterSpacing = 1.sp

@@ -1,35 +1,27 @@
 package com.ignaherner.mispatitas.presentation.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Medication
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Pets
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -140,15 +131,14 @@ fun HomeScreen(
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_paw),
-                                contentDescription = "PawCare",
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                                contentDescription = "MisPatitas logo",
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                         Text(
-                            text = "PawCare",
+                            text = "Mis Patitas",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -321,3 +311,4 @@ fun HomeScreen(
         }
     }
 }
+

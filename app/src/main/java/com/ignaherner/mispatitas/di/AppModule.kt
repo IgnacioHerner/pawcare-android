@@ -5,7 +5,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.room.Room
 import androidx.work.Configuration
 import com.google.firebase.BuildConfig
-import com.ignaherner.mispatitas.data.local.PawCareDatabase
+import com.ignaherner.mispatitas.data.local.MisPatitasDatabase
 import com.ignaherner.mispatitas.data.local.SettingsDataStore
 import com.ignaherner.mispatitas.data.local.dao.AppointmentDao
 import com.ignaherner.mispatitas.data.local.dao.ConditionDao
@@ -28,11 +28,11 @@ abstract class AppModule {
     companion object {
         @Provides
         @Singleton
-        fun providePawCareDatabase(
+        fun provideMisPatitasDatabase(
             @ApplicationContext context: Context
-        ): PawCareDatabase = Room.databaseBuilder(
+        ): MisPatitasDatabase = Room.databaseBuilder(
             context,
-            PawCareDatabase::class.java,
+            MisPatitasDatabase::class.java,
             "pawcare_database"
         ).apply {
             if (BuildConfig.DEBUG){
@@ -42,27 +42,27 @@ abstract class AppModule {
 
         @Provides
         @Singleton
-        fun providePetDao(database: PawCareDatabase): PetDao =
+        fun providePetDao(database: MisPatitasDatabase): PetDao =
             database.petDao()
 
         @Provides
         @Singleton
-        fun provideVaccineDao(database: PawCareDatabase): VaccineDao =
+        fun provideVaccineDao(database: MisPatitasDatabase): VaccineDao =
             database.vaccineDao()
 
         @Provides
         @Singleton
-        fun provideAppointmentDao(database: PawCareDatabase): AppointmentDao =
+        fun provideAppointmentDao(database: MisPatitasDatabase): AppointmentDao =
             database.appointmentDao()
 
         @Provides
         @Singleton
-        fun provideMedicationDao(database: PawCareDatabase): MedicationDao =
+        fun provideMedicationDao(database: MisPatitasDatabase): MedicationDao =
             database.medicationDao()
 
         @Provides
         @Singleton
-        fun provideWeightDao(database: PawCareDatabase): WeightDao =
+        fun provideWeightDao(database: MisPatitasDatabase): WeightDao =
             database.weightDao()
 
         @Provides
@@ -81,12 +81,12 @@ abstract class AppModule {
 
         @Provides
         @Singleton
-        fun provideConditionDao(database: PawCareDatabase): ConditionDao =
+        fun provideConditionDao(database: MisPatitasDatabase): ConditionDao =
             database.conditionDao()
 
         @Provides
         @Singleton
-        fun provideDewormingDao(database: PawCareDatabase) : DewormingDao =
+        fun provideDewormingDao(database: MisPatitasDatabase) : DewormingDao =
             database.dewormingDao()
     }
 }

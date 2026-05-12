@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import com.ignaherner.mispatitas.presentation.PawCareNavGraph
+import com.ignaherner.mispatitas.presentation.MisPatitasNavGraph
 import com.ignaherner.mispatitas.ui.theme.PawCareTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PawCareTheme {
-                PawCareNavGraph()
+                MisPatitasNavGraph()
             }
         }
     }

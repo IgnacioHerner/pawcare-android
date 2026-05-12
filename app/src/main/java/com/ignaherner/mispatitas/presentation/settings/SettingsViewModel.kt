@@ -2,7 +2,7 @@ package com.ignaherner.mispatitas.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ignaherner.mispatitas.data.local.PawCareDatabase
+import com.ignaherner.mispatitas.data.local.MisPatitasDatabase
 import com.ignaherner.mispatitas.data.local.SettingsDataStore
 import com.ignaherner.mispatitas.data.remote.firestore.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val authRepository: AuthRepository,
-    private val database: PawCareDatabase,
+    private val database: MisPatitasDatabase,
 ) : ViewModel() {
 
     val notificationsEnabled: StateFlow<Boolean> = settingsDataStore.notificationsEnabled

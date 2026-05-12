@@ -2,6 +2,7 @@ package com.ignaherner.mispatitas.presentation
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,11 +67,10 @@ fun SplashScreen(
                     .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_paw),
-                    contentDescription = "PawCare",
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                Image(
+                    painter = painterResource(id = R.drawable.ic_mispatitas_logo),
+                    contentDescription = "MisPatitas logo",
+                    modifier = Modifier.size(44.dp)
                 )
             }
 
@@ -90,3 +90,4 @@ fun SplashScreen(
         }
     }
 }
+
