@@ -26,10 +26,13 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +44,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -304,11 +308,11 @@ fun SettingsScreen(
                                     type = "text/plain"
                                     putExtra(
                                         Intent.EXTRA_TEXT,
-                                        "Probá PawCare, la libreta sanitaria digital para tu mascota. https://pawcare.app"
+                                        "Probá MisPatitas, la libreta sanitaria digital para tu mascota. https://pawcare.app"
                                     )
                                 }
                                 context.startActivity(
-                                    Intent.createChooser(shareIntent, "Compartir PawCare")
+                                    Intent.createChooser(shareIntent, "Compartir MisPatitas")
                                 )
                             }
                             .padding(PawSpace.lg),
@@ -322,7 +326,7 @@ fun SettingsScreen(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Compartir PawCare",
+                            text = "Compartir MisPatitas",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
@@ -345,6 +349,70 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
                 )
+            }
+
+            item {
+                var showDeleteDialog by remember { mutableStateOf(false) }
+
+                PawCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDeleteDialog = true }
+                            .padding(PawSpace.lg),
+                        horizontalArrangement = Arrangement.spacedBy(PawSpace.md),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        PawCareIcon(
+                            icon = Icons.Outlined.DeleteForever,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = Danger
+                        )
+                        Text(
+                            text = "Eliminar cuenta",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Danger
+                        )
+                    }
+                }
+
+                if (showDeleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteDialog = false },
+                        icon = {
+                            PawCareIcon(
+                                icon = Icons.Outlined.Warning,
+                                contentDescription = null,
+                                size = PawIconSize.large,
+                                tint = Danger
+                            )
+                        },
+                        title = {
+                            Text("¿Eliminar cuenta?")
+                        },
+                        text = {
+                            Text("Se eliminarán permanentemente tu cuenta, todos los datos de tus mascotas, fotos y registros. Esta acción no se puede deshacer.")
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showDeleteDialog = false
+                                    viewModel.deleteAccount()
+                                    authViewModel.logout()
+                                    onNavigateToLogin()
+                                }
+                            ) {
+                                Text("Eliminar", color = Danger)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    )
+                }
             }
 
             item {
@@ -379,7 +447,7 @@ fun SettingsScreen(
             // Versión
             item {
                 Text(
-                    text = "PawCare v1.0.0",
+                    text = "MisPatitas v1.0.0",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

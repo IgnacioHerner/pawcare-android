@@ -50,6 +50,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun deleteAccount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            database.clearAllTables()
+            authRepository.deleteAccount()
+        }
+    }
+
     val onboardingCompleted: StateFlow<Boolean> = settingsDataStore.onboardingCompleted
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
