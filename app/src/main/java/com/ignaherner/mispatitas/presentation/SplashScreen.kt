@@ -76,7 +76,7 @@ fun SplashScreen(
 
             // Nombre
             Text(
-                text = "PawCare",
+                text = "MisPatitas",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
