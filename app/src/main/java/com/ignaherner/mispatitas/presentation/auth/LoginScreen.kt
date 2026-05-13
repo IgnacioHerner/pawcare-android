@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -77,6 +78,8 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isVetMode by remember { mutableStateOf(false) }
+
+    var showVetComingSoon by remember { mutableStateOf(false) }
 
     val authState by viewModel.authState.collectAsStateWithLifecycle()
 
@@ -383,21 +386,21 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(PawSpace.xl))
 
-                // Google button
-                OutlinedButton(
-                    onClick = { /* TODO */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(PawRadio.md),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                ) {
-                    Text(
-                        text = "Continuar con Google",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+//                // Google button
+//                OutlinedButton(
+//                    onClick = { /* TODO */ },
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(56.dp),
+//                    shape = RoundedCornerShape(PawRadio.md),
+//                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+//                ) {
+//                    Text(
+//                        text = "Continuar con Google",
+//                        style = MaterialTheme.typography.titleSmall,
+//                        color = MaterialTheme.colorScheme.onSurface
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(PawSpace.lg))
             }
@@ -415,7 +418,7 @@ fun LoginScreen(
                 )
                 TextButton(
                     onClick = {
-                        if (isVetMode) onNavigateToVetRegister() else onNavigateToRegister()
+                        if (isVetMode) showVetComingSoon = true else onNavigateToRegister()
                     }
                 ) {
                     Text(
@@ -428,6 +431,31 @@ fun LoginScreen(
             }
 
             Spacer(modifier = Modifier.height(PawSpace.xl))
+
+            if (showVetComingSoon) {
+                AlertDialog(
+                    onDismissRequest = { showVetComingSoon = false },
+                    icon = {
+                        PawCareIcon(
+                            icon = Icons.Outlined.LocalHospital,
+                            contentDescription = null,
+                            size = PawIconSize.medium,
+                            tint = VetPrimary
+                        )
+                    },
+                    title = {
+                        Text("Próximamente")
+                    },
+                    text = {
+                        Text("El registro para profesionales veterinarios estará disponible pronto. Si sos veterinario y querés acceder, contactanos a ignah71@gmail.com")
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showVetComingSoon = false }) {
+                            Text("Entendido", color = VetPrimary)
+                        }
+                    }
+                )
+            }
         }
     }
 }

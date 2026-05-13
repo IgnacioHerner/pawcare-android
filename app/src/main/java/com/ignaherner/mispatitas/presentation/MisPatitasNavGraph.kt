@@ -26,6 +26,7 @@ import com.ignaherner.mispatitas.presentation.appointments.AppointmentViewModel
 import com.ignaherner.mispatitas.presentation.auth.AuthViewModel
 import com.ignaherner.mispatitas.presentation.auth.LoginScreen
 import com.ignaherner.mispatitas.presentation.auth.OnboardingScreen
+import com.ignaherner.mispatitas.presentation.auth.RegisterScreen
 import com.ignaherner.mispatitas.presentation.auth.RoleSelectScreen
 import com.ignaherner.mispatitas.presentation.auth.WelcomeScreen
 import com.ignaherner.mispatitas.presentation.condition.ConditionDetailScreen
@@ -419,6 +420,30 @@ fun MisPatitasNavGraph(
                 }
             )
         }
+
+
+        // Register DUEÑO
+        composable(MisPatitasDestinations.REGISTER) {
+            RegisterScreen(
+                viewModel = authViewModel,
+                onNavigateToLogin = {
+                    navController.navigate(MisPatitasDestinations.LOGIN) {
+                        popUpTo(MisPatitasDestinations.REGISTER) { inclusive = true }
+                    }
+                },
+                onRegisterSuccess = { nombre ->
+                    navController.navigate(MisPatitasDestinations.welcome(nombre)) {
+                        popUpTo(MisPatitasDestinations.REGISTER) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
 
         // Register VET
         composable(MisPatitasDestinations.VET_REGISTER) {

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -72,6 +73,8 @@ fun VetLoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    var showVetComingSoon by remember { mutableStateOf(false) }
 
     val authState by viewModel.authState.collectAsStateWithLifecycle()
 
@@ -226,19 +229,19 @@ fun VetLoginScreen(
                 )
             )
 
-            // Olvidaste contraseña
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = { /* TODO */ }) {
-                    Text(
-                        text = "¿Olvidaste tu contraseña?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+//            // Olvidaste contraseña
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.End
+//            ) {
+//                TextButton(onClick = { /* TODO */ }) {
+//                    Text(
+//                        text = "¿Olvidaste tu contraseña?",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//            }
 
             // Error
             val errorState = authState as? AuthState.Error
@@ -321,7 +324,7 @@ fun VetLoginScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                TextButton(onClick = onNavigateToVetRegister) {
+                TextButton(onClick = { showVetComingSoon = true }) {
                     Text(
                         text = "Registrarme como veterinario",
                         style = MaterialTheme.typography.bodySmall,
@@ -330,8 +333,31 @@ fun VetLoginScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(PawSpace.xl))
         }
+    }
+    if (showVetComingSoon) {
+        AlertDialog(
+            onDismissRequest = { showVetComingSoon = false },
+            icon = {
+                PawCareIcon(
+                    icon = Icons.Outlined.LocalHospital,
+                    contentDescription = null,
+                    size = PawIconSize.medium,
+                    tint = VetPrimary
+                )
+            },
+            title = {
+                Text("Próximamente")
+            },
+            text = {
+                Text("El registro para profesionales veterinarios estará disponible pronto. Si sos veterinario y querés acceder, contactanos a ignacioherner@gmail.com")
+            },
+            confirmButton = {
+                TextButton(onClick = { showVetComingSoon = false }) {
+                    Text("Entendido", color = VetPrimary)
+                }
+            }
+        )
     }
 }
